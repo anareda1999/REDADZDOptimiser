@@ -541,7 +541,7 @@ function Update-UIProgress {
         [int]$Percent
     )
     if ($script:ProgressBar -and $script:ProgressBar.IsHandleCreated) {
-        $action = [Action]{
+        $action = {
             if ($Total -gt 0) {
                 $p = [math]::Min(100, [math]::Max(0, $Percent))
                 $script:ProgressBar.Style = [System.Windows.Forms.ProgressBarStyle]::Blocks
@@ -549,7 +549,7 @@ function Update-UIProgress {
             }
         }
         if ($script:ProgressBar.InvokeRequired) {
-            $script:ProgressBar.Invoke($action)
+            $script:ProgressBar.Invoke([Action]$action)
         } else {
             & $action
         }
@@ -567,7 +567,7 @@ function Append-Log {
     $script:LogLines += $entry
 
     if ($script:LogBox -and $script:LogBox.IsHandleCreated) {
-        $action = [Action]{
+        $action = {
             $color = switch ($Level) {
                 "SUCCESS" { $script:colors.LogSuccessColor }
                 "WARN"    { $script:colors.LogWarnColor }
@@ -582,7 +582,7 @@ function Append-Log {
             $script:LogBox.ScrollToCaret()
         }
         if ($script:LogBox.InvokeRequired) {
-            $script:LogBox.Invoke($action)
+            $script:LogBox.Invoke([Action]$action)
         } else {
             & $action
         }
