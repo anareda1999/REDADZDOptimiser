@@ -1,0 +1,19 @@
+# Logs & Fichiers temporaires
+*.log
+*.tmp
+*.bak
+*~
+
+# Fichiers système Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Éditeurs & IDE
+.vscode/
+.idea/
+
+# Fichiers de sauvegarde générés lors de l'exécution
+*.reg
+*.winoptimizer_backup_*
+*.redadzdoptimiser_backup_*
