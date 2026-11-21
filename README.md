@@ -21,6 +21,18 @@ Supporte trois langues : **Français (FR)**, **English (EN)** et **العربي�
 
 ---
 
+## ⚡ Onglet Performances (Surveillance RAM, Processeur & Processus)
+
+- **Surveillance en temps réel :** Jauges en direct de l'utilisation de la RAM et du Processeur (CPU) actualisées toutes les 1.5 secondes sans ralentissement.
+- **Vider le cache & RAM (EmptyWorkingSet) :** Purge instantanée et sécurisée de la mémoire vive inactive des processus en tâche de fond pour libérer immédiatement des centaines de Mo ou Go de RAM sans fermer vos applications ouvertes.
+- **Nettoyeur de Processus d'Arrière-Plan :** Arrête en un clic les processus dormants ou inutiles (télémétrie Microsoft, Phone Link, Game Bar Xbox, Widgets Windows 11, Cortana, instances Edge et Skype en tâche de fond) tout en protégeant rigoureusement les processus système vitaux (Explorer, DWM, etc.).
+- **Optimisations Processeur & Énergie :**
+  - Activation des plans d'alimentation *Performances Élevées* ou *Performances Optimales (Ultimate)* pour débloquer la fréquence d'horloge maximale du CPU.
+  - Priorité CPU maximale aux applications et jeux au premier plan (`Win32PrioritySeparation = 0x26`).
+  - Désactivation de la mise en veille forcée des cœurs CPU (*Core Parking OFF*).
+
+---
+
 ## 🌐 Choix de la Langue au Démarrage
 
 - **Interface Graphique (GUI) :**

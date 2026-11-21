@@ -76,10 +76,34 @@ $script:I18N = @{
         AdminMsgBox         = "Ce programme requiert les privilèges Administrateur pour appliquer les optimisations !"
 
         TabDebloat          = "🗑️ Débloat"
+        TabPerf             = "⚡ Performances"
         TabPrivacy          = "🔒 Confidentialité"
         TabCleanup          = "🧹 Nettoyage"
         TabRepair           = "🔧 Maintenance"
         TabLogs             = "📋 Journal"
+
+        # Onglet Performances
+        GbPerfMonitor       = "Surveillance des Ressources en temps réel"
+        PerfRamFormat       = "Mémoire Vive (RAM) : {0} Go / {1} Go ({2} %)"
+        BtnFlushRam         = "🚀 Vider le cache & RAM"
+        BtnFlushRamDone     = "✓ Cache RAM vidé : ~{0} Mo libérés !"
+        PerfCpuFormat       = "Processeur (CPU) : {0} %  •  {1} processus actifs"
+        PerfLiveNotice      = "● Surveillance continue en direct • 1.5s"
+        PerfRamTip          = "Astuce : La purge de la mémoire vide en toute sécurité le cache inactif des processus en arrière-plan sans fermer vos applications."
+        GbPerfKill          = "Nettoyeur de Processus d'Arrière-Plan Inutiles"
+        PerfKillInfo        = "Ferme immédiatement les processus d'arrière-plan gourmands ou dormants (Phone Link, Game Bar, Widgets, Télémétrie Microsoft, Edge idle) tout en protégeant les processus système vitaux."
+        PerfKillTargets     = "Processus ciblés : PhoneExperienceHost, GameBarPresenceWriter, Widgets, Cortana, NewsAndInterests, FeedbackHub, Edge (idle)"
+        BtnKillProcesses    = "🛑 Fermer les processus inutiles"
+        BtnKillProcessesDone= "✓ {0} processus d'arrière-plan arrêtés !"
+        CbAutoKillOnOptimize= "Inclure la fermeture des processus inutiles lors de l'Optimisation Globale"
+        GbPerfCpu           = "Optimisations Processeur (CPU) & Alimentation"
+        CbPowerPlan         = "Activer le plan d'alimentation 'Performances Élevées' / 'Performances Optimales'"
+        SubPowerPlan        = "Débloque la fréquence maximale du CPU et supprime les bridages d'économie d'énergie."
+        CbForegroundPriority= "Priorité CPU maximale aux applications au premier plan (Win32PrioritySeparation = 0x26)"
+        SubForegroundPriority="Alloue 3x plus de temps processeur à la fenêtre active (Jeux, logiciels) pour une réactivité instantanée."
+        CbDisableCoreParking= "Désactiver la mise en veille forcée des cœurs du processeur (Core Parking OFF)"
+        BtnApplyCpu         = "⚡ Appliquer les réglages CPU"
+        BtnApplyCpuDone     = "✓ Réglages CPU & Énergie appliqués avec succès !"
 
         GbApps              = "Applications provisionnées à supprimer"
         CbApps              = "Supprimer les bloatwares préinstallés (Xbox, Bing, Solitaire, Feedback, Cartes, etc.)"
@@ -152,10 +176,34 @@ $script:I18N = @{
         AdminMsgBox         = "This utility requires Administrator privileges to apply system optimizations!"
 
         TabDebloat          = "🗑️ Debloat"
+        TabPerf             = "⚡ Performance"
         TabPrivacy          = "🔒 Privacy"
         TabCleanup          = "🧹 Cleanup"
         TabRepair           = "🔧 Maintenance"
         TabLogs             = "📋 Logs"
+
+        # Performance Tab
+        GbPerfMonitor       = "Real-Time Resource Monitor"
+        PerfRamFormat       = "RAM Usage: {0} GB / {1} GB ({2} %)"
+        BtnFlushRam         = "🚀 Flush RAM & Cache"
+        BtnFlushRamDone     = "✓ RAM cache cleared: ~{0} MB freed!"
+        PerfCpuFormat       = "Processor (CPU): {0} %  •  {1} active processes"
+        PerfLiveNotice      = "● Live continuous monitoring • 1.5s"
+        PerfRamTip          = "Tip: Memory purging safely flushes inactive background cache without closing your open applications."
+        GbPerfKill          = "Unnecessary Background Process Cleaner"
+        PerfKillInfo        = "Instantly terminates dormant or unnecessary background processes (Phone Link, Game Bar, Widgets, Telemetry, idle Edge) while protecting vital system processes."
+        PerfKillTargets     = "Targeted processes: PhoneExperienceHost, GameBarPresenceWriter, Widgets, Cortana, NewsAndInterests, FeedbackHub, Edge (idle)"
+        BtnKillProcesses    = "🛑 Stop Unnecessary Processes"
+        BtnKillProcessesDone= "✓ {0} background processes stopped!"
+        CbAutoKillOnOptimize= "Automatically stop unnecessary processes during Global Optimization"
+        GbPerfCpu           = "Processor (CPU) & Power Optimizations"
+        CbPowerPlan         = "Enable 'High Performance' / 'Ultimate Performance' power plan"
+        SubPowerPlan        = "Unlocks maximum CPU clock speed and prevents aggressive frequency downscaling."
+        CbForegroundPriority= "Maximum CPU priority for foreground apps & games (Win32PrioritySeparation = 0x26)"
+        SubForegroundPriority="Allocates 3x more CPU quantum time to the active window for instant responsiveness."
+        CbDisableCoreParking= "Disable CPU core parking (keeps all CPU cores unparked)"
+        BtnApplyCpu         = "⚡ Apply CPU Settings"
+        BtnApplyCpuDone     = "✓ CPU & Power settings successfully applied!"
 
         GbApps              = "Provisioned Apps to Remove"
         CbApps              = "Remove preinstalled bloatware (Xbox, Bing, Solitaire, Feedback, Maps, etc.)"
@@ -228,6 +276,7 @@ $script:I18N = @{
         AdminMsgBox         = "يتطلب هذا البرنامج تشغيله كمسؤول (Run as Administrator) لتطبيق التحسينات!"
 
         TabDebloat          = "🗑️ إزالة الزوائد"
+        TabPerf             = "⚡ الأداء"
         TabPrivacy          = "🔒 الخصوصية"
         TabCleanup          = "🧹 التنظيف"
         TabRepair           = "🔧 الصيانة"
@@ -642,6 +691,7 @@ function Apply-Language {
 
     # Titres des onglets
     if ($debloatTab -and $debloatTab.Page) { $debloatTab.Page.Text = $strings.TabDebloat }
+    if ($perfTab -and $perfTab.Page)       { $perfTab.Page.Text = $strings.TabPerf }
     if ($privacyTab -and $privacyTab.Page) { $privacyTab.Page.Text = $strings.TabPrivacy }
     if ($cleanupTab -and $cleanupTab.Page) { $cleanupTab.Page.Text = $strings.TabCleanup }
     if ($repairTab -and $repairTab.Page)   { $repairTab.Page.Text = $strings.TabRepair }
@@ -663,7 +713,27 @@ function Apply-Language {
     if ($script:CbTasks) { $script:CbTasks.Text = $strings.CbTasks }
     if ($lblTasksCount) { $lblTasksCount.Text = "$($script:TasksToDisable.Count) " + $strings.LblTasksSuffix }
 
-    # Onglet 2 : Confidentialité
+    # Onglet 2 : Performances
+    if ($cardPerfMonitor -and $cardPerfMonitor.Tag) { $cardPerfMonitor.Tag.Header.Text = $strings.GbPerfMonitor }
+    if ($btnFlushRam) { $btnFlushRam.Text = $strings.BtnFlushRam }
+    if ($lblPerfLiveNotice) { $lblPerfLiveNotice.Text = $strings.PerfLiveNotice }
+    if ($lblRamTip) { $lblRamTip.Text = $strings.PerfRamTip }
+
+    if ($cardPerfKill -and $cardPerfKill.Tag) { $cardPerfKill.Tag.Header.Text = $strings.GbPerfKill }
+    if ($lblKillInfo) { $lblKillInfo.Text = $strings.PerfKillInfo }
+    if ($lblKillTargets) { $lblKillTargets.Text = $strings.PerfKillTargets }
+    if ($btnKillProcesses) { $btnKillProcesses.Text = $strings.BtnKillProcesses }
+    if ($script:CbAutoKillOnOptimize) { $script:CbAutoKillOnOptimize.Text = $strings.CbAutoKillOnOptimize }
+
+    if ($cardPerfCpu -and $cardPerfCpu.Tag) { $cardPerfCpu.Tag.Header.Text = $strings.GbPerfCpu }
+    if ($script:CbPowerPlan) { $script:CbPowerPlan.Text = $strings.CbPowerPlan }
+    if ($lblSubPowerPlan) { $lblSubPowerPlan.Text = $strings.SubPowerPlan }
+    if ($script:CbForegroundPriority) { $script:CbForegroundPriority.Text = $strings.CbForegroundPriority }
+    if ($lblSubForegroundPriority) { $lblSubForegroundPriority.Text = $strings.SubForegroundPriority }
+    if ($script:CbDisableCoreParking) { $script:CbDisableCoreParking.Text = $strings.CbDisableCoreParking }
+    if ($btnApplyCpu) { $btnApplyCpu.Text = $strings.BtnApplyCpu }
+
+    # Onglet 3 : Confidentialité
     if ($cardPrivacyReg -and $cardPrivacyReg.Tag) { $cardPrivacyReg.Tag.Header.Text = $strings.GbPrivacyReg }
     if ($script:CbPrivacyReg) { $script:CbPrivacyReg.Text = $strings.CbPrivacyReg }
     if ($script:CbPrivacyBackup) { $script:CbPrivacyBackup.Text = $strings.CbPrivacyBackup }
@@ -846,7 +916,7 @@ $headerPanel.Controls.Add($script:LangCombo)
 $script:TabControl = New-Object System.Windows.Forms.TabControl
 $script:TabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 $script:TabControl.Font = $fonts.SubTitle
-$script:TabControl.ItemSize = New-Object System.Drawing.Size(160, 38)
+$script:TabControl.ItemSize = New-Object System.Drawing.Size(150, 38)
 $script:TabControl.SizeMode = [System.Windows.Forms.TabSizeMode]::Fixed
 $script:TabControl.Appearance = [System.Windows.Forms.TabAppearance]::Normal
 $script:TabControl.BackColor = $colors.BackColor
@@ -978,7 +1048,198 @@ $lblTasksCount.AutoSize = $true
 $cardTasks.Controls.Add($lblTasksCount)
 
 # ────────────────────────────────────────────────────────────────────────
-# ONGLET 2 : CONFIDENTIALITÉ
+# ONGLET 2 : PERFORMANCES (RAM & PROCESSEUR)
+# ────────────────────────────────────────────────────────────────────────
+$perfTab = New-TabPage -Title "⚡ Performances"
+$script:TabControl.TabPages.Add($perfTab.Page)
+
+$yPosPerf = 14
+
+# ── Carte 1: Surveillance des Ressources (RAM & CPU) ──
+$cardPerfMonitor = New-ModernCard -Title "Surveillance des Ressources en temps réel" -Location (New-Object System.Drawing.Point(12, $yPosPerf)) -Size (New-Object System.Drawing.Size(890, 215)) -AccentLineColor $colors.SuccessColor
+$perfTab.Scroll.Controls.Add($cardPerfMonitor)
+
+# RAM
+$lblRamMetric = New-Object System.Windows.Forms.Label
+$lblRamMetric.Text = "Mémoire Vive (RAM) : Calcul en cours..."
+$lblRamMetric.Font = $fonts.SubTitle
+$lblRamMetric.ForeColor = $colors.ForeColor
+$lblRamMetric.Location = New-Object System.Drawing.Point(20, 44)
+$lblRamMetric.Size = New-Object System.Drawing.Size(600, 22)
+$cardPerfMonitor.Controls.Add($lblRamMetric)
+
+$pbRam = New-Object System.Windows.Forms.ProgressBar
+$pbRam.Location = New-Object System.Drawing.Point(20, 70)
+$pbRam.Size = New-Object System.Drawing.Size(610, 22)
+$pbRam.Minimum = 0
+$pbRam.Maximum = 100
+$pbRam.Value = 0
+$pbRam.Style = [System.Windows.Forms.ProgressBarStyle]::Continuous
+$cardPerfMonitor.Controls.Add($pbRam)
+
+$btnFlushRam = New-ModernButton -Text "🚀 Vider le cache & RAM" -Size (New-Object System.Drawing.Size(225, 48)) -Location (New-Object System.Drawing.Point(645, 44)) -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress -Click {
+    if ($script:IsRunning) { return }
+    $origText = $btnFlushRam.Text
+    $btnFlushRam.Enabled = $false
+    $btnFlushRam.Text = "⏳ ..."
+    [System.Windows.Forms.Application]::DoEvents()
+    try {
+        $res = Optimize-RAM
+        Append-Log "✓ Nettoyage RAM : ~$($res.FreedMB) Mo libérés sur $($res.ProcessCount) processus" "SUCCESS"
+        $m = Get-SystemPerformanceMetrics
+        if ($m) {
+            $ramPct = [int]$m.RamPercent
+            if ($pbRam) { $pbRam.Value = [math]::Min(100, [math]::Max(0, $ramPct)) }
+            if ($lblRamMetric) {
+                $lblRamMetric.Text = ($script:I18N[$script:CurrentLang].PerfRamFormat -f $m.UsedRamGB, $m.TotalRamGB, $ramPct)
+            }
+        }
+        $btnFlushRam.Text = ($script:I18N[$script:CurrentLang].BtnFlushRamDone -f [int]$res.FreedMB)
+    } catch {
+        Append-Log "Erreur nettoyage RAM: $_" "ERROR"
+        $btnFlushRam.Text = $origText
+    } finally {
+        $btnFlushRam.Enabled = $true
+    }
+}
+$cardPerfMonitor.Controls.Add($btnFlushRam)
+
+# CPU
+$lblCpuMetric = New-Object System.Windows.Forms.Label
+$lblCpuMetric.Text = "Processeur (CPU) : Calcul en cours..."
+$lblCpuMetric.Font = $fonts.SubTitle
+$lblCpuMetric.ForeColor = $colors.ForeColor
+$lblCpuMetric.Location = New-Object System.Drawing.Point(20, 106)
+$lblCpuMetric.Size = New-Object System.Drawing.Size(600, 22)
+$cardPerfMonitor.Controls.Add($lblCpuMetric)
+
+$pbCpu = New-Object System.Windows.Forms.ProgressBar
+$pbCpu.Location = New-Object System.Drawing.Point(20, 132)
+$pbCpu.Size = New-Object System.Drawing.Size(610, 22)
+$pbCpu.Minimum = 0
+$pbCpu.Maximum = 100
+$pbCpu.Value = 0
+$pbCpu.Style = [System.Windows.Forms.ProgressBarStyle]::Continuous
+$cardPerfMonitor.Controls.Add($pbCpu)
+
+$lblPerfLiveNotice = New-Object System.Windows.Forms.Label
+$lblPerfLiveNotice.Text = "● Surveillance continue en direct • 1.5s"
+$lblPerfLiveNotice.Font = $fonts.Small
+$lblPerfLiveNotice.ForeColor = $colors.MutedColor
+$lblPerfLiveNotice.Location = New-Object System.Drawing.Point(645, 134)
+$lblPerfLiveNotice.Size = New-Object System.Drawing.Size(225, 20)
+$cardPerfMonitor.Controls.Add($lblPerfLiveNotice)
+
+$lblRamTip = New-Object System.Windows.Forms.Label
+$lblRamTip.Text = "Astuce : La purge de la mémoire vide en toute sécurité le cache inactif des processus en arrière-plan sans fermer vos applications."
+$lblRamTip.Font = $fonts.Small
+$lblRamTip.ForeColor = $colors.MutedColor
+$lblRamTip.Location = New-Object System.Drawing.Point(20, 168)
+$lblRamTip.Size = New-Object System.Drawing.Size(850, 36)
+$cardPerfMonitor.Controls.Add($lblRamTip)
+
+$yPosPerf += 230
+
+# ── Carte 2: Fermeture des Processus d'Arrière-Plan ──
+$cardPerfKill = New-ModernCard -Title "Nettoyeur de Processus d'Arrière-Plan Inutiles" -Location (New-Object System.Drawing.Point(12, $yPosPerf)) -Size (New-Object System.Drawing.Size(890, 175)) -AccentLineColor $colors.ErrorColor
+$perfTab.Scroll.Controls.Add($cardPerfKill)
+
+$lblKillInfo = New-Object System.Windows.Forms.Label
+$lblKillInfo.Text = "Ferme immédiatement les processus d'arrière-plan gourmands ou dormants (Phone Link, Game Bar, Widgets, Télémétrie Microsoft, Edge idle) tout en protégeant les processus système vitaux."
+$lblKillInfo.Font = $fonts.Normal
+$lblKillInfo.ForeColor = $colors.ForeColor
+$lblKillInfo.Location = New-Object System.Drawing.Point(20, 42)
+$lblKillInfo.Size = New-Object System.Drawing.Size(850, 36)
+$cardPerfKill.Controls.Add($lblKillInfo)
+
+$lblKillTargets = New-Object System.Windows.Forms.Label
+$lblKillTargets.Text = "Processus ciblés : PhoneExperienceHost, GameBarPresenceWriter, Widgets, Cortana, NewsAndInterests, FeedbackHub, Edge (idle)"
+$lblKillTargets.Font = $fonts.Small
+$lblKillTargets.ForeColor = $colors.MutedColor
+$lblKillTargets.Location = New-Object System.Drawing.Point(20, 80)
+$lblKillTargets.Size = New-Object System.Drawing.Size(850, 20)
+$cardPerfKill.Controls.Add($lblKillTargets)
+
+$btnKillProcesses = New-ModernButton -Text "🛑 Fermer les processus inutiles" -Size (New-Object System.Drawing.Size(260, 42)) -Location (New-Object System.Drawing.Point(20, 112)) -BackColor $colors.ErrorColor -HoverColor $colors.ErrorHover -PressColor $colors.ErrorPress -Click {
+    if ($script:IsRunning) { return }
+    $origText = $btnKillProcesses.Text
+    $btnKillProcesses.Enabled = $false
+    $btnKillProcesses.Text = "⏳ ..."
+    [System.Windows.Forms.Application]::DoEvents()
+    try {
+        $res = Stop-UnnecessaryProcesses
+        Append-Log "✓ Processus d'arrière-plan arrêtés : $($res.TerminatedCount) processus" "SUCCESS"
+        $btnKillProcesses.Text = ($script:I18N[$script:CurrentLang].BtnKillProcessesDone -f $res.TerminatedCount)
+        $m = Get-SystemPerformanceMetrics
+        if ($m -and $lblCpuMetric) {
+            $lblCpuMetric.Text = ($script:I18N[$script:CurrentLang].PerfCpuFormat -f [math]::Round([double]$m.CpuPercent, 1), $m.ProcessCount)
+        }
+    } catch {
+        Append-Log "Erreur arrêt processus: $_" "ERROR"
+        $btnKillProcesses.Text = $origText
+    } finally {
+        $btnKillProcesses.Enabled = $true
+    }
+}
+$cardPerfKill.Controls.Add($btnKillProcesses)
+
+$script:CbAutoKillOnOptimize = New-ModernCheckBox -Text "Inclure la fermeture des processus inutiles lors de l'Optimisation Globale" -Location (New-Object System.Drawing.Point(300, 122)) -Checked $true
+$cardPerfKill.Controls.Add($script:CbAutoKillOnOptimize)
+
+$yPosPerf += 190
+
+# ── Carte 3: Optimisations Processeur & Énergie ──
+$cardPerfCpu = New-ModernCard -Title "Optimisations Processeur (CPU) & Alimentation" -Location (New-Object System.Drawing.Point(12, $yPosPerf)) -Size (New-Object System.Drawing.Size(890, 235)) -AccentLineColor $colors.IndigoAccent
+$perfTab.Scroll.Controls.Add($cardPerfCpu)
+
+$script:CbPowerPlan = New-ModernCheckBox -Text "Activer le plan d'alimentation 'Performances Élevées' / 'Performances Optimales'" -Location (New-Object System.Drawing.Point(20, 40)) -Checked $true
+$cardPerfCpu.Controls.Add($script:CbPowerPlan)
+
+$lblSubPowerPlan = New-Object System.Windows.Forms.Label
+$lblSubPowerPlan.Text = "Débloque la fréquence maximale du CPU et supprime les bridages d'économie d'énergie."
+$lblSubPowerPlan.Font = $fonts.Small
+$lblSubPowerPlan.ForeColor = $colors.MutedColor
+$lblSubPowerPlan.Location = New-Object System.Drawing.Point(42, 64)
+$lblSubPowerPlan.Size = New-Object System.Drawing.Size(820, 18)
+$cardPerfCpu.Controls.Add($lblSubPowerPlan)
+
+$script:CbForegroundPriority = New-ModernCheckBox -Text "Priorité CPU maximale aux applications au premier plan (Win32PrioritySeparation = 0x26)" -Location (New-Object System.Drawing.Point(20, 88)) -Checked $true
+$cardPerfCpu.Controls.Add($script:CbForegroundPriority)
+
+$lblSubForegroundPriority = New-Object System.Windows.Forms.Label
+$lblSubForegroundPriority.Text = "Alloue 3x plus de temps processeur à la fenêtre active (Jeux, logiciels) pour une réactivité instantanée."
+$lblSubForegroundPriority.Font = $fonts.Small
+$lblSubForegroundPriority.ForeColor = $colors.MutedColor
+$lblSubForegroundPriority.Location = New-Object System.Drawing.Point(42, 112)
+$lblSubForegroundPriority.Size = New-Object System.Drawing.Size(820, 18)
+$cardPerfCpu.Controls.Add($lblSubForegroundPriority)
+
+$script:CbDisableCoreParking = New-ModernCheckBox -Text "Désactiver la mise en veille forcée des cœurs du processeur (Core Parking OFF)" -Location (New-Object System.Drawing.Point(20, 136)) -Checked $true
+$cardPerfCpu.Controls.Add($script:CbDisableCoreParking)
+
+$btnApplyCpu = New-ModernButton -Text "⚡ Appliquer les réglages CPU" -Size (New-Object System.Drawing.Size(260, 40)) -Location (New-Object System.Drawing.Point(20, 175)) -BackColor $colors.AccentColor -HoverColor $colors.AccentHover -PressColor $colors.AccentPress -Click {
+    if ($script:IsRunning) { return }
+    $origText = $btnApplyCpu.Text
+    $btnApplyCpu.Enabled = $false
+    $btnApplyCpu.Text = "⏳ ..."
+    [System.Windows.Forms.Application]::DoEvents()
+    try {
+        $res = Optimize-CPU -HighPerformancePower:$script:CbPowerPlan.Checked `
+                             -ForegroundPriority:$script:CbForegroundPriority.Checked `
+                             -DisableCoreParking:$script:CbDisableCoreParking.Checked
+        Append-Log "✓ Réglages CPU appliqués : Plan=$($res.PowerPlan), Priorité=$($res.PrioritySeparation), Parking=$($res.CoreParking)" "SUCCESS"
+        $btnApplyCpu.Text = $script:I18N[$script:CurrentLang].BtnApplyCpuDone
+    } catch {
+        Append-Log "Erreur optimisation CPU: $_" "ERROR"
+        $btnApplyCpu.Text = $origText
+    } finally {
+        $btnApplyCpu.Enabled = $true
+    }
+}
+$cardPerfCpu.Controls.Add($btnApplyCpu)
+
+# ────────────────────────────────────────────────────────────────────────
+# ONGLET 3 : CONFIDENTIALITÉ
 # ────────────────────────────────────────────────────────────────────────
 $privacyTab = New-TabPage -Title "🔒 Confidentialité"
 $script:TabControl.TabPages.Add($privacyTab.Page)
@@ -1330,6 +1591,9 @@ function Start-Optimization {
         SkipPrivacy       = (-not ($script:CbPrivacyReg.Checked -or $script:CbGPO.Checked -or $script:CbHosts.Checked -or $script:CbFirewall.Checked))
         SkipCleanup       = (-not ($script:CbDisk.Checked -or $script:CbRegClean.Checked))
         SkipRepair        = (-not ($script:CbDISM.Checked -or $script:CbSFC.Checked -or $script:CbChkdsk.Checked))
+        OptimizeRAM       = $true
+        StopBloatProcesses = ($script:CbAutoKillOnOptimize -and $script:CbAutoKillOnOptimize.Checked)
+        OptimizeCPU       = ($script:CbPowerPlan.Checked -or $script:CbForegroundPriority.Checked -or $script:CbDisableCoreParking.Checked)
     }
 
     Set-REDADZDOptimiserConfig -BackupRegistry ($script:CbPrivacyBackup.Checked -or $script:CbHostsBackup.Checked -or $script:CbRegBackup.Checked)
@@ -1347,6 +1611,9 @@ function Start-Optimization {
         if ($results.RegistryCleanup) { Append-Log "Registre nettoyé : $($results.RegistryCleanup.Cleaned) clés orphelines" "SUCCESS" }
         if ($results.SystemRepair) { Append-Log "DISM : $($results.SystemRepair.DISM) | SFC : $($results.SystemRepair.SFC) | Chkdsk : $($results.SystemRepair.Chkdsk)" "SUCCESS" }
         if ($results.RestorePoint) { Append-Log "Point de restauration : CRÉÉ ✓" "SUCCESS" }
+        if ($results.CPU) { Append-Log "CPU : Plan=$($results.CPU.PowerPlan) | Priorité=$($results.CPU.PrioritySeparation)" "SUCCESS" }
+        if ($results.Processes) { Append-Log "Processus fermés : $($results.Processes.TerminatedCount) processus" "SUCCESS" }
+        if ($results.RAM) { Append-Log "RAM libérée : ~$($results.RAM.FreedMB) Mo" "SUCCESS" }
 
         Append-Log "" "INFO"
         Append-Log "✅ OPÉRATION TERMINÉE AVEC SUCCÈS - Redémarrage recommandé" "SUCCESS"
@@ -1362,6 +1629,10 @@ function Start-Optimization {
 # ════════════════════════════════════════════════════════════════════════
 
 $form.Add_FormClosing({
+    if ($script:PerfTimer) {
+        $script:PerfTimer.Stop()
+        $script:PerfTimer.Dispose()
+    }
     if ($script:IsRunning) {
         $result = [System.Windows.Forms.MessageBox]::Show(
             $script:I18N[$script:CurrentLang].ClosingConfirm,
@@ -1390,6 +1661,28 @@ Apply-Language -Lang $targetLang
 $form.Add_Shown({
     $form.Activate()
     $form.Focus()
+
+    # Démarrage de la surveillance en temps réel
+    if ($script:PerfTimer) {
+        $script:PerfTimer.Start()
+        # Première lecture immédiate
+        try {
+            $m = Get-SystemPerformanceMetrics
+            if ($m) {
+                $ramPct = [int]$m.RamPercent
+                if ($pbRam) { $pbRam.Value = [math]::Min(100, [math]::Max(0, $ramPct)) }
+                if ($lblRamMetric) {
+                    $lblRamMetric.Text = ($script:I18N[$script:CurrentLang].PerfRamFormat -f $m.UsedRamGB, $m.TotalRamGB, $ramPct)
+                }
+                $cpuVal = [math]::Round([double]$m.CpuPercent, 1)
+                $cpuInt = [int][math]::Min(100, [math]::Max(0, [math]::Round($cpuVal)))
+                if ($pbCpu) { $pbCpu.Value = $cpuInt }
+                if ($lblCpuMetric) {
+                    $lblCpuMetric.Text = ($script:I18N[$script:CurrentLang].PerfCpuFormat -f $cpuVal, $m.ProcessCount)
+                }
+            }
+        } catch {}
+    }
 
     Append-Log "⚡ REDADZDOptimiser Professional ($($script:CurrentLang)) initialisé" "INFO"
     Append-Log "Système : Windows $($winVer.Major).$($winVer.Minor) Build $($winVer.Build)" "INFO"

@@ -449,6 +449,15 @@ function Show-Results {
     if ($Results.RestorePoint -eq $true) {
         Write-Host "Restore Point: CREATED ✓" -ForegroundColor Green
     }
+    if ($Results.CPU) {
+        Write-Host "CPU: Power plan=$($Results.CPU.PowerPlan) - Priority=$($Results.CPU.PrioritySeparation)" -ForegroundColor Cyan
+    }
+    if ($Results.Processes) {
+        Write-Host "Processes: $($Results.Processes.TerminatedCount) stopped" -ForegroundColor Cyan
+    }
+    if ($Results.RAM) {
+        Write-Host "RAM: ~$($Results.RAM.FreedMB) MB freed" -ForegroundColor Cyan
+    }
 
     Write-Host "`nLog: $($script:Config.LogPath)" -ForegroundColor Gray
     Write-Host "`n$($str.RebootWarn)" -ForegroundColor Yellow

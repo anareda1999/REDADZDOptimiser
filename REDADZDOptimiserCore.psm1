@@ -57,6 +57,92 @@ function Get-REDADZDOptimiserConfig {
     return $script:Config
 }
 
+# ─── Définition C# Native pour Métriques & Optimisations Système ───────
+if (-not ([System.Management.Automation.PSTypeName]'REDADZD.SystemHelper').Type) {
+    $csharp = @'
+using System;
+using System.Runtime.InteropServices;
+
+namespace REDADZD {
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    public struct MEMORYSTATUSEX {
+        public uint dwLength;
+        public uint dwMemoryLoad;
+        public ulong ullTotalPhys;
+        public ulong ullAvailPhys;
+        public ulong ullTotalPageFile;
+        public ulong ullAvailPageFile;
+        public ulong ullTotalVirtual;
+        public ulong ullAvailVirtual;
+        public ulong ullAvailExtendedVirtual;
+    }
+
+    public static class SystemHelper {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetSystemTimes(out long idleTime, out long kernelTime, out long userTime);
+
+        [DllImport("psapi.dll", SetLastError = true)]
+        public static extern int EmptyWorkingSet(IntPtr hProcess);
+
+        private static long _lastIdle = 0;
+        private static long _lastKernel = 0;
+        private static long _lastUser = 0;
+
+        public static MEMORYSTATUSEX GetMemoryStatus() {
+            var mem = new MEMORYSTATUSEX();
+            mem.dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
+            GlobalMemoryStatusEx(ref mem);
+            return mem;
+        }
+
+        public static double GetCpuUsage() {
+            long idle, kernel, user;
+            if (!GetSystemTimes(out idle, out kernel, out user)) return 0;
+
+            if (_lastIdle == 0) {
+                _lastIdle = idle;
+                _lastKernel = kernel;
+                _lastUser = user;
+                System.Threading.Thread.Sleep(50);
+                GetSystemTimes(out idle, out kernel, out user);
+            }
+
+            long diffIdle = idle - _lastIdle;
+            long diffKernel = kernel - _lastKernel;
+            long diffUser = user - _lastUser;
+
+            _lastIdle = idle;
+            _lastKernel = kernel;
+            _lastUser = user;
+
+            long total = diffKernel + diffUser;
+            if (total <= 0) return 0;
+
+            double cpu = (double)(total - diffIdle) * 100.0 / total;
+            if (cpu < 0) cpu = 0;
+            if (cpu > 100) cpu = 100;
+            return Math.Round(cpu, 1);
+        }
+
+        public static bool FlushProcessWorkingSet(IntPtr handle) {
+            try {
+                return EmptyWorkingSet(handle) != 0;
+            } catch {
+                return false;
+            }
+        }
+    }
+}
+'@
+    Add-Type -TypeDefinition $csharp
+}
+
+
 # ─── Apps provisionnées à SUPPRIMER (Niveau Équilibré) ──────────────────
 $script:AppsToRemove = @(
     # Xbox / Gaming
@@ -1157,6 +1243,307 @@ function Set-FirewallTelemetryBlock {
     }
 }
 
+
+# ════════════════════════════════════════════════════════════════════════
+# FONCTIONS DE PERFORMANCE : RAM, CPU & PROCESSUS
+# ════════════════════════════════════════════════════════════════════════
+
+function Get-SystemPerformanceMetrics {
+    <#
+    .SYNOPSIS
+        Récupère en temps réel les métriques d'utilisation du CPU, de la RAM et le nombre de processus actifs.
+    #>
+    try {
+        $mem = [REDADZD.SystemHelper]::GetMemoryStatus()
+        $cpu = [REDADZD.SystemHelper]::GetCpuUsage()
+        $totalGB = [math]::Round($mem.ullTotalPhys / 1GB, 2)
+        $freeGB = [math]::Round($mem.ullAvailPhys / 1GB, 2)
+        $usedGB = [math]::Round(($mem.ullTotalPhys - $mem.ullAvailPhys) / 1GB, 2)
+        $loadPct = [int]$mem.dwMemoryLoad
+        $procCount = @(Get-Process).Count
+
+        return [PSCustomObject]@{
+            CpuPercent   = $cpu
+            TotalRamGB   = $totalGB
+            FreeRamGB    = $freeGB
+            UsedRamGB    = $usedGB
+            RamPercent   = $loadPct
+            ProcessCount = $procCount
+        }
+    } catch {
+        return [PSCustomObject]@{
+            CpuPercent   = 0.0
+            TotalRamGB   = 0.0
+            FreeRamGB    = 0.0
+            UsedRamGB    = 0.0
+            RamPercent   = 0
+            ProcessCount = 0
+        }
+    }
+}
+
+function Optimize-RAM {
+    <#
+    .SYNOPSIS
+        Purge la mémoire inactive des processus de travail (EmptyWorkingSet) et force le ramasse-miettes système.
+    #>
+    [CmdletBinding()]
+    param(
+        [switch]$DryRun
+    )
+
+    Write-Log "Optimisation de la mémoire vive (RAM) en cours..." "INFO"
+
+    $memBefore = [REDADZD.SystemHelper]::GetMemoryStatus()
+    $beforeAvailMB = [math]::Round($memBefore.ullAvailPhys / 1MB, 2)
+    $beforeUsedMB = [math]::Round(($memBefore.ullTotalPhys - $memBefore.ullAvailPhys) / 1MB, 2)
+
+    if ($DryRun) {
+        Write-Log "[SIMULATION] Libération du cache RAM simulée." "WARN"
+        return [PSCustomObject]@{
+            BeforeUsedMB = $beforeUsedMB
+            AfterUsedMB  = $beforeUsedMB
+            FreedMB      = 0
+            ProcessCount = 0
+            Success      = $true
+        }
+    }
+
+    $protected = @(
+        'System', 'Idle', 'smss', 'csrss', 'wininit', 'services', 'lsass', 'winlogon',
+        'explorer', 'dwm', 'RuntimeBroker', 'svchost', 'fontdrvhost', 'spoolsv'
+    )
+
+    $flushedCount = 0
+    $allProcesses = Get-Process -ErrorAction SilentlyContinue
+
+    foreach ($proc in $allProcesses) {
+        if ($script:Config.CancelRequested) { break }
+        if (-not $proc -or $proc.Id -le 4) { continue }
+        if ($protected -contains $proc.ProcessName) { continue }
+
+        try {
+            if ($proc.Handle -ne [IntPtr]::Zero) {
+                if ([REDADZD.SystemHelper]::FlushProcessWorkingSet($proc.Handle)) {
+                    $flushedCount++
+                }
+            }
+        } catch {
+            # Processus protégé ou accès refusé, ignoré
+        }
+    }
+
+    # Collecte garbage collector .NET
+    [System.GC]::Collect()
+    [System.GC]::WaitForPendingFinalizers()
+    Start-Sleep -Milliseconds 250
+
+    $memAfter = [REDADZD.SystemHelper]::GetMemoryStatus()
+    $afterAvailMB = [math]::Round($memAfter.ullAvailPhys / 1MB, 2)
+    $afterUsedMB = [math]::Round(($memAfter.ullTotalPhys - $memAfter.ullAvailPhys) / 1MB, 2)
+    $freedMB = [math]::Round($afterAvailMB - $beforeAvailMB, 2)
+    if ($freedMB -lt 0) { $freedMB = 0 }
+
+    Write-Log "Cache RAM vidé avec succès sur $flushedCount processus." "SUCCESS"
+    Write-Log "Mémoire libérée : ~$freedMB Mo (RAM utilisée actuelle : $([math]::Round($afterUsedMB / 1024, 2)) Go)" "SUCCESS"
+
+    return [PSCustomObject]@{
+        BeforeUsedMB = $beforeUsedMB
+        AfterUsedMB  = $afterUsedMB
+        FreedMB      = $freedMB
+        ProcessCount = $flushedCount
+        Success      = $true
+    }
+}
+
+function Stop-UnnecessaryProcesses {
+    <#
+    .SYNOPSIS
+        Arrête de façon sécurisée les processus d'arrière-plan inutiles (bloatware, télémétrie, widgets, etc.)
+    #>
+    [CmdletBinding()]
+    param(
+        [switch]$DryRun
+    )
+
+    Write-Log "Analyse et fermeture des processus d'arrière-plan inutiles..." "INFO"
+
+    $targetProcesses = @(
+        'PhoneExperienceHost',      # Lien avec votre téléphone
+        'YourPhone',
+        'GameBarPresenceWriter',    # Xbox Game Bar
+        'XboxGamingOverlay',
+        'XboxApp',
+        'Widgets',                  # Widgets Windows 11
+        'WidgetService',
+        'Cortana',                  # Assistant Cortana
+        'SearchApp',
+        'NewsAndInterests',         # Actualités Windows
+        'FeedbackHub',              # Commentaires Windows
+        'QuickAssist',              # Assistance rapide
+        'SkypeApp',                 # Skype
+        'SkypeBackgroundHost',
+        'CompatTelRunner',          # Télémétrie Microsoft
+        'DeviceCensus',             # Recensement télémétrie
+        'wermgr',                   # Rapport d'erreurs
+        'Microsoft.Photos'          # Arrière-plan Photos
+    )
+
+    $whitelist = @(
+        'System', 'Idle', 'smss', 'csrss', 'wininit', 'services', 'lsass', 'winlogon',
+        'explorer', 'dwm', 'RuntimeBroker', 'svchost', 'fontdrvhost', 'spoolsv',
+        'taskmgr', 'powershell', 'pwsh', 'cmd', 'conhost'
+    )
+
+    $terminated = @()
+    $running = Get-Process -ErrorAction SilentlyContinue
+
+    foreach ($proc in $running) {
+        if ($script:Config.CancelRequested) { break }
+        if (-not $proc -or $proc.Id -le 4) { continue }
+
+        $name = $proc.ProcessName
+        if ($whitelist -contains $name) { continue }
+
+        if ($targetProcesses -contains $name) {
+            if ($DryRun) {
+                Write-Log "[SIMULATION] Processus ciblé : $name (PID: $($proc.Id))" "WARN"
+                $terminated += $name
+            } else {
+                try {
+                    Stop-Process -Id $proc.Id -Force -ErrorAction Stop
+                    $terminated += "$name (PID: $($proc.Id))"
+                    Write-Log "Processus arrêté : $name" "SUCCESS"
+                } catch {
+                    Write-Log "Impossible d'arrêter le processus $name : $_" "WARN"
+                }
+            }
+        }
+    }
+
+    # Nettoyage des instances Edge dormantes en tâche de fond (sans fenêtre)
+    try {
+        $edgeProcs = Get-Process -Name "msedge" -ErrorAction SilentlyContinue
+        if ($edgeProcs) {
+            $hasVisibleWindow = ($edgeProcs | Where-Object { $_.MainWindowTitle -and $_.MainWindowTitle.Length -gt 0 })
+            if (-not $hasVisibleWindow) {
+                foreach ($ep in $edgeProcs) {
+                    if ($DryRun) {
+                        $terminated += "msedge (background)"
+                    } else {
+                        try {
+                            Stop-Process -Id $ep.Id -Force -ErrorAction SilentlyContinue
+                            $terminated += "msedge (PID: $($ep.Id))"
+                        } catch {}
+                    }
+                }
+                if ($edgeProcs.Count -gt 0) {
+                    Write-Log "Instances Microsoft Edge en tâche de fond arrêtées ($($edgeProcs.Count) instances)." "SUCCESS"
+                }
+            }
+        }
+    } catch {}
+
+    $uniqueCount = ($terminated | Select-Object -Unique).Count
+    Write-Log "Fermeture terminée : $uniqueCount processus d'arrière-plan inutiles arrêtés." "SUCCESS"
+
+    return [PSCustomObject]@{
+        TerminatedCount = $uniqueCount
+        TerminatedList  = $terminated
+    }
+}
+
+function Optimize-CPU {
+    <#
+    .SYNOPSIS
+        Optimise les réglages processeur et alimentation (Plan d'alimentation haute performance, priorité CPU applications premier plan, core parking).
+    #>
+    [CmdletBinding()]
+    param(
+        [switch]$HighPerformancePower = $true,
+        [switch]$ForegroundPriority = $true,
+        [switch]$DisableCoreParking = $false,
+        [switch]$DryRun
+    )
+
+    Write-Log "Application des optimisations processeur & énergie..." "INFO"
+
+    $results = @{
+        PowerPlan          = "Ignoré"
+        PrioritySeparation = "Ignoré"
+        CoreParking        = "Ignoré"
+    }
+
+    # 1. Plan d'alimentation
+    if ($HighPerformancePower) {
+        if ($DryRun) {
+            Write-Log "[SIMULATION] Activation du plan d'alimentation 'Performances Élevées'" "WARN"
+            $results.PowerPlan = "Simulé"
+        } else {
+            try {
+                $ultimateGuid = "e9a42b02-d5df-448d-aa00-03f14749eb61"
+                $highPerfGuid = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"
+
+                & powercfg /duplicatescheme $ultimateGuid 2>$null | Out-Null
+                $powerOutput = & powercfg /setactive $ultimateGuid 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    & powercfg /setactive $highPerfGuid 2>$null | Out-Null
+                    Write-Log "Plan d'alimentation : Performances Élevées activé." "SUCCESS"
+                    $results.PowerPlan = "Performances Élevées"
+                } else {
+                    Write-Log "Plan d'alimentation : Performances Optimales (Ultimate) activé." "SUCCESS"
+                    $results.PowerPlan = "Performances Optimales"
+                }
+            } catch {
+                Write-Log "Erreur activation plan d'alimentation : $_" "WARN"
+                $results.PowerPlan = "Échec"
+            }
+        }
+    }
+
+    # 2. Win32PrioritySeparation
+    if ($ForegroundPriority) {
+        $regPath = "HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl"
+        if ($DryRun) {
+            Write-Log "[SIMULATION] Configuration Win32PrioritySeparation = 38 (0x26: priorité premier plan)" "WARN"
+            $results.PrioritySeparation = "Simulé"
+        } else {
+            try {
+                if (-not (Test-Path $regPath)) {
+                    New-Item -Path $regPath -Force | Out-Null
+                }
+                Set-ItemProperty -Path $regPath -Name "Win32PrioritySeparation" -Value 38 -Type DWord -Force
+                Write-Log "Priorité CPU au premier plan configurée (Win32PrioritySeparation = 0x26 / 38)." "SUCCESS"
+                $results.PrioritySeparation = "Appliqué (38 / 0x26)"
+            } catch {
+                Write-Log "Erreur configuration Win32PrioritySeparation : $_" "WARN"
+                $results.PrioritySeparation = "Échec"
+            }
+        }
+    }
+
+    # 3. Core Parking
+    if ($DisableCoreParking) {
+        if ($DryRun) {
+            Write-Log "[SIMULATION] Désactivation du Core Parking CPU" "WARN"
+            $results.CoreParking = "Simulé"
+        } else {
+            try {
+                & powercfg -setacvalueindex scheme_current sub_processor CPMINCORES 100 2>$null | Out-Null
+                & powercfg -setdcvalueindex scheme_current sub_processor CPMINCORES 100 2>$null | Out-Null
+                & powercfg -setactive scheme_current 2>$null | Out-Null
+                Write-Log "Core Parking CPU désactivé (100% des cœurs toujours actifs)." "SUCCESS"
+                $results.CoreParking = "Désactivé (100% cœurs)"
+            } catch {
+                Write-Log "Erreur configuration Core Parking : $_" "WARN"
+                $results.CoreParking = "Échec"
+            }
+        }
+    }
+
+    return [PSCustomObject]$results
+}
+
 # ════════════════════════════════════════════════════════════════════════
 # ORCHESTRATEUR PRINCIPAL
 # ════════════════════════════════════════════════════════════════════════
@@ -1182,6 +1569,9 @@ function Invoke-REDADZDOptimiser {
         [switch]$FirewallBlock = $true,
         [switch]$DisableTelemetryGPO = $true,
         [switch]$DisableTelemetryServices = $true,
+        [switch]$OptimizeRAM = $false,
+        [switch]$StopBloatProcesses = $false,
+        [switch]$OptimizeCPU = $false,
         [switch]$DryRun,
         [switch]$Verbose
     )
@@ -1280,6 +1670,27 @@ function Invoke-REDADZDOptimiser {
         $results.SystemRepair = Invoke-SystemRepair -RunDISM -RunSFC -RunChkdsk:$false
     }
 
+    # Optimisation Processeur & Énergie
+    if ($OptimizeCPU) {
+        if ($script:Config.CancelRequested) { Write-Log "Optimisation interrompue par l'utilisateur." "WARN"; return $results }
+        Write-Log "--- Optimisations Processeur & Énergie ---" "INFO"
+        $results.CPU = Optimize-CPU -DryRun:$DryRun
+    }
+
+    # Nettoyage des processus d'arrière-plan inutiles
+    if ($StopBloatProcesses) {
+        if ($script:Config.CancelRequested) { Write-Log "Optimisation interrompue par l'utilisateur." "WARN"; return $results }
+        Write-Log "--- Nettoyage des processus d'arrière-plan ---" "INFO"
+        $results.Processes = Stop-UnnecessaryProcesses -DryRun:$DryRun
+    }
+
+    # Purge et optimisation RAM
+    if ($OptimizeRAM) {
+        if ($script:Config.CancelRequested) { Write-Log "Optimisation interrompue par l'utilisateur." "WARN"; return $results }
+        Write-Log "--- Optimisation de la mémoire vive (RAM) ---" "INFO"
+        $results.RAM = Optimize-RAM -DryRun:$DryRun
+    }
+
     $endTime = Get-Date
     $duration = $endTime - $startTime
 
@@ -1315,6 +1726,10 @@ Export-ModuleMember -Function @(
     'Disable-TelemetryServices',
     'Block-TelemetryHosts',
     'Set-FirewallTelemetryBlock',
+    'Get-SystemPerformanceMetrics',
+    'Optimize-RAM',
+    'Stop-UnnecessaryProcesses',
+    'Optimize-CPU',
     'Invoke-REDADZDOptimiser',
     'Invoke-WinOptimizer',
     'Set-REDADZDOptimiserConfig',
