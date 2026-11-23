@@ -131,14 +131,19 @@ $script:I18N = @{
 
         # Onglet Démarrage (Startup Manager)
         GbStartupManager    = "Gestionnaire des Applications au Démarrage de Windows"
-        LblStartupDesc      = "Désactivez les logiciels superflus au démarrage pour faire démarrer votre PC en quelques secondes."
-        BtnRefreshStartup   = "🔄 Actualiser la liste"
-        BtnDisableStartup   = "🛑 Désactiver l'application sélectionnée"
+        LblStartupDesc      = "Cochez les applications superflues au démarrage pour les désactiver ou réactivez celles dont vous avez besoin."
+        BtnCheckAllStartup  = "☑️ Tout cocher"
+        BtnUncheckAllStartup= "⬜ Tout décocher"
+        BtnDisableStartup   = "🛑 Désactiver cochés"
+        BtnEnableStartup    = "✅ Réactiver cochés"
+        BtnRefreshStartup   = "🔄 Actualiser"
         ColStartupName      = "Nom"
         ColStartupLocation  = "Emplacement"
         ColStartupStatus    = "Statut"
         ColStartupCommand   = "Commande / Chemin"
-        StartupDisabledDone = "✓ Application '{0}' désactivée au démarrage."
+        StartupDisabledDone = "✓ {0} application(s) désactivée(s) au démarrage."
+        StartupEnabledDone  = "✓ {0} application(s) réactivée(s) au démarrage."
+        StartupNoSelection  = "Veuillez cocher au moins une application dans la liste."
 
         # Onglet Performances
         GbPerfMonitor       = "Surveillance des Ressources en temps réel"
@@ -288,14 +293,19 @@ $script:I18N = @{
 
         # Startup Manager Tab
         GbStartupManager    = "Windows Startup Applications Manager"
-        LblStartupDesc      = "Disable non-essential startup apps to make Windows boot up in under 10 seconds."
-        BtnRefreshStartup   = "🔄 Refresh List"
-        BtnDisableStartup   = "🛑 Disable Selected Application"
+        LblStartupDesc      = "Check non-essential startup apps to disable them, or re-enable apps you need."
+        BtnCheckAllStartup  = "☑️ Select All"
+        BtnUncheckAllStartup= "⬜ Deselect All"
+        BtnDisableStartup   = "🛑 Disable Checked"
+        BtnEnableStartup    = "✅ Enable Checked"
+        BtnRefreshStartup   = "🔄 Refresh"
         ColStartupName      = "Name"
         ColStartupLocation  = "Location"
         ColStartupStatus    = "Status"
         ColStartupCommand   = "Command / Path"
-        StartupDisabledDone = "✓ Application '{0}' disabled from startup."
+        StartupDisabledDone = "✓ {0} application(s) disabled from startup."
+        StartupEnabledDone  = "✓ {0} application(s) re-enabled at startup."
+        StartupNoSelection  = "Please check at least one application in the list."
 
         # Performance Tab
         GbPerfMonitor       = "Real-Time Resource Monitor"
@@ -410,6 +420,64 @@ $script:I18N = @{
         PresetDescMax       = "(أقصى أداء للألعاب: إزالة شاملة، تنظيف السجل وأعلى قوة)"
         PresetAppliedLog    = "تم تطبيق الوضع '{0}' بنجاح."
         CopyrightText       = "© 2026 REDADZDOptimiser • Anagou Reda  |  هاتف : 0542439514"
+
+        # تبويب البرامج (Winget)
+        GbBrowsers          = "متصفحات الويب"
+        GbUtilities         = "الأدوات المساعدة وإدارة الملفات"
+        GbGamingApps        = "الألعاب والبث"
+        GbDevOffice         = "المكتب والتطوير"
+        BtnSelectAllApps    = "✓ تحديد الكل"
+        BtnDeselectAllApps  = "✕ إلغاء تحديد الكل"
+        BtnInstallApps      = "🚀 تثبيت التطبيقات المحددة (Winget)"
+        BtnInstallingApps   = "⏳ جارٍ التثبيت..."
+        InstallAppsDone     = "✓ اكتمل التثبيت : تم تثبيت {0}، فشل {1}."
+
+        # تبويب الشبكة و DNS
+        GbDnsSelector       = "اختيار خادم DNS سريع وآمن"
+        OptDnsCloudflare    = "⚡ Cloudflare (1.1.1.1 / 1.0.0.1 - سرعة قصوى للألعاب)"
+        OptDnsGoogle        = "🔒 Google DNS (8.8.8.8 / 8.8.4.4 - توافق عالي)"
+        OptDnsQuad9         = "🛡️ Quad9 (9.9.9.9 - حماية متقدمة ضد البرمجيات الخبيثة)"
+        OptDnsDhcp          = "🔄 تلقائي / مزود الخدمة (DHCP الافتراضي)"
+        BtnApplyDns         = "⚡ تطبيق خادم DNS المختار"
+        BtnApplyDnsDone     = "✓ تم تطبيق DNS بنجاح!"
+        GbGamingNetwork     = "تحسين استجابة الشبكة للألعاب (Ping TCP/IP)"
+        CbNetThrottling     = "تعطيل خنق سرعة الشبكة للوسائط المتعددة (NetworkThrottlingIndex)"
+        CbNagleAlgo         = "تعطيل خوارزمية Nagle لتسريع وصول الحزم (TcpAckFrequency = 1)"
+        BtnApplyGamingNet   = "🚀 تطبيق تحسينات الشبكة للألعاب"
+        BtnApplyGamingDone  = "✓ تم تطبيق تسريع TCP/IP للألعاب!"
+        GbResetNetwork      = "إصلاح وإعادة ضبط إعدادات الشبكة"
+        LblResetNetworkDesc = "يقوم بمسح كاش DNS وإعادة تهيئة Winsock و TCP/IP لحل مشاكل الاتصال."
+        BtnResetNetStack    = "🧹 مسح كاش DNS وإعادة تعيين Winsock / IP"
+        BtnResetNetDone     = "✓ تمت إعادة ضبط الشبكة ومسح الكاش بنجاح!"
+
+        # تبويب إدارة الإقلاع (Startup Manager)
+        GbStartupManager    = "إدارة تطبيقات بدء التشغيل (الإقلاع)"
+        LblStartupDesc      = "حدد البرامج غير الضرورية لتعطيلها، أو أعد تفعيل البرامج التي تحتاجها لتسريع الإقلاع."
+        BtnCheckAllStartup  = "☑️ تحديد الكل"
+        BtnUncheckAllStartup= "⬜ إلغاء التحديد"
+        BtnDisableStartup   = "🛑 تعطيل المحدد"
+        BtnEnableStartup    = "✅ تفعيل المحدد"
+        BtnRefreshStartup   = "🔄 تحديث"
+        ColStartupName      = "الاسم"
+        ColStartupLocation  = "الموقع"
+        ColStartupStatus    = "الحالة"
+        ColStartupCommand   = "الأمر / المسار"
+        StartupDisabledDone = "✓ تم تعطيل {0} تطبيق(تطبيقات) عند بدء التشغيل."
+        StartupEnabledDone  = "✓ تم تفعيل {0} تطبيق(تطبيقات) عند بدء التشغيل."
+        StartupNoSelection  = "يرجى تحديد تطبيق واحد على الأقل في القائمة."
+
+        # تبويب الأداء (Performance)
+        GbPerfMonitor       = "مراقبة موارد النظام المباشرة"
+        PerfRamFormat       = "استهلاك الذاكرة (RAM) : {0} جيجابايت / {1} جيجابايت ({2} %)"
+        BtnFlushRam         = "🚀 تفريغ الذاكرة المؤقتة (RAM)"
+        BtnFlushRamDone     = "✓ تم تفريغ كاش الذاكرة : تم تحرير ~{0} ميجابايت!"
+        PerfCpuFormat       = "استهلاك المعالج (CPU) : {0} %  •  {1} عملية نشطة"
+        PerfLiveNotice      = "● مراقبة حية مستمرة • 1.5 ثانية"
+        PerfRamTip          = "فائدة : تنظيف الذاكرة يفرغ بأمان الكاش الخامل في الخلفية دون إغلاق أي من برامجك."
+        GbPerfKill          = "إغلاق العمليات غير الضرورية في الخلفية"
+        LblPerfKill         = "إنهاء العمليات المعلقة والمهدرة للموارد بأمان لتحرير أنوية المعالج."
+        BtnKillUseless      = "⚡ إنهاء العمليات غير المجدية الآن"
+        BtnKillUselessDone  = "✓ تم إنهاء {0} عملية غير ضرورية بنجاح !"
 
         GbApps              = "تطبيقات النظام غير الضرورية للإزالة"
         CbApps              = "إزالة التطبيقات المثبتة مسبقاً (Xbox, Bing, Solitaire, Feedback, الخرائط، إلخ)"
@@ -1073,8 +1141,11 @@ function Apply-Language {
     # Onglet Démarrage
     if ($cardStartupManager -and $cardStartupManager.Tag) { $cardStartupManager.Tag.Header.Text = $strings.GbStartupManager }
     if ($lblStartupDesc) { $lblStartupDesc.Text = $strings.LblStartupDesc }
-    if ($btnRefreshStartup) { $btnRefreshStartup.Text = $strings.BtnRefreshStartup }
+    if ($btnCheckAllStartup) { $btnCheckAllStartup.Text = $strings.BtnCheckAllStartup }
+    if ($btnUncheckAllStartup) { $btnUncheckAllStartup.Text = $strings.BtnUncheckAllStartup }
     if ($btnDisableStartup) { $btnDisableStartup.Text = $strings.BtnDisableStartup }
+    if ($btnEnableStartup) { $btnEnableStartup.Text = $strings.BtnEnableStartup }
+    if ($btnRefreshStartup) { $btnRefreshStartup.Text = $strings.BtnRefreshStartup }
     if ($lvStartup -and $lvStartup.Columns.Count -ge 4) {
         $lvStartup.Columns[0].Text = $strings.ColStartupName
         $lvStartup.Columns[1].Text = $strings.ColStartupLocation
@@ -1959,7 +2030,7 @@ $cardStartupManager = New-ModernCard -Title "Gestionnaire des Applications au D�
 $startupTab.Scroll.Controls.Add($cardStartupManager)
 
 $lblStartupDesc = New-Object System.Windows.Forms.Label
-$lblStartupDesc.Text = "Désactivez les logiciels superflus au démarrage pour faire démarrer votre PC en quelques secondes."
+$lblStartupDesc.Text = "Cochez les applications superflues au démarrage pour les désactiver ou réactivez celles dont vous avez besoin."
 $lblStartupDesc.Location = New-Object System.Drawing.Point(20, 42)
 $lblStartupDesc.Size = New-Object System.Drawing.Size(850, 22)
 $lblStartupDesc.Font = $fonts.Normal
@@ -1972,12 +2043,13 @@ $lvStartup.Size = New-Object System.Drawing.Size(850, 380)
 $lvStartup.View = [System.Windows.Forms.View]::Details
 $lvStartup.FullRowSelect = $true
 $lvStartup.GridLines = $true
-$lvStartup.MultiSelect = $false
+$lvStartup.MultiSelect = $true
+$lvStartup.CheckBoxes = $true
 $lvStartup.Font = $fonts.Normal
 $lvStartup.Columns.Add("Nom", 220) | Out-Null
-$lvStartup.Columns.Add("Emplacement", 140) | Out-Null
+$lvStartup.Columns.Add("Emplacement", 150) | Out-Null
 $lvStartup.Columns.Add("Statut", 90) | Out-Null
-$lvStartup.Columns.Add("Commande / Chemin", 390) | Out-Null
+$lvStartup.Columns.Add("Commande / Chemin", 370) | Out-Null
 $cardStartupManager.Controls.Add($lvStartup)
 
 function Update-StartupList {
@@ -1989,35 +2061,103 @@ function Update-StartupList {
         $lvi.SubItems.Add($item.Status) | Out-Null
         $lvi.SubItems.Add($item.Command) | Out-Null
         $lvi.Tag = $item
+        if ($item.Status -eq "Désactivé") {
+            $lvi.ForeColor = $colors.MutedColor
+        }
         $lvStartup.Items.Add($lvi) | Out-Null
     }
 }
 
-$btnRefreshStartup = New-ModernButton -Text "🔄 Actualiser la liste" -Size (New-Object System.Drawing.Size(180, 36)) -Location (New-Object System.Drawing.Point(20, 465)) -Click {
-    Update-StartupList
-} -BackColor $colors.AccentColor -HoverColor $colors.AccentHover -PressColor $colors.AccentPress
-$cardStartupManager.Controls.Add($btnRefreshStartup)
+$btnCheckAllStartup = New-ModernButton -Text "☑️ Tout cocher" -Size (New-Object System.Drawing.Size(125, 36)) -Location (New-Object System.Drawing.Point(20, 465)) -Click {
+    foreach ($item in $lvStartup.Items) {
+        $item.Checked = $true
+    }
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$cardStartupManager.Controls.Add($btnCheckAllStartup)
 
-$btnDisableStartup = New-ModernButton -Text "🛑 Désactiver l'application sélectionnée" -Size (New-Object System.Drawing.Size(280, 36)) -Location (New-Object System.Drawing.Point(215, 465)) -Click {
-    if ($lvStartup.SelectedItems.Count -eq 0) {
+$btnUncheckAllStartup = New-ModernButton -Text "⬜ Tout décocher" -Size (New-Object System.Drawing.Size(125, 36)) -Location (New-Object System.Drawing.Point(152, 465)) -Click {
+    foreach ($item in $lvStartup.Items) {
+        $item.Checked = $false
+    }
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$cardStartupManager.Controls.Add($btnUncheckAllStartup)
+
+$btnDisableStartup = New-ModernButton -Text "🛑 Désactiver cochés" -Size (New-Object System.Drawing.Size(185, 36)) -Location (New-Object System.Drawing.Point(284, 465)) -Click {
+    $targetItems = @($lvStartup.CheckedItems)
+    if ($targetItems.Count -eq 0 -and $lvStartup.SelectedItems.Count -gt 0) {
+        $targetItems = @($lvStartup.SelectedItems)
+    }
+    if ($targetItems.Count -eq 0) {
         [System.Windows.Forms.MessageBox]::Show(
-            "Veuillez sélectionner une application dans la liste.",
+            $script:I18N[$script:CurrentLang].StartupNoSelection,
             "Information",
             [System.Windows.Forms.MessageBoxButtons]::OK,
             [System.Windows.Forms.MessageBoxIcon]::Information
         ) | Out-Null
         return
     }
-    $selected = $lvStartup.SelectedItems[0].Tag
-    if ($selected) {
-        $res = Disable-StartupProgram -Name $selected.Name -Location $selected.Location
-        if ($res) {
-            Append-Log ($script:I18N[$script:CurrentLang].StartupDisabledDone -f $selected.Name) "SUCCESS"
-            Update-StartupList
+    $count = 0
+    foreach ($item in $targetItems) {
+        $data = $item.Tag
+        if ($data -and $data.Status -eq "Activé") {
+            $res = Disable-StartupProgram -Name $data.Name -Location $data.Location
+            if ($res) { $count++ }
         }
+    }
+    if ($count -gt 0) {
+        Append-Log ($script:I18N[$script:CurrentLang].StartupDisabledDone -f $count) "SUCCESS"
+        Update-StartupList
+    } else {
+        [System.Windows.Forms.MessageBox]::Show(
+            "Aucune application active sélectionnée à désactiver.",
+            "Information",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
     }
 } -BackColor $colors.ErrorColor -HoverColor $colors.ErrorHover -PressColor $colors.ErrorPress
 $cardStartupManager.Controls.Add($btnDisableStartup)
+
+$btnEnableStartup = New-ModernButton -Text "✅ Réactiver cochés" -Size (New-Object System.Drawing.Size(185, 36)) -Location (New-Object System.Drawing.Point(476, 465)) -Click {
+    $targetItems = @($lvStartup.CheckedItems)
+    if ($targetItems.Count -eq 0 -and $lvStartup.SelectedItems.Count -gt 0) {
+        $targetItems = @($lvStartup.SelectedItems)
+    }
+    if ($targetItems.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show(
+            $script:I18N[$script:CurrentLang].StartupNoSelection,
+            "Information",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+        return
+    }
+    $count = 0
+    foreach ($item in $targetItems) {
+        $data = $item.Tag
+        if ($data -and $data.Status -eq "Désactivé") {
+            $res = Enable-StartupProgram -Name $data.Name -Location $data.Location
+            if ($res) { $count++ }
+        }
+    }
+    if ($count -gt 0) {
+        Append-Log ($script:I18N[$script:CurrentLang].StartupEnabledDone -f $count) "SUCCESS"
+        Update-StartupList
+    } else {
+        [System.Windows.Forms.MessageBox]::Show(
+            "Aucune application désactivée sélectionnée à réactiver.",
+            "Information",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+    }
+} -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress
+$cardStartupManager.Controls.Add($btnEnableStartup)
+
+$btnRefreshStartup = New-ModernButton -Text "🔄 Actualiser" -Size (New-Object System.Drawing.Size(160, 36)) -Location (New-Object System.Drawing.Point(668, 465)) -Click {
+    Update-StartupList
+} -BackColor $colors.AccentColor -HoverColor $colors.AccentHover -PressColor $colors.AccentPress
+$cardStartupManager.Controls.Add($btnRefreshStartup)
 
 # ────────────────────────────────────────────────────────────────────────
 # ONGLET 6 : CONFIDENTIALITÉ

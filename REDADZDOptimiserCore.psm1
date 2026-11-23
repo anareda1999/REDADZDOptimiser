@@ -1722,9 +1722,9 @@ function Optimize-NetworkGaming {
 function Get-StartupPrograms {
     $items = @()
 
-    # 1. HKCU Run
+    # 1. HKCU Run (Actifs)
     $runHKCU = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-    if (Test-Path $runHKCU) {
+    if (Test-Path $runHKCU -ErrorAction SilentlyContinue) {
         try {
             $props = Get-ItemProperty -Path $runHKCU -ErrorAction SilentlyContinue
             if ($props) {
@@ -1742,9 +1742,29 @@ function Get-StartupPrograms {
         } catch {}
     }
 
-    # 2. HKLM Run
+    # 1b. HKCU RunDisabled (Désactivés)
+    $runDisabledHKCU = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunDisabled"
+    if (Test-Path $runDisabledHKCU -ErrorAction SilentlyContinue) {
+        try {
+            $props = Get-ItemProperty -Path $runDisabledHKCU -ErrorAction SilentlyContinue
+            if ($props) {
+                foreach ($prop in $props.PSObject.Properties) {
+                    if ($prop.Name -notin @('PSPath', 'PSParentPath', 'PSChildName', 'PSDrive', 'PSProvider')) {
+                        $items += [PSCustomObject]@{
+                            Name     = $prop.Name
+                            Command  = [string]$prop.Value
+                            Location = "HKCU:RunDisabled"
+                            Status   = "Désactivé"
+                        }
+                    }
+                }
+            }
+        } catch {}
+    }
+
+    # 2. HKLM Run (Actifs)
     $runHKLM = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
-    if (Test-Path $runHKLM) {
+    if (Test-Path $runHKLM -ErrorAction SilentlyContinue) {
         try {
             $props = Get-ItemProperty -Path $runHKLM -ErrorAction SilentlyContinue
             if ($props) {
@@ -1762,9 +1782,29 @@ function Get-StartupPrograms {
         } catch {}
     }
 
-    # 3. Dossiers Startup
+    # 2b. HKLM RunDisabled (Désactivés)
+    $runDisabledHKLM = "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunDisabled"
+    if (Test-Path $runDisabledHKLM -ErrorAction SilentlyContinue) {
+        try {
+            $props = Get-ItemProperty -Path $runDisabledHKLM -ErrorAction SilentlyContinue
+            if ($props) {
+                foreach ($prop in $props.PSObject.Properties) {
+                    if ($prop.Name -notin @('PSPath', 'PSParentPath', 'PSChildName', 'PSDrive', 'PSProvider')) {
+                        $items += [PSCustomObject]@{
+                            Name     = $prop.Name
+                            Command  = [string]$prop.Value
+                            Location = "HKLM:RunDisabled"
+                            Status   = "Désactivé"
+                        }
+                    }
+                }
+            }
+        } catch {}
+    }
+
+    # 3. Dossiers Startup Utilisateur
     $userStartup = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
-    if (Test-Path $userStartup) {
+    if (Test-Path $userStartup -ErrorAction SilentlyContinue) {
         try {
             Get-ChildItem -Path $userStartup -Filter "*.lnk" -ErrorAction SilentlyContinue | ForEach-Object {
                 $items += [PSCustomObject]@{
@@ -1774,11 +1814,23 @@ function Get-StartupPrograms {
                     Status   = "Activé"
                 }
             }
+            $userDisabled = Join-Path $userStartup "Disabled"
+            if (Test-Path $userDisabled -ErrorAction SilentlyContinue) {
+                Get-ChildItem -Path $userDisabled -Filter "*.lnk" -ErrorAction SilentlyContinue | ForEach-Object {
+                    $items += [PSCustomObject]@{
+                        Name     = $_.BaseName
+                        Command  = $_.FullName
+                        Location = "Startup:User"
+                        Status   = "Désactivé"
+                    }
+                }
+            }
         } catch {}
     }
 
+    # 4. Dossiers Startup Commun (Tous les utilisateurs)
     $allStartup = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
-    if (Test-Path $allStartup) {
+    if (Test-Path $allStartup -ErrorAction SilentlyContinue) {
         try {
             Get-ChildItem -Path $allStartup -Filter "*.lnk" -ErrorAction SilentlyContinue | ForEach-Object {
                 $items += [PSCustomObject]@{
@@ -1786,6 +1838,17 @@ function Get-StartupPrograms {
                     Command  = $_.FullName
                     Location = "Startup:Common"
                     Status   = "Activé"
+                }
+            }
+            $allDisabled = Join-Path $allStartup "Disabled"
+            if (Test-Path $allDisabled -ErrorAction SilentlyContinue) {
+                Get-ChildItem -Path $allDisabled -Filter "*.lnk" -ErrorAction SilentlyContinue | ForEach-Object {
+                    $items += [PSCustomObject]@{
+                        Name     = $_.BaseName
+                        Command  = $_.FullName
+                        Location = "Startup:Common"
+                        Status   = "Désactivé"
+                    }
                 }
             }
         } catch {}
@@ -1802,30 +1865,34 @@ function Disable-StartupProgram {
         [string]$Location
     )
     try {
-        switch ($Location) {
-            "HKCU:Run" {
+        switch -Wildcard ($Location) {
+            "*HKCU*" {
                 $reg = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
                 $backup = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunDisabled"
                 if (-not (Test-Path $backup)) { New-Item -Path $backup -Force | Out-Null }
-                $val = (Get-ItemProperty -Path $reg -Name $Name).$Name
-                Set-ItemProperty -Path $backup -Name $Name -Value $val -Force
-                Remove-ItemProperty -Path $reg -Name $Name -Force
-                Write-Log "Programme désactivé au démarrage : $Name" "SUCCESS"
-                return $true
+                $val = (Get-ItemProperty -Path $reg -Name $Name -ErrorAction SilentlyContinue).$Name
+                if ($val) {
+                    Set-ItemProperty -Path $backup -Name $Name -Value $val -Force
+                    Remove-ItemProperty -Path $reg -Name $Name -Force -ErrorAction SilentlyContinue
+                    Write-Log "Programme désactivé au démarrage : $Name" "SUCCESS"
+                    return $true
+                }
             }
-            "HKLM:Run" {
+            "*HKLM*" {
                 $reg = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
                 $backup = "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunDisabled"
                 if (-not (Test-Path $backup)) { New-Item -Path $backup -Force | Out-Null }
-                $val = (Get-ItemProperty -Path $reg -Name $Name).$Name
-                Set-ItemProperty -Path $backup -Name $Name -Value $val -Force
-                Remove-ItemProperty -Path $reg -Name $Name -Force
-                Write-Log "Programme désactivé au démarrage : $Name" "SUCCESS"
-                return $true
+                $val = (Get-ItemProperty -Path $reg -Name $Name -ErrorAction SilentlyContinue).$Name
+                if ($val) {
+                    Set-ItemProperty -Path $backup -Name $Name -Value $val -Force
+                    Remove-ItemProperty -Path $reg -Name $Name -Force -ErrorAction SilentlyContinue
+                    Write-Log "Programme désactivé au démarrage : $Name" "SUCCESS"
+                    return $true
+                }
             }
             default {
                 # Dossiers Startup
-                $folder = if ($Location -eq "Startup:Common") { "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" } else { "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup" }
+                $folder = if ($Location -like "*Common*") { "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" } else { "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup" }
                 $targetFile = Join-Path $folder "$Name.lnk"
                 if (Test-Path $targetFile) {
                     $disabledFolder = Join-Path $folder "Disabled"
@@ -1840,6 +1907,65 @@ function Disable-StartupProgram {
         Write-Log "Erreur désactivation démarrage pour $Name : $_" "WARN"
         return $false
     }
+    return $false
+}
+
+function Enable-StartupProgram {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Name,
+        [Parameter(Mandatory=$true)]
+        [string]$Location
+    )
+    try {
+        switch -Wildcard ($Location) {
+            "*HKCU*" {
+                $reg = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+                $backup = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunDisabled"
+                if (Test-Path $backup) {
+                    $prop = (Get-ItemProperty -Path $backup -Name $Name -ErrorAction SilentlyContinue)
+                    if ($null -ne $prop -and $null -ne $prop.$Name) {
+                        $val = $prop.$Name
+                        if (-not (Test-Path $reg)) { New-Item -Path $reg -Force | Out-Null }
+                        Set-ItemProperty -Path $reg -Name $Name -Value $val -Force
+                        Remove-ItemProperty -Path $backup -Name $Name -Force -ErrorAction SilentlyContinue
+                        Write-Log "Programme réactivé au démarrage : $Name" "SUCCESS"
+                        return $true
+                    }
+                }
+            }
+            "*HKLM*" {
+                $reg = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
+                $backup = "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunDisabled"
+                if (Test-Path $backup) {
+                    $prop = (Get-ItemProperty -Path $backup -Name $Name -ErrorAction SilentlyContinue)
+                    if ($null -ne $prop -and $null -ne $prop.$Name) {
+                        $val = $prop.$Name
+                        if (-not (Test-Path $reg)) { New-Item -Path $reg -Force | Out-Null }
+                        Set-ItemProperty -Path $reg -Name $Name -Value $val -Force
+                        Remove-ItemProperty -Path $backup -Name $Name -Force -ErrorAction SilentlyContinue
+                        Write-Log "Programme réactivé au démarrage : $Name" "SUCCESS"
+                        return $true
+                    }
+                }
+            }
+            default {
+                # Dossiers Startup
+                $folder = if ($Location -like "*Common*") { "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" } else { "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup" }
+                $disabledFolder = Join-Path $folder "Disabled"
+                $disabledFile = Join-Path $disabledFolder "$Name.lnk"
+                if (Test-Path $disabledFile) {
+                    Move-Item -Path $disabledFile -Destination (Join-Path $folder "$Name.lnk") -Force
+                    Write-Log "Raccourci de démarrage réactivé : $Name" "SUCCESS"
+                    return $true
+                }
+            }
+        }
+    } catch {
+        Write-Log "Erreur réactivation démarrage pour $Name : $_" "WARN"
+        return $false
+    }
+    return $false
 }
 
 # ════════════════════════════════════════════════════════════════════════
@@ -2037,6 +2163,7 @@ Export-ModuleMember -Function @(
     'Optimize-NetworkGaming',
     'Get-StartupPrograms',
     'Disable-StartupProgram',
+    'Enable-StartupProgram',
     'Invoke-REDADZDOptimiser',
     'Invoke-WinOptimizer',
     'Set-REDADZDOptimiserConfig',
