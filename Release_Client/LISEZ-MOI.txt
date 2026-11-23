@@ -1,0 +1,17 @@
+﻿========================================================================
+ REDADZDOptimiser Professional - Édition Client Autonome
+ Auteur : Anagou Reda  |  Téléphone : 0542439514
+========================================================================
+
+INSTRUCTIONS D'UTILISATION :
+1. Double-cliquez sur "REDADZDOptimiser.exe" (acceptez l'autorisation UAC Administrateur).
+2. Choisissez votre langue (Français, English, العربية).
+3. Sélectionnez le niveau d'optimisation souhaité :
+   - 🌱 Tweak Minimal : Nettoyage doux du cache et fichiers temporaires.
+   - ⚡ Tweak Standard : Recommandé (RAM, CPU, Débloat, Télémétrie, Réseau).
+   - 🚀 Tweak Max : Extrême pour le Gaming et performances maximales.
+4. Cliquez sur "▶ Démarrer l'optimisation".
+
+NOTE IMPORTANTE :
+Cet exécutable est entièrement autonome. Il ne requiert aucune installation
+et n'installe aucun fichier caché sur votre ordinateur.

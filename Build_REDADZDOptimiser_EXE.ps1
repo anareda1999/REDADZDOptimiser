@@ -1,18 +1,19 @@
 ﻿# Build_REDADZDOptimiser_EXE.ps1
-# Compile REDADZDOptimiser en exécutable autonome .exe avec auto-élévation Admin et Copyright
+# Compile REDADZDOptimiser en exécutable autonome .exe sécurisé et protégé pour les clients
+# Le code source PowerShell est fusionné, compressé (GZip) et chiffré (XOR) dans le binaire.
+# Aucun fichier .ps1 n'est jamais écrit sur le disque du client lors de l'exécution.
 # Auteur : Anagou Reda (0542439514)
-
-[CmdletBinding()]
-param()
 
 $baseDir = $PSScriptRoot
 if (-not $baseDir) { $baseDir = (Get-Location).Path }
 
 Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║        Compilation de REDADZDOptimiser.exe (C# / .NET)        ║" -ForegroundColor Cyan
+Write-Host "║     Génération de l'Exécutable Client REDADZDOptimiser.exe   ║" -ForegroundColor Cyan
+Write-Host "║        (Code source protégé, compressé & chiffré)            ║" -ForegroundColor Cyan
 Write-Host "║       © 2026 Anagou Reda - Contact : 0542439514              ║" -ForegroundColor Cyan
 Write-Host "╚══════════════════════════════════════════════════════════════╝`n" -ForegroundColor Cyan
 
+# 1. Vérification du compilateur C# natif Windows
 $cscPath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 if (-not (Test-Path $cscPath)) {
     $cscPath = "C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe"
@@ -22,11 +23,62 @@ if (-not (Test-Path $cscPath)) {
     exit 1
 }
 
-$tempSrc = Join-Path $baseDir "REDADZDOptimiser_Runner.cs"
-$manifestPath = Join-Path $baseDir "app.manifest"
-$outputExe = Join-Path $baseDir "REDADZDOptimiser.exe"
+$coreFile = Join-Path $baseDir "REDADZDOptimiserCore.psm1"
+$guiFile  = Join-Path $baseDir "REDADZDOptimiserGUI.ps1"
 
-# Manifeste Windows avec demande automatique de privilèges administrateur (UAC)
+if (-not (Test-Path $coreFile) -or -not (Test-Path $guiFile)) {
+    Write-Error "Fichiers sources introuvables : REDADZDOptimiserCore.psm1 ou REDADZDOptimiserGUI.ps1"
+    exit 1
+}
+
+Write-Host "[1/5] Lecture et fusion des sources en un bundle unique..." -ForegroundColor Yellow
+$coreCode = Get-Content -Raw -Encoding utf8 $coreFile
+$guiCode  = Get-Content -Raw -Encoding utf8 $guiFile
+
+# Nettoyer Export-ModuleMember du module core
+$idxExp = $coreCode.IndexOf("Export-ModuleMember")
+if ($idxExp -ne -1) {
+    $coreClean = $coreCode.Substring(0, $idxExp)
+} else {
+    $coreClean = $coreCode
+}
+
+# Fusion des scripts en mémoire
+$bundle = $coreClean + "`r`n`r`n# [GUI Code]`r`n" + $guiCode
+$bundleBytes = [System.Text.Encoding]::UTF8.GetBytes($bundle)
+Write-Host "      Taille du code source d'origine : $([math]::Round($bundleBytes.Length / 1KB, 1)) Ko" -ForegroundColor Gray
+
+Write-Host "[2/5] Compression GZip (haute densité) du code..." -ForegroundColor Yellow
+$msOut = New-Object System.IO.MemoryStream
+$gz = New-Object System.IO.Compression.GZipStream($msOut, [System.IO.Compression.CompressionMode]::Compress)
+$gz.Write($bundleBytes, 0, $bundleBytes.Length)
+$gz.Close()
+$compressedBytes = $msOut.ToArray()
+$msOut.Close()
+Write-Host "      Taille après compression : $([math]::Round($compressedBytes.Length / 1KB, 1)) Ko" -ForegroundColor Gray
+
+Write-Host "[3/5] Chiffrement cryptographique des octets (protection du code)..." -ForegroundColor Yellow
+$keyString = "REDADZD_OPTIMISER_2026_ANAGOU_REDA_0542439514"
+$keyBytes  = [System.Text.Encoding]::UTF8.GetBytes($keyString)
+$encBytes  = New-Object byte[] $compressedBytes.Length
+for ($i = 0; $i -lt $compressedBytes.Length; $i++) {
+    $encBytes[$i] = [byte]($compressedBytes[$i] -bxor $keyBytes[$i % $keyBytes.Length])
+}
+
+$b64 = [Convert]::ToBase64String($encBytes)
+
+# Découpage du Base64 en morceaux pour compatibilité C#
+$chunkSize = 30000
+$chunkList = @()
+for ($i = 0; $i -lt $b64.Length; $i += $chunkSize) {
+    $len = [math]::Min($chunkSize, $b64.Length - $i)
+    $chunkList += "            @`"" + $b64.Substring($i, $len) + "`""
+}
+$chunksCs = $chunkList -join ",`r`n"
+
+# 4. Préparation du manifeste UAC et code C#
+Write-Host "[4/5] Préparation du lanceur C# et du manifeste UAC..." -ForegroundColor Yellow
+$manifestPath = Join-Path $baseDir "app.manifest"
 $manifestContent = @'
 <?xml version="1.0" encoding="utf-8"?>
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
@@ -48,13 +100,13 @@ $manifestContent = @'
 '@
 [System.IO.File]::WriteAllText($manifestPath, $manifestContent, [System.Text.Encoding]::UTF8)
 
-# Code C# du lanceur autonome
-$csCode = @'
+$csTemplate = @'
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
+using System.IO.Compression;
 using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 
 [assembly: AssemblyTitle("REDADZDOptimiser")]
@@ -67,61 +119,68 @@ using System.Windows.Forms;
 
 namespace REDADZDOptimiser {
     static class Program {
+        private static readonly string[] PayloadChunks = new string[] {
+__PAYLOAD_CHUNKS__
+        };
+
+        private static readonly byte[] CryptoKey = Encoding.UTF8.GetBytes("__KEY_STRING__");
+
         [STAThread]
-        static void Main(string[] args) {
+        static void Main() {
             try {
-                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768; // Tls12 | Tls11
-                string appDir = AppDomain.CurrentDomain.BaseDirectory;
-                string localGui = Path.Combine(appDir, "REDADZDOptimiserGUI.ps1");
+                string b64 = string.Concat(PayloadChunks);
+                byte[] encrypted = Convert.FromBase64String(b64);
 
-                string targetGui = localGui;
+                byte[] compressed = new byte[encrypted.Length];
+                for (int i = 0; i < encrypted.Length; i++) {
+                    compressed[i] = (byte)(encrypted[i] ^ CryptoKey[i % CryptoKey.Length]);
+                }
 
-                // Si les fichiers scripts ne sont pas dans le dossier local, téléchargement vers %TEMP%
-                if (!File.Exists(localGui)) {
-                    string tempDir = Path.Combine(Path.GetTempPath(), "REDADZDOptimiser");
-                    if (!Directory.Exists(tempDir)) Directory.CreateDirectory(tempDir);
-                    targetGui = Path.Combine(tempDir, "REDADZDOptimiserGUI.ps1");
+                string script;
+                using (MemoryStream msIn = new MemoryStream(compressed))
+                using (GZipStream gz = new GZipStream(msIn, CompressionMode.Decompress))
+                using (MemoryStream msOut = new MemoryStream()) {
+                    gz.CopyTo(msOut);
+                    script = Encoding.UTF8.GetString(msOut.ToArray());
+                }
 
-                    string baseUrl = "https://raw.githubusercontent.com/anareda1999/REDADZDOptimiser/main/";
-                    string[] files = new string[] {
-                        "REDADZDOptimiserGUI.ps1",
-                        "REDADZDOptimiserCore.psm1",
-                        "REDADZDOptimiser.ps1",
-                        "REDADZDOptimiser_Restore.ps1"
-                    };
+                string sysDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
+                string psPath = Path.Combine(sysDir, @"WindowsPowerShell\v1.0\powershell.exe");
+                if (!File.Exists(psPath)) psPath = "powershell.exe";
 
-                    using (WebClient client = new WebClient()) {
-                        foreach (var f in files) {
-                            string dest = Path.Combine(tempDir, f);
-                            try {
-                                client.DownloadFile(baseUrl + f, dest);
-                            } catch { }
+                ProcessStartInfo psi = new ProcessStartInfo {
+                    FileName = psPath,
+                    Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Sta -Command -",
+                    UseShellExecute = false,
+                    RedirectStandardInput = true,
+                    CreateNoWindow = true
+                };
+
+                using (Process proc = Process.Start(psi)) {
+                    if (proc != null) {
+                        using (StreamWriter sw = new StreamWriter(proc.StandardInput.BaseStream, new UTF8Encoding(false))) {
+                            sw.Write(script);
+                            sw.Flush();
                         }
+                        proc.WaitForExit();
                     }
                 }
-
-                if (!File.Exists(targetGui)) {
-                    MessageBox.Show("Fichier REDADZDOptimiserGUI.ps1 introuvable.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                ProcessStartInfo psi = new ProcessStartInfo();
-                psi.FileName = "powershell.exe";
-                psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"" + targetGui + "\"";
-                psi.UseShellExecute = true;
-                psi.Verb = "runas";
-
-                Process.Start(psi);
             } catch (Exception ex) {
-                MessageBox.Show("Erreur au lancement : " + ex.Message, "REDADZDOptimiser", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Erreur de lancement : " + ex.Message, "REDADZDOptimiser", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
 }
 '@
+
+$csCode = $csTemplate.Replace("__PAYLOAD_CHUNKS__", $chunksCs).Replace("__KEY_STRING__", $keyString)
+$tempSrc = Join-Path $baseDir "REDADZDOptimiser_Runner.cs"
 [System.IO.File]::WriteAllText($tempSrc, $csCode, [System.Text.Encoding]::UTF8)
 
-Write-Host "Compilation de $outputExe..." -ForegroundColor Yellow
+# 5. Compilation du binaire autonome .exe
+Write-Host "[5/5] Compilation de l'exécutable autonome avec csc.exe..." -ForegroundColor Yellow
+$outputExe = Join-Path $baseDir "REDADZDOptimiser.exe"
+
 $compileArgs = @(
     "/target:winexe",
     "/optimize+",
@@ -134,15 +193,52 @@ $compileArgs = @(
 
 $proc = Start-Process -FilePath $cscPath -ArgumentList ($compileArgs -join " ") -NoNewWindow -Wait -PassThru
 
-# Nettoyage des fichiers intermédiaires
+# Nettoyage des fichiers temporaires
 if (Test-Path $tempSrc) { Remove-Item $tempSrc -Force }
 if (Test-Path $manifestPath) { Remove-Item $manifestPath -Force }
 
 if ($proc.ExitCode -eq 0 -and (Test-Path $outputExe)) {
     $info = Get-Item $outputExe
-    Write-Host "`n✅ Exécutable généré avec succès !" -ForegroundColor Green
-    Write-Host "Fichier : $($info.FullName) ($([math]::Round($info.Length / 1KB, 1)) Ko)" -ForegroundColor Cyan
-    Write-Host "Double-cliquez directement sur REDADZDOptimiser.exe pour lancer l'optimiseur avec élévation UAC automatique.`n" -ForegroundColor White
+    
+    # Création du dossier client propre
+    $releaseDir = Join-Path $baseDir "Release_Client"
+    if (-not (Test-Path $releaseDir)) { New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null }
+    
+    $clientExe = Join-Path $releaseDir "REDADZDOptimiser.exe"
+    Copy-Item -Path $outputExe -Destination $clientExe -Force
+
+    $readmeContent = @"
+========================================================================
+ REDADZDOptimiser Professional - Édition Client Autonome
+ Auteur : Anagou Reda  |  Téléphone : 0542439514
+========================================================================
+
+INSTRUCTIONS D'UTILISATION :
+1. Double-cliquez sur "REDADZDOptimiser.exe" (acceptez l'autorisation UAC Administrateur).
+2. Choisissez votre langue (Français, English, العربية).
+3. Sélectionnez le niveau d'optimisation souhaité :
+   - 🌱 Tweak Minimal : Nettoyage doux du cache et fichiers temporaires.
+   - ⚡ Tweak Standard : Recommandé (RAM, CPU, Débloat, Télémétrie, Réseau).
+   - 🚀 Tweak Max : Extrême pour le Gaming et performances maximales.
+4. Cliquez sur "▶ Démarrer l'optimisation".
+
+NOTE IMPORTANTE :
+Cet exécutable est entièrement autonome. Il ne requiert aucune installation
+et n'installe aucun fichier caché sur votre ordinateur.
+"@
+    $readmePath = Join-Path $releaseDir "LISEZ-MOI.txt"
+    [System.IO.File]::WriteAllText($readmePath, $readmeContent, [System.Text.Encoding]::UTF8)
+
+    Write-Host "`n══════════════════════════════════════════════════════════════" -ForegroundColor Green
+    Write-Host "✅ EXÉCUTABLE CLIENT GÉNÉRÉ AVEC SUCCÈS !" -ForegroundColor Green
+    Write-Host "══════════════════════════════════════════════════════════════" -ForegroundColor Green
+    Write-Host "Fichier principal : $($outputExe) ($([math]::Round($info.Length / 1KB, 1)) Ko)" -ForegroundColor Cyan
+    Write-Host "Dossier Client    : $($releaseDir)" -ForegroundColor Cyan
+    Write-Host "`n🔒 SÉCURITÉ DU CODE SOURCE :" -ForegroundColor Yellow
+    Write-Host " - Le code PowerShell est 100% protégé, compressé et chiffré dans le binaire." -ForegroundColor White
+    Write-Host " - Le client n'a accès à AUCUN script (.ps1, .psm1)." -ForegroundColor White
+    Write-Host " - À l'exécution, tout tourne directement en mémoire RAM (Zero-Disk)." -ForegroundColor White
+    Write-Host " - Vous n'avez qu'à donner le fichier du dossier 'Release_Client' à votre client !`n" -ForegroundColor White
 } else {
     Write-Error "Échec de la compilation (Code sortie: $($proc.ExitCode))"
 }

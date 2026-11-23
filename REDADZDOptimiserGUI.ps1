@@ -31,23 +31,25 @@ param(
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# ─── Chargement du module core ─────────────────────────────────────────
-if (-not $PSScriptRoot) {
-    $PSScriptRoot = if ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path } else { (Get-Location).Path }
-}
-$script:ModulePath = Join-Path $PSScriptRoot "REDADZDOptimiserCore.psm1"
+# ─── Chargement du module core (si non déjà chargé en mémoire) ────────
+if (-not (Get-Command 'Invoke-REDADZDOptimiser' -ErrorAction SilentlyContinue)) {
+    if (-not $PSScriptRoot) {
+        $PSScriptRoot = if ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path } else { (Get-Location).Path }
+    }
+    $script:ModulePath = Join-Path $PSScriptRoot "REDADZDOptimiserCore.psm1"
 
-if (-not (Test-Path $script:ModulePath)) {
-    [System.Windows.Forms.MessageBox]::Show(
-        "Fichier REDADZDOptimiserCore.psm1 introuvable dans:`n$PSScriptRoot",
-        "Erreur fatale",
-        [System.Windows.Forms.MessageBoxButtons]::OK,
-        [System.Windows.Forms.MessageBoxIcon]::Error
-    ) | Out-Null
-    exit 1
+    if (Test-Path $script:ModulePath) {
+        Import-Module $script:ModulePath -Force
+    } else {
+        [System.Windows.Forms.MessageBox]::Show(
+            "Fichier REDADZDOptimiserCore.psm1 introuvable dans:`n$PSScriptRoot",
+            "Erreur fatale",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Error
+        ) | Out-Null
+        exit 1
+    }
 }
-
-Import-Module $script:ModulePath -Force
 
 # Relier les logs et la progression du module vers la GUI
 Set-REDADZDOptimiserConfig -OnLog {
