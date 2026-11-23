@@ -77,8 +77,11 @@ $script:I18N = @{
         AdminMsgBox         = "Ce programme requiert les privilèges Administrateur pour appliquer les optimisations !"
 
         TabDebloat          = "🗑️ Débloat"
-        TabPerf             = "⚡ Performances"
-        TabPrivacy          = "🔒 Confidentialité"
+        TabPerf             = "⚡ Performance"
+        TabSoftware         = "📦 Logiciels"
+        TabNetwork          = "🌐 Réseau & DNS"
+        TabStartup          = "🚀 Démarrage"
+        TabPrivacy          = "🔒 Vie Privée"
         TabCleanup          = "🧹 Nettoyage"
         TabRepair           = "🔧 Maintenance"
         TabLogs             = "📋 Journal"
@@ -93,6 +96,49 @@ $script:I18N = @{
         PresetDescMax       = "(Extrême & Gaming : Débloat total, registre, réparation & puissance max)"
         PresetAppliedLog    = "Préréglage '{0}' appliqué avec succès."
         CopyrightText       = "© 2026 REDADZDOptimiser • Anagou Reda  |  Tél : 0542439514"
+
+
+        # Onglet Logiciels (Winget)
+        GbBrowsers          = "Navigateurs Web"
+        GbUtilities         = "Utilitaires & Fichiers"
+        GbGamingApps        = "Jeux & Streaming"
+        GbDevOffice         = "Bureautique & Développement"
+        BtnSelectAllApps    = "✓ Tout cocher"
+        BtnDeselectAllApps  = "✕ Tout décocher"
+        BtnInstallApps      = "🚀 Installer les applications cochées (Winget)"
+        BtnInstallingApps   = "⏳ Installation en cours..."
+        InstallAppsDone     = "✓ Installation terminée : {0} installées, {1} échecs."
+
+        # Onglet Réseau & DNS
+        GbDnsSelector       = "Sélecteur DNS Rapide & Sécurisé"
+        OptDnsCloudflare    = "⚡ Cloudflare (1.1.1.1 / 1.0.0.1 - Vitesse max & Jeux en ligne)"
+        OptDnsGoogle        = "🔒 Google DNS (8.8.8.8 / 8.8.4.4 - Haute compatibilité)"
+        OptDnsQuad9         = "🛡️ Quad9 (9.9.9.9 - Sécurité anti-malware renforcée)"
+        OptDnsDhcp          = "🔄 Automatique / FAI (DHCP standard par défaut)"
+        BtnApplyDns         = "⚡ Appliquer le serveur DNS sélectionné"
+        BtnApplyDnsDone     = "✓ DNS appliqué avec succès !"
+
+        GbGamingNetwork     = "Optimisations Latence Réseau & Gaming (Ping TCP/IP)"
+        CbNetThrottling     = "Désactiver la limitation de bande passante multimédia (NetworkThrottlingIndex)"
+        CbNagleAlgo         = "Désactiver l'algorithme Nagle (TcpAckFrequency & TCPNoDelay = 1)"
+        BtnApplyGamingNet   = "🚀 Appliquer les optimisations réseau gaming"
+        BtnApplyGamingDone  = "✓ Tweaks TCP/IP gaming appliqués !"
+
+        GbResetNetwork      = "Dépannage & Réinitialisation Réseau"
+        LblResetNetworkDesc = "Vide le cache DNS et réinitialise Winsock et la pile TCP/IP pour réparer les erreurs de connexion."
+        BtnResetNetStack    = "🧹 Vider le cache DNS & Réinitialiser Winsock / IP"
+        BtnResetNetDone     = "✓ Réseau et cache DNS réinitialisés !"
+
+        # Onglet Démarrage (Startup Manager)
+        GbStartupManager    = "Gestionnaire des Applications au Démarrage de Windows"
+        LblStartupDesc      = "Désactivez les logiciels superflus au démarrage pour faire démarrer votre PC en quelques secondes."
+        BtnRefreshStartup   = "🔄 Actualiser la liste"
+        BtnDisableStartup   = "🛑 Désactiver l'application sélectionnée"
+        ColStartupName      = "Nom"
+        ColStartupLocation  = "Emplacement"
+        ColStartupStatus    = "Statut"
+        ColStartupCommand   = "Commande / Chemin"
+        StartupDisabledDone = "✓ Application '{0}' désactivée au démarrage."
 
         # Onglet Performances
         GbPerfMonitor       = "Surveillance des Ressources en temps réel"
@@ -189,6 +235,9 @@ $script:I18N = @{
 
         TabDebloat          = "🗑️ Debloat"
         TabPerf             = "⚡ Performance"
+        TabSoftware         = "📦 Software"
+        TabNetwork          = "🌐 Network & DNS"
+        TabStartup          = "🚀 Startup"
         TabPrivacy          = "🔒 Privacy"
         TabCleanup          = "🧹 Cleanup"
         TabRepair           = "🔧 Maintenance"
@@ -204,6 +253,49 @@ $script:I18N = @{
         PresetDescMax       = "(Extreme & Gaming: Full debloat, registry, repair & max power)"
         PresetAppliedLog    = "Preset '{0}' successfully applied."
         CopyrightText       = "© 2026 REDADZDOptimiser • Anagou Reda  |  Phone: 0542439514"
+
+
+        # Software Tab (Winget)
+        GbBrowsers          = "Web Browsers"
+        GbUtilities         = "Utilities & File Tools"
+        GbGamingApps        = "Gaming & Streaming"
+        GbDevOffice         = "Office & Development"
+        BtnSelectAllApps    = "✓ Select All"
+        BtnDeselectAllApps  = "✕ Deselect All"
+        BtnInstallApps      = "🚀 Install Selected Applications (Winget)"
+        BtnInstallingApps   = "⏳ Installing..."
+        InstallAppsDone     = "✓ Installation finished: {0} installed, {1} failed."
+
+        # Network & DNS Tab
+        GbDnsSelector       = "Fast & Secure DNS Selector"
+        OptDnsCloudflare    = "⚡ Cloudflare (1.1.1.1 / 1.0.0.1 - Lowest ping & gaming)"
+        OptDnsGoogle        = "🔒 Google DNS (8.8.8.8 / 8.8.4.4 - High reliability)"
+        OptDnsQuad9         = "🛡️ Quad9 (9.9.9.9 - Enhanced anti-malware security)"
+        OptDnsDhcp          = "🔄 Automatic / ISP (Default DHCP)"
+        BtnApplyDns         = "⚡ Apply Selected DNS Server"
+        BtnApplyDnsDone     = "✓ DNS successfully applied!"
+
+        GbGamingNetwork     = "Network Latency & Gaming Optimizations (TCP/IP)"
+        CbNetThrottling     = "Disable multimedia network throttling (NetworkThrottlingIndex)"
+        CbNagleAlgo         = "Disable Nagle algorithm (TcpAckFrequency & TCPNoDelay = 1)"
+        BtnApplyGamingNet   = "🚀 Apply Gaming Network Optimizations"
+        BtnApplyGamingDone  = "✓ Gaming TCP/IP tweaks applied!"
+
+        GbResetNetwork      = "Network Reset & Troubleshooting"
+        LblResetNetworkDesc = "Flushes DNS cache and resets Winsock / TCP/IP stack to repair connectivity issues."
+        BtnResetNetStack    = "🧹 Flush DNS Cache & Reset Winsock / IP"
+        BtnResetNetDone     = "✓ Network stack & DNS cache flushed!"
+
+        # Startup Manager Tab
+        GbStartupManager    = "Windows Startup Applications Manager"
+        LblStartupDesc      = "Disable non-essential startup apps to make Windows boot up in under 10 seconds."
+        BtnRefreshStartup   = "🔄 Refresh List"
+        BtnDisableStartup   = "🛑 Disable Selected Application"
+        ColStartupName      = "Name"
+        ColStartupLocation  = "Location"
+        ColStartupStatus    = "Status"
+        ColStartupCommand   = "Command / Path"
+        StartupDisabledDone = "✓ Application '{0}' disabled from startup."
 
         # Performance Tab
         GbPerfMonitor       = "Real-Time Resource Monitor"
@@ -298,8 +390,11 @@ $script:I18N = @{
         AdminErr            = "⚠ غير مسؤول (صلاحيات محدودة)"
         AdminMsgBox         = "يتطلب هذا البرنامج تشغيله كمسؤول (Run as Administrator) لتطبيق التحسينات!"
 
-        TabDebloat          = "🗑️ إزالة الزوائد"
+        TabDebloat          = "🗑️ الزوائد"
         TabPerf             = "⚡ الأداء"
+        TabSoftware         = "📦 البرامج"
+        TabNetwork          = "🌐 الشبكة"
+        TabStartup          = "🚀 الإقلاع"
         TabPrivacy          = "🔒 الخصوصية"
         TabCleanup          = "🧹 التنظيف"
         TabRepair           = "🔧 الصيانة"
@@ -905,9 +1000,12 @@ function Apply-Language {
     }
 
     # Titres des onglets
-    if ($debloatTab -and $debloatTab.Page) { $debloatTab.Page.Text = $strings.TabDebloat }
-    if ($perfTab -and $perfTab.Page)       { $perfTab.Page.Text = $strings.TabPerf }
-    if ($privacyTab -and $privacyTab.Page) { $privacyTab.Page.Text = $strings.TabPrivacy }
+    if ($debloatTab -and $debloatTab.Page)   { $debloatTab.Page.Text = $strings.TabDebloat }
+    if ($perfTab -and $perfTab.Page)         { $perfTab.Page.Text = $strings.TabPerf }
+    if ($softwareTab -and $softwareTab.Page) { $softwareTab.Page.Text = $strings.TabSoftware }
+    if ($networkTab -and $networkTab.Page)   { $networkTab.Page.Text = $strings.TabNetwork }
+    if ($startupTab -and $startupTab.Page)   { $startupTab.Page.Text = $strings.TabStartup }
+    if ($privacyTab -and $privacyTab.Page)   { $privacyTab.Page.Text = $strings.TabPrivacy }
     if ($cleanupTab -and $cleanupTab.Page) { $cleanupTab.Page.Text = $strings.TabCleanup }
     if ($repairTab -and $repairTab.Page)   { $repairTab.Page.Text = $strings.TabRepair }
     if ($logsTab -and $logsTab.Page)       { $logsTab.Page.Text = $strings.TabLogs }
@@ -948,7 +1046,43 @@ function Apply-Language {
     if ($script:CbDisableCoreParking) { $script:CbDisableCoreParking.Text = $strings.CbDisableCoreParking }
     if ($btnApplyCpu) { $btnApplyCpu.Text = $strings.BtnApplyCpu }
 
-    # Onglet 3 : Confidentialité
+    # Onglet Logiciels
+    if ($cardBrowsers -and $cardBrowsers.Tag) { $cardBrowsers.Tag.Header.Text = $strings.GbBrowsers }
+    if ($cardUtilities -and $cardUtilities.Tag) { $cardUtilities.Tag.Header.Text = $strings.GbUtilities }
+    if ($cardGamingApps -and $cardGamingApps.Tag) { $cardGamingApps.Tag.Header.Text = $strings.GbGamingApps }
+    if ($cardDevOffice -and $cardDevOffice.Tag) { $cardDevOffice.Tag.Header.Text = $strings.GbDevOffice }
+    if ($btnSelectAllApps) { $btnSelectAllApps.Text = $strings.BtnSelectAllApps }
+    if ($btnDeselectAllApps) { $btnDeselectAllApps.Text = $strings.BtnDeselectAllApps }
+    if ($btnInstallApps) { $btnInstallApps.Text = $strings.BtnInstallApps }
+
+    # Onglet Réseau
+    if ($cardDnsSelector -and $cardDnsSelector.Tag) { $cardDnsSelector.Tag.Header.Text = $strings.GbDnsSelector }
+    if ($rbDnsCloudflare) { $rbDnsCloudflare.Text = $strings.OptDnsCloudflare }
+    if ($rbDnsGoogle) { $rbDnsGoogle.Text = $strings.OptDnsGoogle }
+    if ($rbDnsQuad9) { $rbDnsQuad9.Text = $strings.OptDnsQuad9 }
+    if ($rbDnsDhcp) { $rbDnsDhcp.Text = $strings.OptDnsDhcp }
+    if ($btnApplyDns) { $btnApplyDns.Text = $strings.BtnApplyDns }
+    if ($cardGamingNetwork -and $cardGamingNetwork.Tag) { $cardGamingNetwork.Tag.Header.Text = $strings.GbGamingNetwork }
+    if ($script:CbNetThrottling) { $script:CbNetThrottling.Text = $strings.CbNetThrottling }
+    if ($script:CbNagleAlgo) { $script:CbNagleAlgo.Text = $strings.CbNagleAlgo }
+    if ($btnApplyGamingNet) { $btnApplyGamingNet.Text = $strings.BtnApplyGamingNet }
+    if ($cardResetNetwork -and $cardResetNetwork.Tag) { $cardResetNetwork.Tag.Header.Text = $strings.GbResetNetwork }
+    if ($lblResetNetworkDesc) { $lblResetNetworkDesc.Text = $strings.LblResetNetworkDesc }
+    if ($btnResetNetStack) { $btnResetNetStack.Text = $strings.BtnResetNetStack }
+
+    # Onglet Démarrage
+    if ($cardStartupManager -and $cardStartupManager.Tag) { $cardStartupManager.Tag.Header.Text = $strings.GbStartupManager }
+    if ($lblStartupDesc) { $lblStartupDesc.Text = $strings.LblStartupDesc }
+    if ($btnRefreshStartup) { $btnRefreshStartup.Text = $strings.BtnRefreshStartup }
+    if ($btnDisableStartup) { $btnDisableStartup.Text = $strings.BtnDisableStartup }
+    if ($lvStartup -and $lvStartup.Columns.Count -ge 4) {
+        $lvStartup.Columns[0].Text = $strings.ColStartupName
+        $lvStartup.Columns[1].Text = $strings.ColStartupLocation
+        $lvStartup.Columns[2].Text = $strings.ColStartupStatus
+        $lvStartup.Columns[3].Text = $strings.ColStartupCommand
+    }
+
+    # Onglet 6 : Confidentialité
     if ($cardPrivacyReg -and $cardPrivacyReg.Tag) { $cardPrivacyReg.Tag.Header.Text = $strings.GbPrivacyReg }
     if ($script:CbPrivacyReg) { $script:CbPrivacyReg.Text = $strings.CbPrivacyReg }
     if ($script:CbPrivacyBackup) { $script:CbPrivacyBackup.Text = $strings.CbPrivacyBackup }
@@ -1005,8 +1139,8 @@ function Apply-Language {
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "REDADZDOptimiser Professional"
-$form.Size = New-Object System.Drawing.Size(1000, 770)
-$form.MinimumSize = New-Object System.Drawing.Size(940, 700)
+$form.Size = New-Object System.Drawing.Size(1020, 780)
+$form.MinimumSize = New-Object System.Drawing.Size(980, 720)
 $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $form.BackColor = $colors.BackColor
 $form.ForeColor = $colors.ForeColor
@@ -1220,7 +1354,7 @@ $presetPanel.Controls.Add($lblPresetDesc)
 $script:TabControl = New-Object System.Windows.Forms.TabControl
 $script:TabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 $script:TabControl.Font = $fonts.SubTitle
-$script:TabControl.ItemSize = New-Object System.Drawing.Size(150, 38)
+$script:TabControl.ItemSize = New-Object System.Drawing.Size(106, 38)
 $script:TabControl.SizeMode = [System.Windows.Forms.TabSizeMode]::Fixed
 $script:TabControl.Appearance = [System.Windows.Forms.TabAppearance]::Normal
 $script:TabControl.BackColor = $colors.BackColor
@@ -1542,8 +1676,351 @@ $btnApplyCpu = New-ModernButton -Text "⚡ Appliquer les réglages CPU" -Size (N
 }
 $cardPerfCpu.Controls.Add($btnApplyCpu)
 
+
 # ────────────────────────────────────────────────────────────────────────
-# ONGLET 3 : CONFIDENTIALITÉ
+# ONGLET 3 : LOGICIELS (WINGET INSTALLER)
+# ────────────────────────────────────────────────────────────────────────
+$softwareTab = New-TabPage -Title "📦 Logiciels"
+$script:TabControl.TabPages.Add($softwareTab.Page)
+
+$yPosSoft = 14
+
+# Barre d'actions rapides logiciels
+$btnSelectAllApps = New-ModernButton -Text "✓ Tout cocher" -Size (New-Object System.Drawing.Size(130, 32)) -Location (New-Object System.Drawing.Point(12, $yPosSoft)) -Click {
+    foreach ($cb in $script:AppCheckBoxes) { $cb.Checked = $true }
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$softwareTab.Scroll.Controls.Add($btnSelectAllApps)
+
+$btnDeselectAllApps = New-ModernButton -Text "✕ Tout décocher" -Size (New-Object System.Drawing.Size(140, 32)) -Location (New-Object System.Drawing.Point(150, $yPosSoft)) -Click {
+    foreach ($cb in $script:AppCheckBoxes) { $cb.Checked = $false }
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$softwareTab.Scroll.Controls.Add($btnDeselectAllApps)
+
+$btnInstallApps = New-ModernButton -Text "🚀 Installer les applications cochées (Winget)" -Size (New-Object System.Drawing.Size(320, 32)) -Location (New-Object System.Drawing.Point(300, $yPosSoft)) -Click {
+    if ($script:IsRunning) { return }
+    $selected = @()
+    foreach ($cb in $script:AppCheckBoxes) {
+        if ($cb.Checked -and $cb.Tag) { $selected += $cb.Tag }
+    }
+    if ($selected.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show(
+            "Veuillez cocher au moins une application à installer !",
+            "Information",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+        return
+    }
+    $origText = $btnInstallApps.Text
+    $btnInstallApps.Enabled = $false
+    $btnInstallApps.Text = $script:I18N[$script:CurrentLang].BtnInstallingApps
+    $script:TabControl.SelectedTab = $logsTab.Page
+    [System.Windows.Forms.Application]::DoEvents()
+    try {
+        Append-Log "Démarrage de l'installation de $($selected.Count) application(s) via Winget..." "INFO"
+        $res = Install-WingetApps -AppIds $selected -OnProgress {
+            param($app, $cur, $tot)
+            Update-UIProgress "Installation Winget: $app" $cur $tot "" ([int](($cur / $tot) * 100))
+        }
+        Append-Log ($script:I18N[$script:CurrentLang].InstallAppsDone -f $res.Installed.Count, $res.Failed.Count) "SUCCESS"
+    } catch {
+        Append-Log "Erreur installation applications : $_" "ERROR"
+    } finally {
+        $btnInstallApps.Enabled = $true
+        $btnInstallApps.Text = $origText
+        Update-UIProgress "Prêt" 0 0 "" 0
+    }
+} -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress
+$softwareTab.Scroll.Controls.Add($btnInstallApps)
+
+$yPosSoft += 44
+
+$script:AppCheckBoxes = @()
+
+# 1. Navigateurs Web
+$cardBrowsers = New-ModernCard -Title "Navigateurs Web" -Location (New-Object System.Drawing.Point(12, $yPosSoft)) -Size (New-Object System.Drawing.Size(890, 130)) -AccentLineColor $colors.AccentColor
+$softwareTab.Scroll.Controls.Add($cardBrowsers)
+
+$cbChrome = New-ModernCheckBox -Text "Google Chrome" -Location (New-Object System.Drawing.Point(20, 42)) -Checked $false
+$cbChrome.Tag = "Google.Chrome"
+$cardBrowsers.Controls.Add($cbChrome); $script:AppCheckBoxes += $cbChrome
+
+$cbBrave = New-ModernCheckBox -Text "Brave Browser (Sécurisé & Sans pub)" -Location (New-Object System.Drawing.Point(20, 72)) -Checked $true
+$cbBrave.Tag = "Brave.Brave"
+$cardBrowsers.Controls.Add($cbBrave); $script:AppCheckBoxes += $cbBrave
+
+$cbFirefox = New-ModernCheckBox -Text "Mozilla Firefox" -Location (New-Object System.Drawing.Point(450, 42)) -Checked $false
+$cbFirefox.Tag = "Mozilla.Firefox"
+$cardBrowsers.Controls.Add($cbFirefox); $script:AppCheckBoxes += $cbFirefox
+
+$cbOperaGX = New-ModernCheckBox -Text "Opera GX Gaming Browser" -Location (New-Object System.Drawing.Point(450, 72)) -Checked $false
+$cbOperaGX.Tag = "Opera.OperaGX"
+$cardBrowsers.Controls.Add($cbOperaGX); $script:AppCheckBoxes += $cbOperaGX
+
+$yPosSoft += 145
+
+# 2. Utilitaires & Fichiers
+$cardUtilities = New-ModernCard -Title "Utilitaires & Fichiers" -Location (New-Object System.Drawing.Point(12, $yPosSoft)) -Size (New-Object System.Drawing.Size(890, 160)) -AccentLineColor $colors.CyanAccent
+$softwareTab.Scroll.Controls.Add($cardUtilities)
+
+$cb7zip = New-ModernCheckBox -Text "7-Zip (Compresseur de fichiers ultra-rapide)" -Location (New-Object System.Drawing.Point(20, 42)) -Checked $true
+$cb7zip.Tag = "7zip.7zip"
+$cardUtilities.Controls.Add($cb7zip); $script:AppCheckBoxes += $cb7zip
+
+$cbWinrar = New-ModernCheckBox -Text "WinRAR" -Location (New-Object System.Drawing.Point(20, 72)) -Checked $false
+$cbWinrar.Tag = "RARLab.WinRAR"
+$cardUtilities.Controls.Add($cbWinrar); $script:AppCheckBoxes += $cbWinrar
+
+$cbVLC = New-ModernCheckBox -Text "VLC Media Player (Lecteur multimédia tous formats)" -Location (New-Object System.Drawing.Point(20, 102)) -Checked $true
+$cbVLC.Tag = "VideoLAN.VLC"
+$cardUtilities.Controls.Add($cbVLC); $script:AppCheckBoxes += $cbVLC
+
+$cbNotepad = New-ModernCheckBox -Text "Notepad++ (Éditeur de texte avancé)" -Location (New-Object System.Drawing.Point(450, 42)) -Checked $true
+$cbNotepad.Tag = "Notepad++.Notepad++"
+$cardUtilities.Controls.Add($cbNotepad); $script:AppCheckBoxes += $cbNotepad
+
+$cbPowerToys = New-ModernCheckBox -Text "Microsoft PowerToys (Boîte à outils Windows officielle)" -Location (New-Object System.Drawing.Point(450, 72)) -Checked $false
+$cbPowerToys.Tag = "Microsoft.PowerToys"
+$cardUtilities.Controls.Add($cbPowerToys); $script:AppCheckBoxes += $cbPowerToys
+
+$yPosSoft += 175
+
+# 3. Jeux & Streaming
+$cardGamingApps = New-ModernCard -Title "Jeux & Streaming" -Location (New-Object System.Drawing.Point(12, $yPosSoft)) -Size (New-Object System.Drawing.Size(890, 130)) -AccentLineColor $colors.PurpleAccent
+$softwareTab.Scroll.Controls.Add($cardGamingApps)
+
+$cbSteam = New-ModernCheckBox -Text "Steam" -Location (New-Object System.Drawing.Point(20, 42)) -Checked $true
+$cbSteam.Tag = "Valve.Steam"
+$cardGamingApps.Controls.Add($cbSteam); $script:AppCheckBoxes += $cbSteam
+
+$cbDiscord = New-ModernCheckBox -Text "Discord" -Location (New-Object System.Drawing.Point(20, 72)) -Checked $true
+$cbDiscord.Tag = "Discord.Discord"
+$cardGamingApps.Controls.Add($cbDiscord); $script:AppCheckBoxes += $cbDiscord
+
+$cbEpic = New-ModernCheckBox -Text "Epic Games Launcher" -Location (New-Object System.Drawing.Point(450, 42)) -Checked $false
+$cbEpic.Tag = "EpicGames.EpicGamesLauncher"
+$cardGamingApps.Controls.Add($cbEpic); $script:AppCheckBoxes += $cbEpic
+
+$cbOBS = New-ModernCheckBox -Text "OBS Studio (Enregistrement & Streaming vidéo)" -Location (New-Object System.Drawing.Point(450, 72)) -Checked $false
+$cbOBS.Tag = "OBSProject.OBSStudio"
+$cardGamingApps.Controls.Add($cbOBS); $script:AppCheckBoxes += $cbOBS
+
+$yPosSoft += 145
+
+# 4. Bureautique & Développement
+$cardDevOffice = New-ModernCard -Title "Bureautique & Développement" -Location (New-Object System.Drawing.Point(12, $yPosSoft)) -Size (New-Object System.Drawing.Size(890, 130)) -AccentLineColor $colors.IndigoAccent
+$softwareTab.Scroll.Controls.Add($cardDevOffice)
+
+$cbVSCode = New-ModernCheckBox -Text "Visual Studio Code" -Location (New-Object System.Drawing.Point(20, 42)) -Checked $true
+$cbVSCode.Tag = "Microsoft.VisualStudioCode"
+$cardDevOffice.Controls.Add($cbVSCode); $script:AppCheckBoxes += $cbVSCode
+
+$cbLibreOffice = New-ModernCheckBox -Text "LibreOffice (Suite bureautique complète gratuite)" -Location (New-Object System.Drawing.Point(20, 72)) -Checked $false
+$cbLibreOffice.Tag = "TheDocumentFoundation.LibreOffice"
+$cardDevOffice.Controls.Add($cbLibreOffice); $script:AppCheckBoxes += $cbLibreOffice
+
+$cbAdobeReader = New-ModernCheckBox -Text "Adobe Acrobat Reader" -Location (New-Object System.Drawing.Point(450, 42)) -Checked $false
+$cbAdobeReader.Tag = "Adobe.Acrobat.Reader.64-bit"
+$cardDevOffice.Controls.Add($cbAdobeReader); $script:AppCheckBoxes += $cbAdobeReader
+
+$cbAnyDesk = New-ModernCheckBox -Text "AnyDesk (Accès et assistance à distance)" -Location (New-Object System.Drawing.Point(450, 72)) -Checked $false
+$cbAnyDesk.Tag = "AnyDeskSoftwareGmbH.AnyDesk"
+$cardDevOffice.Controls.Add($cbAnyDesk); $script:AppCheckBoxes += $cbAnyDesk
+
+# ────────────────────────────────────────────────────────────────────────
+# ONGLET 4 : RÉSEAU & DNS
+# ────────────────────────────────────────────────────────────────────────
+$networkTab = New-TabPage -Title "🌐 Réseau & DNS"
+$script:TabControl.TabPages.Add($networkTab.Page)
+
+$yPosNet = 14
+
+# 1. Carte Sélecteur DNS
+$cardDnsSelector = New-ModernCard -Title "Sélecteur DNS Rapide & Sécurisé" -Location (New-Object System.Drawing.Point(12, $yPosNet)) -Size (New-Object System.Drawing.Size(890, 205)) -AccentLineColor $colors.AccentColor
+$networkTab.Scroll.Controls.Add($cardDnsSelector)
+
+$rbDnsCloudflare = New-Object System.Windows.Forms.RadioButton
+$rbDnsCloudflare.Text = "⚡ Cloudflare (1.1.1.1 / 1.0.0.1 - Vitesse max & Jeux en ligne)"
+$rbDnsCloudflare.Location = New-Object System.Drawing.Point(20, 40)
+$rbDnsCloudflare.Size = New-Object System.Drawing.Size(800, 24)
+$rbDnsCloudflare.Font = $fonts.Normal
+$rbDnsCloudflare.ForeColor = $colors.ForeColor
+$rbDnsCloudflare.Checked = $true
+$cardDnsSelector.Controls.Add($rbDnsCloudflare)
+
+$rbDnsGoogle = New-Object System.Windows.Forms.RadioButton
+$rbDnsGoogle.Text = "🔒 Google DNS (8.8.8.8 / 8.8.4.4 - Haute compatibilité)"
+$rbDnsGoogle.Location = New-Object System.Drawing.Point(20, 68)
+$rbDnsGoogle.Size = New-Object System.Drawing.Size(800, 24)
+$rbDnsGoogle.Font = $fonts.Normal
+$rbDnsGoogle.ForeColor = $colors.ForeColor
+$cardDnsSelector.Controls.Add($rbDnsGoogle)
+
+$rbDnsQuad9 = New-Object System.Windows.Forms.RadioButton
+$rbDnsQuad9.Text = "🛡️ Quad9 (9.9.9.9 - Sécurité anti-malware renforcée)"
+$rbDnsQuad9.Location = New-Object System.Drawing.Point(20, 96)
+$rbDnsQuad9.Size = New-Object System.Drawing.Size(800, 24)
+$rbDnsQuad9.Font = $fonts.Normal
+$rbDnsQuad9.ForeColor = $colors.ForeColor
+$cardDnsSelector.Controls.Add($rbDnsQuad9)
+
+$rbDnsDhcp = New-Object System.Windows.Forms.RadioButton
+$rbDnsDhcp.Text = "🔄 Automatique / FAI (DHCP standard par défaut)"
+$rbDnsDhcp.Location = New-Object System.Drawing.Point(20, 124)
+$rbDnsDhcp.Size = New-Object System.Drawing.Size(800, 24)
+$rbDnsDhcp.Font = $fonts.Normal
+$rbDnsDhcp.ForeColor = $colors.ForeColor
+$cardDnsSelector.Controls.Add($rbDnsDhcp)
+
+$btnApplyDns = New-ModernButton -Text "⚡ Appliquer le serveur DNS sélectionné" -Size (New-Object System.Drawing.Size(300, 36)) -Location (New-Object System.Drawing.Point(20, 155)) -Click {
+    $prov = if ($rbDnsCloudflare.Checked) { "Cloudflare" } elseif ($rbDnsGoogle.Checked) { "Google" } elseif ($rbDnsQuad9.Checked) { "Quad9" } else { "DHCP" }
+    try {
+        $res = Set-SystemDns -Provider $prov
+        Append-Log "✓ Configuration DNS ($prov) appliquée avec succès." "SUCCESS"
+        [System.Windows.Forms.MessageBox]::Show(
+            $script:I18N[$script:CurrentLang].BtnApplyDnsDone,
+            "DNS",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+    } catch {
+        Append-Log "Erreur configuration DNS : $_" "ERROR"
+    }
+} -BackColor $colors.AccentColor -HoverColor $colors.AccentHover -PressColor $colors.AccentPress
+$cardDnsSelector.Controls.Add($btnApplyDns)
+
+$yPosNet += 220
+
+# 2. Carte Gaming & Latence
+$cardGamingNetwork = New-ModernCard -Title "Optimisations Latence Réseau & Gaming (Ping TCP/IP)" -Location (New-Object System.Drawing.Point(12, $yPosNet)) -Size (New-Object System.Drawing.Size(890, 160)) -AccentLineColor $colors.SuccessColor
+$networkTab.Scroll.Controls.Add($cardGamingNetwork)
+
+$script:CbNetThrottling = New-ModernCheckBox -Text "Désactiver la limitation de bande passante multimédia (NetworkThrottlingIndex)" -Location (New-Object System.Drawing.Point(20, 42)) -Checked $true
+$cardGamingNetwork.Controls.Add($script:CbNetThrottling)
+
+$script:CbNagleAlgo = New-ModernCheckBox -Text "Désactiver l'algorithme Nagle (TcpAckFrequency & TCPNoDelay = 1)" -Location (New-Object System.Drawing.Point(20, 72)) -Checked $true
+$cardGamingNetwork.Controls.Add($script:CbNagleAlgo)
+
+$btnApplyGamingNet = New-ModernButton -Text "🚀 Appliquer les optimisations réseau gaming" -Size (New-Object System.Drawing.Size(320, 36)) -Location (New-Object System.Drawing.Point(20, 108)) -Click {
+    try {
+        Optimize-NetworkGaming
+        Append-Log "✓ Optimisations latence réseau gaming TCP/IP appliquées." "SUCCESS"
+        [System.Windows.Forms.MessageBox]::Show(
+            $script:I18N[$script:CurrentLang].BtnApplyGamingDone,
+            "Réseau Gaming",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+    } catch {
+        Append-Log "Erreur optimisation réseau gaming : $_" "ERROR"
+    }
+} -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress
+$cardGamingNetwork.Controls.Add($btnApplyGamingNet)
+
+$yPosNet += 175
+
+# 3. Carte Réinitialisation Réseau
+$cardResetNetwork = New-ModernCard -Title "Dépannage & Réinitialisation Réseau" -Location (New-Object System.Drawing.Point(12, $yPosNet)) -Size (New-Object System.Drawing.Size(890, 130)) -AccentLineColor $colors.WarningColor
+$networkTab.Scroll.Controls.Add($cardResetNetwork)
+
+$lblResetNetworkDesc = New-Object System.Windows.Forms.Label
+$lblResetNetworkDesc.Text = "Vide le cache DNS et réinitialise Winsock et la pile TCP/IP pour réparer les erreurs de connexion."
+$lblResetNetworkDesc.Location = New-Object System.Drawing.Point(20, 42)
+$lblResetNetworkDesc.Size = New-Object System.Drawing.Size(850, 24)
+$lblResetNetworkDesc.Font = $fonts.Normal
+$lblResetNetworkDesc.ForeColor = $colors.MutedColor
+$cardResetNetwork.Controls.Add($lblResetNetworkDesc)
+
+$btnResetNetStack = New-ModernButton -Text "🧹 Vider le cache DNS & Réinitialiser Winsock / IP" -Size (New-Object System.Drawing.Size(340, 36)) -Location (New-Object System.Drawing.Point(20, 76)) -Click {
+    try {
+        Reset-NetworkStack
+        Append-Log "✓ Cache DNS vidé et pile réseau Winsock/TCP-IP réinitialisée avec succès." "SUCCESS"
+        [System.Windows.Forms.MessageBox]::Show(
+            $script:I18N[$script:CurrentLang].BtnResetNetDone,
+            "Réseau",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+    } catch {
+        Append-Log "Erreur réinitialisation réseau : $_" "ERROR"
+    }
+} -BackColor $colors.WarningColor -HoverColor $colors.WarningHover -PressColor $colors.WarningPress
+$cardResetNetwork.Controls.Add($btnResetNetStack)
+
+# ────────────────────────────────────────────────────────────────────────
+# ONGLET 5 : DÉMARRAGE WINDOWS (STARTUP MANAGER)
+# ────────────────────────────────────────────────────────────────────────
+$startupTab = New-TabPage -Title "🚀 Démarrage"
+$script:TabControl.TabPages.Add($startupTab.Page)
+
+$yPosStart = 14
+
+$cardStartupManager = New-ModernCard -Title "Gestionnaire des Applications au Démarrage de Windows" -Location (New-Object System.Drawing.Point(12, $yPosStart)) -Size (New-Object System.Drawing.Size(890, 520)) -AccentLineColor $colors.IndigoAccent
+$startupTab.Scroll.Controls.Add($cardStartupManager)
+
+$lblStartupDesc = New-Object System.Windows.Forms.Label
+$lblStartupDesc.Text = "Désactivez les logiciels superflus au démarrage pour faire démarrer votre PC en quelques secondes."
+$lblStartupDesc.Location = New-Object System.Drawing.Point(20, 42)
+$lblStartupDesc.Size = New-Object System.Drawing.Size(850, 22)
+$lblStartupDesc.Font = $fonts.Normal
+$lblStartupDesc.ForeColor = $colors.MutedColor
+$cardStartupManager.Controls.Add($lblStartupDesc)
+
+$lvStartup = New-Object System.Windows.Forms.ListView
+$lvStartup.Location = New-Object System.Drawing.Point(20, 72)
+$lvStartup.Size = New-Object System.Drawing.Size(850, 380)
+$lvStartup.View = [System.Windows.Forms.View]::Details
+$lvStartup.FullRowSelect = $true
+$lvStartup.GridLines = $true
+$lvStartup.MultiSelect = $false
+$lvStartup.Font = $fonts.Normal
+$lvStartup.Columns.Add("Nom", 220) | Out-Null
+$lvStartup.Columns.Add("Emplacement", 140) | Out-Null
+$lvStartup.Columns.Add("Statut", 90) | Out-Null
+$lvStartup.Columns.Add("Commande / Chemin", 390) | Out-Null
+$cardStartupManager.Controls.Add($lvStartup)
+
+function Update-StartupList {
+    $lvStartup.Items.Clear()
+    $items = Get-StartupPrograms
+    foreach ($item in $items) {
+        $lvi = New-Object System.Windows.Forms.ListViewItem($item.Name)
+        $lvi.SubItems.Add($item.Location) | Out-Null
+        $lvi.SubItems.Add($item.Status) | Out-Null
+        $lvi.SubItems.Add($item.Command) | Out-Null
+        $lvi.Tag = $item
+        $lvStartup.Items.Add($lvi) | Out-Null
+    }
+}
+
+$btnRefreshStartup = New-ModernButton -Text "🔄 Actualiser la liste" -Size (New-Object System.Drawing.Size(180, 36)) -Location (New-Object System.Drawing.Point(20, 465)) -Click {
+    Update-StartupList
+} -BackColor $colors.AccentColor -HoverColor $colors.AccentHover -PressColor $colors.AccentPress
+$cardStartupManager.Controls.Add($btnRefreshStartup)
+
+$btnDisableStartup = New-ModernButton -Text "🛑 Désactiver l'application sélectionnée" -Size (New-Object System.Drawing.Size(280, 36)) -Location (New-Object System.Drawing.Point(215, 465)) -Click {
+    if ($lvStartup.SelectedItems.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show(
+            "Veuillez sélectionner une application dans la liste.",
+            "Information",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+        return
+    }
+    $selected = $lvStartup.SelectedItems[0].Tag
+    if ($selected) {
+        $res = Disable-StartupProgram -Name $selected.Name -Location $selected.Location
+        if ($res) {
+            Append-Log ($script:I18N[$script:CurrentLang].StartupDisabledDone -f $selected.Name) "SUCCESS"
+            Update-StartupList
+        }
+    }
+} -BackColor $colors.ErrorColor -HoverColor $colors.ErrorHover -PressColor $colors.ErrorPress
+$cardStartupManager.Controls.Add($btnDisableStartup)
+
+# ────────────────────────────────────────────────────────────────────────
+# ONGLET 6 : CONFIDENTIALITÉ
 # ────────────────────────────────────────────────────────────────────────
 $privacyTab = New-TabPage -Title "🔒 Confidentialité"
 $script:TabControl.TabPages.Add($privacyTab.Page)
@@ -2006,6 +2483,9 @@ $form.Add_Shown({
 
     # Application du préréglage Standard par défaut
     Apply-Preset -Preset "Standard"
+
+    # Chargement initial des programmes de démarrage
+    try { Update-StartupList } catch {}
 
     Append-Log "⚡ REDADZDOptimiser Professional ($($script:CurrentLang)) initialisé" "INFO"
     Append-Log "Système : Windows $($winVer.Major).$($winVer.Minor) Build $($winVer.Build)" "INFO"

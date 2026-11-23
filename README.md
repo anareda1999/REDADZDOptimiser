@@ -22,6 +22,26 @@ Supporte trois langues : **Français (FR)**, **English (EN)** et **العربي�
 ---
 
 
+## 📦 Nouvelles Fonctionnalités Majeures
+
+### 1. 📦 Installateur de Logiciels Essentiels (Winget)
+Installez vos applications favorites en un seul clic via le gestionnaire officiel Microsoft Winget :
+- **Navigateurs :** Google Chrome, Brave Browser, Mozilla Firefox, Opera GX.
+- **Utilitaires :** 7-Zip, WinRAR, VLC Media Player, Notepad++, Microsoft PowerToys.
+- **Gaming & Streaming :** Steam, Discord, Epic Games Launcher, OBS Studio.
+- **Bureautique & Dev :** Visual Studio Code, LibreOffice, Adobe Acrobat Reader, AnyDesk.
+
+### 2. 🌐 Optimiseur Réseau, Ping & DNS Gaming
+- **Sélecteur DNS en 1 clic :** Basculez instantanément entre **Cloudflare (1.1.1.1)**, **Google DNS (8.8.8.8)**, **Quad9 (9.9.9.9)** ou le DNS automatique de votre FAI (DHCP).
+- **Tweaks TCP/IP Gaming :** Désactivation de la limitation de bande passante multimédia (*NetworkThrottlingIndex*) et de l'algorithme Nagle (*TcpAckFrequency & TCPNoDelay*) pour éliminer la latence et stabiliser le ping en jeu.
+- **Réinitialisation Réseau :** Vidage du cache DNS (`ipconfig /flushdns`) et réinitialisation complète de la pile Winsock / IP pour réparer les erreurs de connexion.
+
+### 3. 🚀 Gestionnaire de Démarrage Windows (Startup Manager)
+- Affiche en direct tous les logiciels qui se lancent au démarrage de Windows (Registre HKCU/HKLM et dossiers Startup).
+- Permet de désactiver en un clic les applications superflues pour réduire le temps de démarrage du PC à moins de 8 secondes.
+
+---
+
 ## 🎛️ Préréglages d'Optimisation Rapide (Menu Horizontal)
 
 L'interface graphique intègre désormais un **sélecteur de profils horizontal** au sommet des onglets permettant d'ajuster automatiquement les cases à cocher en un seul clic :
@@ -101,7 +121,26 @@ L'interface graphique intègre désormais un **sélecteur de profils horizontal*
 
 ## 🚀 Utilisation Rapide
 
-### Option A : Interface Graphique (Recommandée)
+### ⚡ Option 0 : Commande Magique (One-Liner - Sans rien télécharger)
+Ouvrez simplement **PowerShell** en tant qu'Administrateur et collez cette commande unique :
+```powershell
+irm https://raw.githubusercontent.com/anareda1999/REDADZDOptimiser/main/Launch.ps1 | iex
+```
+*Le programme se charge et se lance automatiquement sans aucune manipulation technique.*
+
+---
+
+### 📦 Option A : Exécutable Autonome (.exe) - RECOMMANDÉ
+Double-cliquez directement sur :
+```text
+REDADZDOptimiser.exe
+```
+*(Auto-élévation administrateur UAC intégrée, aucune connaissance technique requise)*
+
+---
+
+### Option B : Lanceur Batch GUI
+Double-cliquez sur :
 Double-cliquez sur :
 ```cmd
 Launch_REDADZDOptimiser_GUI.bat

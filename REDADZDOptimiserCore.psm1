@@ -1544,6 +1544,304 @@ function Optimize-CPU {
     return [PSCustomObject]$results
 }
 
+
+# ════════════════════════════════════════════════════════════════════════
+# 13. INSTALLATEUR DE LOGICIELS (WINGET)
+# ════════════════════════════════════════════════════════════════════════
+
+function Resolve-WingetPath {
+    $cmd = Get-Command "winget.exe" -ErrorAction SilentlyContinue
+    if ($cmd -and (Test-Path $cmd.Source)) { return $cmd.Source }
+    $appPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe"
+    if (Test-Path $appPath) { return $appPath }
+    $progPath = "$env:ProgramFiles\WindowsApps\Microsoft.DesktopAppInstaller_*_x64__8wekyb3d8bbwe\winget.exe"
+    $found = Get-ChildItem $progPath -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($found) { return $found.FullName }
+    return "winget"
+}
+
+function Test-WingetInstalled {
+    try {
+        $wPath = Resolve-WingetPath
+        $proc = Start-Process -FilePath $wPath -ArgumentList "--version" -NoNewWindow -Wait -PassThru -ErrorAction Stop
+        return ($proc.ExitCode -eq 0)
+    } catch {
+        return $false
+    }
+}
+
+function Install-WingetApps {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string[]]$AppIds,
+        [scriptblock]$OnProgress
+    )
+    $results = @{
+        Installed = @()
+        Failed    = @()
+    }
+
+    $wPath = Resolve-WingetPath
+
+    $total = $AppIds.Count
+    $current = 0
+    foreach ($app in $AppIds) {
+        $current++
+        if ($script:Config.CancelRequested) { break }
+        Write-Log "Installation de l'application ($current/$total) : $app..." "INFO"
+        if ($OnProgress) { & $OnProgress $app $current $total }
+
+        try {
+            $argList = "install --id `"$app`" --exact --silent --accept-package-agreements --accept-source-agreements --disable-interactivity"
+            $p = Start-Process -FilePath $wPath -ArgumentList $argList -NoNewWindow -Wait -PassThru -ErrorAction Stop
+            if ($p.ExitCode -eq 0 -or $p.ExitCode -eq 2316632065 -or $p.ExitCode -eq -1978335189) { # 0 = Success, already installed
+                Write-Log "Application installée avec succès : $app" "SUCCESS"
+                $results.Installed += $app
+            } else {
+                Write-Log "Échec ou avertissement installation pour $app (Code: $($p.ExitCode))" "WARN"
+                $results.Failed += $app
+            }
+        } catch {
+            Write-Log "Erreur lors de l'installation de $app : $_" "WARN"
+            $results.Failed += $app
+        }
+    }
+    return [PSCustomObject]$results
+}
+
+# ════════════════════════════════════════════════════════════════════════
+# 14. OPTIMISATION RÉSEAU, PING & DNS GAMING
+# ════════════════════════════════════════════════════════════════════════
+
+function Get-ActiveNetworkAdapters {
+    $adapters = Get-NetAdapter -Physical -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq "Up" }
+    if (-not $adapters) {
+        $adapters = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq "Up" }
+    }
+    return $adapters
+}
+
+function Set-SystemDns {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [ValidateSet("Cloudflare", "Google", "Quad9", "DHCP")]
+        [string]$Provider
+    )
+
+    $adapters = Get-ActiveNetworkAdapters
+    if (-not $adapters) {
+        Write-Log "Aucune carte réseau active détectée pour la configuration DNS." "WARN"
+        return $false
+    }
+
+    $dnsServers = switch ($Provider) {
+        "Cloudflare" { @("1.1.1.1", "1.0.0.1") }
+        "Google"     { @("8.8.8.8", "8.8.4.4") }
+        "Quad9"      { @("9.9.9.9", "149.112.112.112") }
+        "DHCP"       { $null }
+    }
+
+    $successCount = 0
+    foreach ($adapter in $adapters) {
+        try {
+            if ($Provider -eq "DHCP") {
+                Set-DnsClientServerAddress -InterfaceIndex $adapter.InterfaceIndex -ResetServerAddresses -ErrorAction Stop
+                Write-Log "DNS remis en automatique (DHCP) sur : $($adapter.Name)" "SUCCESS"
+                $successCount++
+            } else {
+                Set-DnsClientServerAddress -InterfaceIndex $adapter.InterfaceIndex -ServerAddresses $dnsServers -ErrorAction Stop
+                Write-Log "DNS $Provider ($($dnsServers -join ', ')) configuré sur : $($adapter.Name)" "SUCCESS"
+                $successCount++
+            }
+        } catch {
+            Write-Log "Erreur configuration DNS sur $($adapter.Name) : $_" "WARN"
+        }
+    }
+    return ($successCount -gt 0)
+}
+
+function Reset-NetworkStack {
+    Write-Log "Réinitialisation et vidage du cache réseau..." "INFO"
+    try {
+        & ipconfig /flushdns 2>$null | Out-Null
+        Write-Log "Cache de résolution DNS vidé avec succès (ipconfig /flushdns)." "SUCCESS"
+    } catch {}
+    try {
+        & netsh winsock reset 2>$null | Out-Null
+        Write-Log "Catalogue Winsock réinitialisé." "SUCCESS"
+    } catch {}
+    try {
+        & netsh int ip reset 2>$null | Out-Null
+        Write-Log "Pile protocolaire TCP/IP réinitialisée." "SUCCESS"
+    } catch {}
+    return $true
+}
+
+function Optimize-NetworkGaming {
+    [CmdletBinding()]
+    param([switch]$DryRun)
+
+    Write-Log "Application des optimisations latence réseau & gaming (TCP/IP)..." "INFO"
+    $regMultimedia = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
+    $regTCPIP = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"
+
+    if ($DryRun) {
+        Write-Log "[SIMULATION] Optimisations latence réseau appliquées." "WARN"
+        return $true
+    }
+
+    try {
+        # 1. Supprimer le bridage réseau Windows Multimédia
+        if (-not (Test-Path $regMultimedia)) { New-Item -Path $regMultimedia -Force | Out-Null }
+        Set-ItemProperty -Path $regMultimedia -Name "NetworkThrottlingIndex" -Value 0xffffffff -Type DWord -Force
+        Set-ItemProperty -Path $regMultimedia -Name "SystemResponsiveness" -Value 0 -Type DWord -Force
+        Write-Log "Limitation réseau multimédia désactivée (NetworkThrottlingIndex = OFF)." "SUCCESS"
+
+        # 2. Désactiver l'algorithme Nagle sur chaque interface
+        if (Test-Path $regTCPIP) {
+            Get-ChildItem -Path $regTCPIP | ForEach-Object {
+                $subKey = $_.PSPath
+                Set-ItemProperty -Path $subKey -Name "TcpAckFrequency" -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+                Set-ItemProperty -Path $subKey -Name "TCPNoDelay" -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+            }
+            Write-Log "Algorithme Nagle désactivé (TcpAckFrequency=1, TCPNoDelay=1 pour gaming)." "SUCCESS"
+        }
+        return $true
+    } catch {
+        Write-Log "Erreur optimisation réseau gaming : $_" "WARN"
+        return $false
+    }
+}
+
+# ════════════════════════════════════════════════════════════════════════
+# 15. GESTIONNAIRE DE DÉMARRAGE WINDOWS (STARTUP MANAGER)
+# ════════════════════════════════════════════════════════════════════════
+
+function Get-StartupPrograms {
+    $items = @()
+
+    # 1. HKCU Run
+    $runHKCU = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+    if (Test-Path $runHKCU) {
+        try {
+            $props = Get-ItemProperty -Path $runHKCU -ErrorAction SilentlyContinue
+            if ($props) {
+                foreach ($prop in $props.PSObject.Properties) {
+                    if ($prop.Name -notin @('PSPath', 'PSParentPath', 'PSChildName', 'PSDrive', 'PSProvider')) {
+                        $items += [PSCustomObject]@{
+                            Name     = $prop.Name
+                            Command  = [string]$prop.Value
+                            Location = "HKCU:Run"
+                            Status   = "Activé"
+                        }
+                    }
+                }
+            }
+        } catch {}
+    }
+
+    # 2. HKLM Run
+    $runHKLM = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
+    if (Test-Path $runHKLM) {
+        try {
+            $props = Get-ItemProperty -Path $runHKLM -ErrorAction SilentlyContinue
+            if ($props) {
+                foreach ($prop in $props.PSObject.Properties) {
+                    if ($prop.Name -notin @('PSPath', 'PSParentPath', 'PSChildName', 'PSDrive', 'PSProvider')) {
+                        $items += [PSCustomObject]@{
+                            Name     = $prop.Name
+                            Command  = [string]$prop.Value
+                            Location = "HKLM:Run"
+                            Status   = "Activé"
+                        }
+                    }
+                }
+            }
+        } catch {}
+    }
+
+    # 3. Dossiers Startup
+    $userStartup = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
+    if (Test-Path $userStartup) {
+        try {
+            Get-ChildItem -Path $userStartup -Filter "*.lnk" -ErrorAction SilentlyContinue | ForEach-Object {
+                $items += [PSCustomObject]@{
+                    Name     = $_.BaseName
+                    Command  = $_.FullName
+                    Location = "Startup:User"
+                    Status   = "Activé"
+                }
+            }
+        } catch {}
+    }
+
+    $allStartup = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+    if (Test-Path $allStartup) {
+        try {
+            Get-ChildItem -Path $allStartup -Filter "*.lnk" -ErrorAction SilentlyContinue | ForEach-Object {
+                $items += [PSCustomObject]@{
+                    Name     = $_.BaseName
+                    Command  = $_.FullName
+                    Location = "Startup:Common"
+                    Status   = "Activé"
+                }
+            }
+        } catch {}
+    }
+
+    return $items
+}
+
+function Disable-StartupProgram {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Name,
+        [Parameter(Mandatory=$true)]
+        [string]$Location
+    )
+    try {
+        switch ($Location) {
+            "HKCU:Run" {
+                $reg = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+                $backup = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunDisabled"
+                if (-not (Test-Path $backup)) { New-Item -Path $backup -Force | Out-Null }
+                $val = (Get-ItemProperty -Path $reg -Name $Name).$Name
+                Set-ItemProperty -Path $backup -Name $Name -Value $val -Force
+                Remove-ItemProperty -Path $reg -Name $Name -Force
+                Write-Log "Programme désactivé au démarrage : $Name" "SUCCESS"
+                return $true
+            }
+            "HKLM:Run" {
+                $reg = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
+                $backup = "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunDisabled"
+                if (-not (Test-Path $backup)) { New-Item -Path $backup -Force | Out-Null }
+                $val = (Get-ItemProperty -Path $reg -Name $Name).$Name
+                Set-ItemProperty -Path $backup -Name $Name -Value $val -Force
+                Remove-ItemProperty -Path $reg -Name $Name -Force
+                Write-Log "Programme désactivé au démarrage : $Name" "SUCCESS"
+                return $true
+            }
+            default {
+                # Dossiers Startup
+                $folder = if ($Location -eq "Startup:Common") { "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" } else { "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup" }
+                $targetFile = Join-Path $folder "$Name.lnk"
+                if (Test-Path $targetFile) {
+                    $disabledFolder = Join-Path $folder "Disabled"
+                    if (-not (Test-Path $disabledFolder)) { New-Item -Path $disabledFolder -ItemType Directory -Force | Out-Null }
+                    Move-Item -Path $targetFile -Destination (Join-Path $disabledFolder "$Name.lnk") -Force
+                    Write-Log "Raccourci de démarrage désactivé : $Name" "SUCCESS"
+                    return $true
+                }
+            }
+        }
+    } catch {
+        Write-Log "Erreur désactivation démarrage pour $Name : $_" "WARN"
+        return $false
+    }
+}
+
 # ════════════════════════════════════════════════════════════════════════
 # ORCHESTRATEUR PRINCIPAL
 # ════════════════════════════════════════════════════════════════════════
@@ -1730,6 +2028,15 @@ Export-ModuleMember -Function @(
     'Optimize-RAM',
     'Stop-UnnecessaryProcesses',
     'Optimize-CPU',
+    'Resolve-WingetPath',
+    'Test-WingetInstalled',
+    'Install-WingetApps',
+    'Get-ActiveNetworkAdapters',
+    'Set-SystemDns',
+    'Reset-NetworkStack',
+    'Optimize-NetworkGaming',
+    'Get-StartupPrograms',
+    'Disable-StartupProgram',
     'Invoke-REDADZDOptimiser',
     'Invoke-WinOptimizer',
     'Set-REDADZDOptimiserConfig',
