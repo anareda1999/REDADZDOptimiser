@@ -21,6 +21,31 @@ Supporte trois langues : **Français (FR)**, **English (EN)** et **العربي�
 
 ---
 
+
+## 🎛️ Préréglages d'Optimisation Rapide (Menu Horizontal)
+
+L'interface graphique intègre désormais un **sélecteur de profils horizontal** au sommet des onglets permettant d'ajuster automatiquement les cases à cocher en un seul clic :
+
+1. **🌱 Tweak Minimal (Léger & Sécurisé) :**
+   - *Pour :* Bureautique, télétravail, utilisateurs prudents voulant préserver toutes les fonctionnalités.
+   - *Actions :* Point de restauration système, purge des fichiers temporaires et caches, vidage corbeille, plan d'alimentation Haute Performance, vérification d'intégrité SFC rapide, restrictions de base de télémétrie dans le registre. Ne supprime aucune application préinstallée et ne touche pas aux services système sensibles.
+
+2. **⚡ Tweak Standard (Équilibré & Recommandé) :**
+   - *Pour :* 95% des utilisateurs souhaitant un Windows rapide, épuré et respectueux de la vie privée.
+   - *Actions :* Tout le profil Minimal **+** suppression des bloatwares inutiles (Xbox, Bing, etc.), désactivation des services et tâches de télémétrie (DiagTrack, dmwappushservice), blocage DNS des serveurs de tracking via Hosts et pare-feu, règles GPO renforcées, nettoyage approfondi Windows Update (DISM), réparations complètes DISM & SFC, priorité CPU au premier plan et désactivation du Core Parking.
+
+3. **🚀 Tweak Max (Performances Extrêmes & Gaming) :**
+   - *Pour :* Gamers, monteurs vidéo et passionnés cherchant chaque pourcent de FPS et de réactivité.
+   - *Actions :* Tout le profil Standard **+** nettoyage approfondi du registre (clés orphelines, extensions invalides avec sauvegarde .reg automatique), planification d'une vérification minutieuse des disques au redémarrage (Chkdsk /f /r), et arrêt automatique de tous les processus d'arrière-plan inutiles.
+
+---
+
+## 👤 Auteur & Copyright
+
+- **Auteur :** Anagou Reda
+- **Contact / Téléphone :** `0542439514`
+- **Projet :** REDADZDOptimiser Professional
+
 ## ⚡ Onglet Performances (Surveillance RAM, Processeur & Processus)
 
 - **Surveillance en temps réel :** Jauges en direct de l'utilisation de la RAM et du Processeur (CPU) actualisées toutes les 1.5 secondes sans ralentissement.

@@ -16,6 +16,7 @@ cls
 echo.
 echo ================================================================
 echo   REDADZDOptimiser - Language / Langue / اختيار اللغة
+echo   © 2026 Anagou Reda - Tel: 0542439514
 echo ================================================================
 echo.
 echo   1) Français (FR)
@@ -49,6 +50,7 @@ echo.
 echo ╔══════════════════════════════════════════════════════════════╗
 echo ║              REDADZDOptimiser - Lanceur Windows                  ║
 echo ║                  Optimisation Windows 10/11                  ║
+echo ║             © 2026 Anagou Reda - Tel: 0542439514             ║
 echo ╚══════════════════════════════════════════════════════════════╝
 echo.
 echo [OK] Droits administrateur confirmés
@@ -88,6 +90,7 @@ echo.
 echo ╔══════════════════════════════════════════════════════════════╗
 echo ║              REDADZDOptimiser - Windows Launcher                 ║
 echo ║                  Windows 10/11 Optimization                  ║
+echo ║             © 2026 Anagou Reda - Tel: 0542439514             ║
 echo ╚══════════════════════════════════════════════════════════════╝
 echo.
 echo [OK] Administrator privileges confirmed

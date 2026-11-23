@@ -210,6 +210,7 @@ function Test-Prerequisites {
     $osVersion = [System.Environment]::OSVersion.Version
     $build = $osVersion.Build
     Write-Host "Windows Version: $($osVersion.Major).$($osVersion.Minor).$build" -ForegroundColor Gray
+    Write-Host "REDADZDOptimiser Professional • Copyright (c) 2026 Anagou Reda (0542439514)" -ForegroundColor Cyan
 
     if ($build -lt 19041) {
         Write-Warning $str.WinVerWarning

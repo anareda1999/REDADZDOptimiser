@@ -1,6 +1,7 @@
 ﻿@echo off
 chcp 65001 >nul
 title REDADZDOptimiser - Lancement GUI
+:: Copyright (c) 2026 REDADZDOptimiser - Anagou Reda (0542439514)
 
 :: Auto-élévation en administrateur
 net session >nul 2>&1

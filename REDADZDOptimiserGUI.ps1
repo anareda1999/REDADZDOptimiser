@@ -64,6 +64,7 @@ $script:CancelToken = $false
 $script:CurrentLang = "FR"
 $script:LogLines = @()
 $script:SuppressLangEvent = $false
+$script:CurrentPreset = "Standard"
 
 # ─── Dictionnaire de traduction (FR / EN / AR) ─────────────────────────
 $script:I18N = @{
@@ -81,6 +82,17 @@ $script:I18N = @{
         TabCleanup          = "🧹 Nettoyage"
         TabRepair           = "🔧 Maintenance"
         TabLogs             = "📋 Journal"
+
+        # Préréglages d'optimisation & Copyright
+        PresetLabel         = "⚡ Préréglages :"
+        BtnPresetMin        = "🌱 Tweak Minimal"
+        BtnPresetStd        = "⚡ Tweak Standard"
+        BtnPresetMax        = "🚀 Tweak Max"
+        PresetDescMin       = "(Sécurisé : Cache & Temp, préserve apps et services)"
+        PresetDescStd       = "(Recommandé : Débloat, télémétrie, nettoyage & CPU)"
+        PresetDescMax       = "(Extrême & Gaming : Débloat total, registre, réparation & puissance max)"
+        PresetAppliedLog    = "Préréglage '{0}' appliqué avec succès."
+        CopyrightText       = "© 2026 REDADZDOptimiser • Anagou Reda  |  Tél : 0542439514"
 
         # Onglet Performances
         GbPerfMonitor       = "Surveillance des Ressources en temps réel"
@@ -182,6 +194,17 @@ $script:I18N = @{
         TabRepair           = "🔧 Maintenance"
         TabLogs             = "📋 Logs"
 
+        # Optimization Presets & Copyright
+        PresetLabel         = "⚡ Presets:"
+        BtnPresetMin        = "🌱 Minimal Tweak"
+        BtnPresetStd        = "⚡ Standard Tweak"
+        BtnPresetMax        = "🚀 Maximum Tweak"
+        PresetDescMin       = "(Safe: Cache & Temp, preserves all apps & services)"
+        PresetDescStd       = "(Recommended: Debloat, privacy, cleanup & CPU)"
+        PresetDescMax       = "(Extreme & Gaming: Full debloat, registry, repair & max power)"
+        PresetAppliedLog    = "Preset '{0}' successfully applied."
+        CopyrightText       = "© 2026 REDADZDOptimiser • Anagou Reda  |  Phone: 0542439514"
+
         # Performance Tab
         GbPerfMonitor       = "Real-Time Resource Monitor"
         PerfRamFormat       = "RAM Usage: {0} GB / {1} GB ({2} %)"
@@ -281,6 +304,17 @@ $script:I18N = @{
         TabCleanup          = "🧹 التنظيف"
         TabRepair           = "🔧 الصيانة"
         TabLogs             = "📋 السجل"
+
+        # أوضاع التحسين وحقوق المطور
+        PresetLabel         = "⚡ أوضاع التحسين :"
+        BtnPresetMin        = "🌱 تحسين خفيف"
+        BtnPresetStd        = "⚡ تحسين قياسي"
+        BtnPresetMax        = "🚀 تحسين أقصى"
+        PresetDescMin       = "(آمن: تنظيف خفيف، يحافظ على كل البرامج والخدمات)"
+        PresetDescStd       = "(موصى به: إزالة الزوائد، حماية الخصوصية وتسريع المعالج)"
+        PresetDescMax       = "(أقصى أداء للألعاب: إزالة شاملة، تنظيف السجل وأعلى قوة)"
+        PresetAppliedLog    = "تم تطبيق الوضع '{0}' بنجاح."
+        CopyrightText       = "© 2026 REDADZDOptimiser • Anagou Reda  |  هاتف : 0542439514"
 
         GbApps              = "تطبيقات النظام غير الضرورية للإزالة"
         CbApps              = "إزالة التطبيقات المثبتة مسبقاً (Xbox, Bing, Solitaire, Feedback, الخرائط، إلخ)"
@@ -659,6 +693,172 @@ function Show-LanguageDialog {
     return $script:chosenLang
 }
 
+
+# ════════════════════════════════════════════════════════════════════════
+# GESTION DES PRÉRÉGLAGES (MINIMAL / STANDARD / MAX)
+# ════════════════════════════════════════════════════════════════════════
+
+function Set-PresetButtonState {
+    param(
+        [System.Windows.Forms.Button]$Btn,
+        [bool]$Active,
+        [System.Drawing.Color]$ActiveColor
+    )
+    if (-not $Btn) { return }
+    $Btn.Tag.IsActive = $Active
+    if ($Active) {
+        $Btn.BackColor = $ActiveColor
+        $Btn.ForeColor = [System.Drawing.Color]::White
+        $Btn.Font = $fonts.Button
+        $Btn.Tag.BaseColor = $ActiveColor
+        $Btn.Tag.HoverColor = $ActiveColor
+    } else {
+        $Btn.BackColor = [System.Drawing.Color]::FromArgb(248, 250, 252)
+        $Btn.ForeColor = [System.Drawing.Color]::FromArgb(71, 85, 105)
+        $Btn.Font = $fonts.Normal
+        $Btn.Tag.BaseColor = [System.Drawing.Color]::FromArgb(248, 250, 252)
+        $Btn.Tag.HoverColor = [System.Drawing.Color]::FromArgb(241, 245, 249)
+    }
+    $Btn.Invalidate()
+}
+
+function Apply-Preset {
+    param(
+        [Parameter(Mandatory=$true)]
+        [ValidateSet("Minimal", "Standard", "Max")]
+        [string]$Preset
+    )
+    $script:CurrentPreset = $Preset
+
+    # Mise à jour graphique des 3 boutons
+    $isMin = ($Preset -eq "Minimal")
+    $isStd = ($Preset -eq "Standard")
+    $isMax = ($Preset -eq "Max")
+
+    Set-PresetButtonState $script:BtnPresetMin $isMin $colors.SuccessColor
+    Set-PresetButtonState $script:BtnPresetStd $isStd $colors.AccentColor
+    Set-PresetButtonState $script:BtnPresetMax $isMax $colors.PurpleAccent
+
+    # Application des cases à cocher selon le niveau
+    switch ($Preset) {
+        "Minimal" {
+            # 1. Point de restauration
+            if ($script:CbRestorePoint)       { $script:CbRestorePoint.Checked = $true }
+            # 2. Débloat (Désactivé en Minimal pour sécurité absolue)
+            if ($script:CbApps)               { $script:CbApps.Checked = $false }
+            if ($script:CbAppsAllUsers)       { $script:CbAppsAllUsers.Checked = $false }
+            # 3. Services & Tâches
+            if ($script:CbServices)           { $script:CbServices.Checked = $false }
+            if ($script:CbServicesSC)         { $script:CbServicesSC.Checked = $false }
+            if ($script:CbTasks)              { $script:CbTasks.Checked = $false }
+            # 4. Performances
+            if ($script:CbAutoKillOnOptimize) { $script:CbAutoKillOnOptimize.Checked = $false }
+            if ($script:CbPowerPlan)          { $script:CbPowerPlan.Checked = $true }
+            if ($script:CbForegroundPriority) { $script:CbForegroundPriority.Checked = $false }
+            if ($script:CbDisableCoreParking) { $script:CbDisableCoreParking.Checked = $false }
+            # 5. Confidentialité
+            if ($script:CbPrivacyReg)         { $script:CbPrivacyReg.Checked = $true }
+            if ($script:CbPrivacyBackup)      { $script:CbPrivacyBackup.Checked = $true }
+            if ($script:CbGPO)                { $script:CbGPO.Checked = $false }
+            if ($script:CbHosts)              { $script:CbHosts.Checked = $false }
+            if ($script:CbHostsBackup)        { $script:CbHostsBackup.Checked = $true }
+            if ($script:CbFirewall)           { $script:CbFirewall.Checked = $false }
+            # 6. Nettoyage
+            if ($script:CbDisk)               { $script:CbDisk.Checked = $true }
+            if ($script:CbDiskRecycle)        { $script:CbDiskRecycle.Checked = $true }
+            if ($script:CbDiskWinUpdate)      { $script:CbDiskWinUpdate.Checked = $false }
+            if ($script:CbRegClean)           { $script:CbRegClean.Checked = $false }
+            if ($script:CbRegBackup)          { $script:CbRegBackup.Checked = $true }
+            if ($script:CbRegAggressive)      { $script:CbRegAggressive.Checked = $false }
+            # 7. Maintenance
+            if ($script:CbDISM)               { $script:CbDISM.Checked = $false }
+            if ($script:CbSFC)                { $script:CbSFC.Checked = $true }
+            if ($script:CbChkdsk)             { $script:CbChkdsk.Checked = $false }
+        }
+        "Standard" {
+            # 1. Point de restauration
+            if ($script:CbRestorePoint)       { $script:CbRestorePoint.Checked = $true }
+            # 2. Débloat (Bloatwares préinstallés supprimés)
+            if ($script:CbApps)               { $script:CbApps.Checked = $true }
+            if ($script:CbAppsAllUsers)       { $script:CbAppsAllUsers.Checked = $true }
+            # 3. Services & Tâches (Désactivation télémétrie)
+            if ($script:CbServices)           { $script:CbServices.Checked = $true }
+            if ($script:CbServicesSC)         { $script:CbServicesSC.Checked = $true }
+            if ($script:CbTasks)              { $script:CbTasks.Checked = $true }
+            # 4. Performances
+            if ($script:CbAutoKillOnOptimize) { $script:CbAutoKillOnOptimize.Checked = $true }
+            if ($script:CbPowerPlan)          { $script:CbPowerPlan.Checked = $true }
+            if ($script:CbForegroundPriority) { $script:CbForegroundPriority.Checked = $true }
+            if ($script:CbDisableCoreParking) { $script:CbDisableCoreParking.Checked = $true }
+            # 5. Confidentialité (GPO, Registre, Hosts, Pare-feu)
+            if ($script:CbPrivacyReg)         { $script:CbPrivacyReg.Checked = $true }
+            if ($script:CbPrivacyBackup)      { $script:CbPrivacyBackup.Checked = $true }
+            if ($script:CbGPO)                { $script:CbGPO.Checked = $true }
+            if ($script:CbHosts)              { $script:CbHosts.Checked = $true }
+            if ($script:CbHostsBackup)        { $script:CbHostsBackup.Checked = $true }
+            if ($script:CbFirewall)           { $script:CbFirewall.Checked = $true }
+            # 6. Nettoyage
+            if ($script:CbDisk)               { $script:CbDisk.Checked = $true }
+            if ($script:CbDiskRecycle)        { $script:CbDiskRecycle.Checked = $true }
+            if ($script:CbDiskWinUpdate)      { $script:CbDiskWinUpdate.Checked = $true }
+            if ($script:CbRegClean)           { $script:CbRegClean.Checked = $false }
+            if ($script:CbRegBackup)          { $script:CbRegBackup.Checked = $true }
+            if ($script:CbRegAggressive)      { $script:CbRegAggressive.Checked = $false }
+            # 7. Maintenance (DISM + SFC)
+            if ($script:CbDISM)               { $script:CbDISM.Checked = $true }
+            if ($script:CbSFC)                { $script:CbSFC.Checked = $true }
+            if ($script:CbChkdsk)             { $script:CbChkdsk.Checked = $false }
+        }
+        "Max" {
+            # 1. Point de restauration
+            if ($script:CbRestorePoint)       { $script:CbRestorePoint.Checked = $true }
+            # 2. Débloat maximal
+            if ($script:CbApps)               { $script:CbApps.Checked = $true }
+            if ($script:CbAppsAllUsers)       { $script:CbAppsAllUsers.Checked = $true }
+            # 3. Services & Tâches
+            if ($script:CbServices)           { $script:CbServices.Checked = $true }
+            if ($script:CbServicesSC)         { $script:CbServicesSC.Checked = $true }
+            if ($script:CbTasks)              { $script:CbTasks.Checked = $true }
+            # 4. Performances Extrêmes
+            if ($script:CbAutoKillOnOptimize) { $script:CbAutoKillOnOptimize.Checked = $true }
+            if ($script:CbPowerPlan)          { $script:CbPowerPlan.Checked = $true }
+            if ($script:CbForegroundPriority) { $script:CbForegroundPriority.Checked = $true }
+            if ($script:CbDisableCoreParking) { $script:CbDisableCoreParking.Checked = $true }
+            # 5. Confidentialité
+            if ($script:CbPrivacyReg)         { $script:CbPrivacyReg.Checked = $true }
+            if ($script:CbPrivacyBackup)      { $script:CbPrivacyBackup.Checked = $true }
+            if ($script:CbGPO)                { $script:CbGPO.Checked = $true }
+            if ($script:CbHosts)              { $script:CbHosts.Checked = $true }
+            if ($script:CbHostsBackup)        { $script:CbHostsBackup.Checked = $true }
+            if ($script:CbFirewall)           { $script:CbFirewall.Checked = $true }
+            # 6. Nettoyage Approfondi (Disque + Registre complet)
+            if ($script:CbDisk)               { $script:CbDisk.Checked = $true }
+            if ($script:CbDiskRecycle)        { $script:CbDiskRecycle.Checked = $true }
+            if ($script:CbDiskWinUpdate)      { $script:CbDiskWinUpdate.Checked = $true }
+            if ($script:CbRegClean)           { $script:CbRegClean.Checked = $true }
+            if ($script:CbRegBackup)          { $script:CbRegBackup.Checked = $true }
+            if ($script:CbRegAggressive)      { $script:CbRegAggressive.Checked = $true }
+            # 7. Maintenance Intégrale (DISM + SFC + Chkdsk)
+            if ($script:CbDISM)               { $script:CbDISM.Checked = $true }
+            if ($script:CbSFC)                { $script:CbSFC.Checked = $true }
+            if ($script:CbChkdsk)             { $script:CbChkdsk.Checked = $true }
+        }
+    }
+
+    # Mise à jour du texte descriptif
+    $strings = $script:I18N[$script:CurrentLang]
+    if ($lblPresetDesc -and $strings) {
+        $lblPresetDesc.Text = switch ($Preset) {
+            "Minimal"  { $strings.PresetDescMin }
+            "Standard" { $strings.PresetDescStd }
+            "Max"      { $strings.PresetDescMax }
+        }
+    }
+    if ($script:LogBox) {
+        Append-Log ($strings.PresetAppliedLog -f $Preset) "INFO"
+    }
+}
+
 # ════════════════════════════════════════════════════════════════════════
 # APPLICATION DYNAMIQUE DE LA LANGUE (STABLE & PROPRE)
 # ════════════════════════════════════════════════════════════════════════
@@ -678,6 +878,21 @@ function Apply-Language {
     $subtitleLabel.Text = $strings.SubTitle
     $adminBadge.Text = if ($isAdmin) { $strings.AdminOk } else { $strings.AdminErr }
     if ($script:LangLabel) { $script:LangLabel.Text = $strings.LangLabel }
+
+    # Barre de préréglages & Copyright
+    if ($lblPresetTitle) { $lblPresetTitle.Text = $strings.PresetLabel }
+    if ($script:BtnPresetMin) { $script:BtnPresetMin.Text = $strings.BtnPresetMin }
+    if ($script:BtnPresetStd) { $script:BtnPresetStd.Text = $strings.BtnPresetStd }
+    if ($script:BtnPresetMax) { $script:BtnPresetMax.Text = $strings.BtnPresetMax }
+    if ($lblPresetDesc) {
+        $lblPresetDesc.Text = switch ($script:CurrentPreset) {
+            "Minimal"  { $strings.PresetDescMin }
+            "Standard" { $strings.PresetDescStd }
+            "Max"      { $strings.PresetDescMax }
+            default    { $strings.PresetDescStd }
+        }
+    }
+    if ($copyrightLabel) { $copyrightLabel.Text = $strings.CopyrightText }
 
     # Synchroniser le sélecteur
     if ($script:LangCombo) {
@@ -790,20 +1005,21 @@ function Apply-Language {
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "REDADZDOptimiser Professional"
-$form.Size = New-Object System.Drawing.Size(980, 740)
-$form.MinimumSize = New-Object System.Drawing.Size(900, 680)
+$form.Size = New-Object System.Drawing.Size(1000, 770)
+$form.MinimumSize = New-Object System.Drawing.Size(940, 700)
 $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $form.BackColor = $colors.BackColor
 $form.ForeColor = $colors.ForeColor
 $form.Font = $fonts.Normal
 $form.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Get-Process -Id $PID).Path)
 
-# Layout global en 3 lignes : Header (70px), Onglets (100%), Barre d'action (66px)
+# Layout global en 4 lignes : Header (70px), Préréglages (48px), Onglets (100%), Barre d'action (66px)
 $mainLayout = New-Object System.Windows.Forms.TableLayoutPanel
 $mainLayout.Dock = [System.Windows.Forms.DockStyle]::Fill
 $mainLayout.ColumnCount = 1
-$mainLayout.RowCount = 3
+$mainLayout.RowCount = 4
 $mainLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 70))) | Out-Null
+$mainLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 48))) | Out-Null
 $mainLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null
 $mainLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 66))) | Out-Null
 $mainLayout.BackColor = $colors.BackColor
@@ -910,6 +1126,94 @@ $script:LangCombo.Add_SelectedIndexChanged({
 $headerPanel.Controls.Add($script:LangCombo)
 
 # ════════════════════════════════════════════════════════════════════════
+# 1.5. MENU HORIZONTAL DES PRÉRÉGLAGES (TWEAK MINIMAL / STANDARD / MAX)
+# ════════════════════════════════════════════════════════════════════════
+
+$presetPanel = New-Object System.Windows.Forms.Panel
+$presetPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$presetPanel.BackColor = $colors.CardBack
+$presetPanel.Padding = New-Object System.Windows.Forms.Padding(24, 6, 24, 6)
+$mainLayout.Controls.Add($presetPanel, 0, 1)
+
+# Ligne inférieure de séparation fine
+$presetPanel.Add_Paint({
+    param($s, $e)
+    $pen = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+    $e.Graphics.DrawLine($pen, 0, $s.Height - 1, $s.Width, $s.Height - 1)
+    $pen.Dispose()
+})
+
+$lblPresetTitle = New-Object System.Windows.Forms.Label
+$lblPresetTitle.Text = "⚡ Préréglages :"
+$lblPresetTitle.Font = $fonts.SubTitle
+$lblPresetTitle.ForeColor = $colors.ForeColor
+$lblPresetTitle.Location = New-Object System.Drawing.Point(24, 13)
+$lblPresetTitle.AutoSize = $true
+$presetPanel.Controls.Add($lblPresetTitle)
+
+function New-PresetButton {
+    param(
+        [string]$Text,
+        [System.Drawing.Point]$Location,
+        [scriptblock]$Click
+    )
+    $btn = New-Object System.Windows.Forms.Button
+    $btn.Text = $Text
+    $btn.Location = $Location
+    $btn.Size = New-Object System.Drawing.Size(155, 30)
+    $btn.Font = $fonts.Normal
+    $btn.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+    $btn.FlatAppearance.BorderSize = 0
+    $btn.Cursor = [System.Windows.Forms.Cursors]::Hand
+    $btn.BackColor = [System.Drawing.Color]::FromArgb(248, 250, 252)
+    $btn.ForeColor = [System.Drawing.Color]::FromArgb(71, 85, 105)
+    $btn.Tag = @{
+        BaseColor  = [System.Drawing.Color]::FromArgb(248, 250, 252)
+        HoverColor = [System.Drawing.Color]::FromArgb(241, 245, 249)
+        IsActive   = $false
+    }
+    $btn.Add_MouseEnter({
+        if (-not $this.Tag.IsActive) { $this.BackColor = $this.Tag.HoverColor }
+    })
+    $btn.Add_MouseLeave({
+        if (-not $this.Tag.IsActive) { $this.BackColor = $this.Tag.BaseColor }
+    })
+    $btn.Add_Paint({
+        param($s, $e)
+        if (-not $s.Tag.IsActive) {
+            $pen = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+            $e.Graphics.DrawRectangle($pen, 0, 0, $s.Width - 1, $s.Height - 1)
+            $pen.Dispose()
+        }
+    })
+    if ($Click) { $btn.Add_Click($Click) }
+    return $btn
+}
+
+$script:BtnPresetMin = New-PresetButton -Text "🌱 Tweak Minimal" -Location (New-Object System.Drawing.Point(145, 9)) -Click {
+    Apply-Preset -Preset "Minimal"
+}
+$presetPanel.Controls.Add($script:BtnPresetMin)
+
+$script:BtnPresetStd = New-PresetButton -Text "⚡ Tweak Standard" -Location (New-Object System.Drawing.Point(310, 9)) -Click {
+    Apply-Preset -Preset "Standard"
+}
+$presetPanel.Controls.Add($script:BtnPresetStd)
+
+$script:BtnPresetMax = New-PresetButton -Text "🚀 Tweak Max" -Location (New-Object System.Drawing.Point(475, 9)) -Click {
+    Apply-Preset -Preset "Max"
+}
+$presetPanel.Controls.Add($script:BtnPresetMax)
+
+$lblPresetDesc = New-Object System.Windows.Forms.Label
+$lblPresetDesc.Text = "(Recommandé : Débloat, télémétrie, nettoyage & CPU)"
+$lblPresetDesc.Font = $fonts.Small
+$lblPresetDesc.ForeColor = $colors.MutedColor
+$lblPresetDesc.Location = New-Object System.Drawing.Point(645, 15)
+$lblPresetDesc.AutoSize = $true
+$presetPanel.Controls.Add($lblPresetDesc)
+
+# ════════════════════════════════════════════════════════════════════════
 # 2. ONGLETS PRINCIPAUX (STYLE MODERNE CLAIR AVEC ACCENT ROYAL)
 # ════════════════════════════════════════════════════════════════════════
 
@@ -921,7 +1225,7 @@ $script:TabControl.SizeMode = [System.Windows.Forms.TabSizeMode]::Fixed
 $script:TabControl.Appearance = [System.Windows.Forms.TabAppearance]::Normal
 $script:TabControl.BackColor = $colors.BackColor
 $script:TabControl.ForeColor = $colors.ForeColor
-$mainLayout.Controls.Add($script:TabControl, 0, 1)
+$mainLayout.Controls.Add($script:TabControl, 0, 2)
 
 # OwnerDraw personnalisé : fond blanc pour l'actif avec ligne d'accent bleue, gris clair pour inactif
 $script:TabControl.DrawMode = [System.Windows.Forms.TabDrawMode]::OwnerDrawFixed
@@ -1481,7 +1785,7 @@ $bottomPanel = New-Object System.Windows.Forms.Panel
 $bottomPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
 $bottomPanel.BackColor = $colors.BottomBack
 $bottomPanel.Padding = New-Object System.Windows.Forms.Padding(24, 6, 24, 8)
-$mainLayout.Controls.Add($bottomPanel, 0, 2)
+$mainLayout.Controls.Add($bottomPanel, 0, 3)
 
 # Ligne supérieure de séparation
 $bottomPanel.Add_Paint({
@@ -1500,13 +1804,29 @@ $script:ProgressBar.ForeColor = $colors.AccentColor
 $script:ProgressBar.BackColor = $colors.BorderColor
 $bottomPanel.Controls.Add($script:ProgressBar)
 
+# Ligne inférieure contenant le Copyright à gauche et les Boutons à droite
+$actionRow = New-Object System.Windows.Forms.Panel
+$actionRow.Dock = [System.Windows.Forms.DockStyle]::Fill
+$actionRow.BackColor = $colors.Transparent
+$bottomPanel.Controls.Add($actionRow)
+
+# Copyright & Auteur (Anagou Reda 0542439514)
+$copyrightLabel = New-Object System.Windows.Forms.Label
+$copyrightLabel.Text = "© 2026 REDADZDOptimiser • Anagou Reda  |  Tél : 0542439514"
+$copyrightLabel.Font = $fonts.Small
+$copyrightLabel.ForeColor = $colors.MutedColor
+$copyrightLabel.Location = New-Object System.Drawing.Point(0, 16)
+$copyrightLabel.AutoSize = $true
+$actionRow.Controls.Add($copyrightLabel)
+
 # Conteneur des boutons d'action (Alignés à droite)
 $btnFlow = New-Object System.Windows.Forms.FlowLayoutPanel
-$btnFlow.Dock = [System.Windows.Forms.DockStyle]::Bottom
+$btnFlow.Dock = [System.Windows.Forms.DockStyle]::Right
+$btnFlow.Width = 570
 $btnFlow.Height = 44
 $btnFlow.FlowDirection = [System.Windows.Forms.FlowDirection]::RightToLeft
 $btnFlow.BackColor = $colors.Transparent
-$bottomPanel.Controls.Add($btnFlow)
+$actionRow.Controls.Add($btnFlow)
 
 # Bouton ANNULER (Rouge Corail)
 $script:BtnCancel = New-ModernButton -Text "✕ Annuler" -Size (New-Object System.Drawing.Size(130, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
@@ -1683,6 +2003,9 @@ $form.Add_Shown({
             }
         } catch {}
     }
+
+    # Application du préréglage Standard par défaut
+    Apply-Preset -Preset "Standard"
 
     Append-Log "⚡ REDADZDOptimiser Professional ($($script:CurrentLang)) initialisé" "INFO"
     Append-Log "Système : Windows $($winVer.Major).$($winVer.Minor) Build $($winVer.Build)" "INFO"
