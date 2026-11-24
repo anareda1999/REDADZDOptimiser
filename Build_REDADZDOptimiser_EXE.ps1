@@ -1,5 +1,6 @@
 ﻿# Build_REDADZDOptimiser_EXE.ps1
 # Compile REDADZDOptimiser en exécutable autonome .exe sécurisé et protégé pour les clients
+# Moteur in-memory natif (System.Management.Automation) pour un encodage Unicode parfait (Accents, Arabe, Émojis)
 # Le code source PowerShell est fusionné, compressé (GZip) et chiffré (XOR) dans le binaire.
 # Aucun fichier .ps1 n'est jamais écrit sur le disque du client lors de l'exécution.
 # Auteur : Anagou Reda (0542439514)
@@ -9,7 +10,7 @@ if (-not $baseDir) { $baseDir = (Get-Location).Path }
 
 Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
 Write-Host "║     Génération de l'Exécutable Client REDADZDOptimiser.exe   ║" -ForegroundColor Cyan
-Write-Host "║        (Code source protégé, compressé & chiffré)            ║" -ForegroundColor Cyan
+Write-Host "║        (Code protégé, chiffré & Encodage Unicode HD)         ║" -ForegroundColor Cyan
 Write-Host "║       © 2026 Anagou Reda - Contact : 0542439514              ║" -ForegroundColor Cyan
 Write-Host "╚══════════════════════════════════════════════════════════════╝`n" -ForegroundColor Cyan
 
@@ -23,6 +24,27 @@ if (-not (Test-Path $cscPath)) {
     exit 1
 }
 
+# 2. Localisation de System.Management.Automation.dll (moteur PowerShell in-memory)
+$smaCandidates = @(
+    "C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0__31bf3856ad364e35\System.Management.Automation.dll",
+    "C:\Windows\assembly\GAC_MSIL\System.Management.Automation\1.0.0.0__31bf3856ad364e35\System.Management.Automation.dll",
+    "C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll",
+    "C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\v1.0\System.Management.Automation.dll"
+)
+
+$smaPath = $null
+foreach ($path in $smaCandidates) {
+    if (Test-Path $path) {
+        $smaPath = $path
+        break
+    }
+}
+
+if (-not $smaPath) {
+    Write-Error "System.Management.Automation.dll introuvable pour la compilation."
+    exit 1
+}
+
 $coreFile = Join-Path $baseDir "REDADZDOptimiserCore.psm1"
 $guiFile  = Join-Path $baseDir "REDADZDOptimiserGUI.ps1"
 
@@ -32,8 +54,8 @@ if (-not (Test-Path $coreFile) -or -not (Test-Path $guiFile)) {
 }
 
 Write-Host "[1/5] Lecture et fusion des sources en un bundle unique..." -ForegroundColor Yellow
-$coreCode = Get-Content -Raw -Encoding utf8 $coreFile
-$guiCode  = Get-Content -Raw -Encoding utf8 $guiFile
+$coreCode = [System.IO.File]::ReadAllText($coreFile, [System.Text.Encoding]::UTF8)
+$guiCode  = [System.IO.File]::ReadAllText($guiFile, [System.Text.Encoding]::UTF8)
 
 # Nettoyer Export-ModuleMember du module core
 $idxExp = $coreCode.IndexOf("Export-ModuleMember")
@@ -44,7 +66,7 @@ if ($idxExp -ne -1) {
 }
 
 # Fusion des scripts en mémoire
-$bundle = $coreClean + "`r`n`r`n# [GUI Code]`r`n" + $guiCode
+$bundle = $coreClean + "`r`n`r`n# [GUI Code Inlined]`r`n" + $guiCode
 $bundleBytes = [System.Text.Encoding]::UTF8.GetBytes($bundle)
 Write-Host "      Taille du code source d'origine : $([math]::Round($bundleBytes.Length / 1KB, 1)) Ko" -ForegroundColor Gray
 
@@ -102,9 +124,9 @@ $manifestContent = @'
 
 $csTemplate = @'
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Management.Automation;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
@@ -119,6 +141,7 @@ using System.Windows.Forms;
 
 namespace REDADZDOptimiser {
     static class Program {
+        // Blocs du code source PowerShell compressé et chiffré
         private static readonly string[] PayloadChunks = new string[] {
 __PAYLOAD_CHUNKS__
         };
@@ -128,6 +151,7 @@ __PAYLOAD_CHUNKS__
         [STAThread]
         static void Main() {
             try {
+                // 1. Déchiffrement et décompression en mémoire pure (aucun fichier temporaire sur disque)
                 string b64 = string.Concat(PayloadChunks);
                 byte[] encrypted = Convert.FromBase64String(b64);
 
@@ -144,26 +168,11 @@ __PAYLOAD_CHUNKS__
                     script = Encoding.UTF8.GetString(msOut.ToArray());
                 }
 
-                string sysDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
-                string psPath = Path.Combine(sysDir, @"WindowsPowerShell\v1.0\powershell.exe");
-                if (!File.Exists(psPath)) psPath = "powershell.exe";
-
-                ProcessStartInfo psi = new ProcessStartInfo {
-                    FileName = psPath,
-                    Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Sta -Command -",
-                    UseShellExecute = false,
-                    RedirectStandardInput = true,
-                    CreateNoWindow = true
-                };
-
-                using (Process proc = Process.Start(psi)) {
-                    if (proc != null) {
-                        using (StreamWriter sw = new StreamWriter(proc.StandardInput.BaseStream, new UTF8Encoding(false))) {
-                            sw.Write(script);
-                            sw.Flush();
-                        }
-                        proc.WaitForExit();
-                    }
+                // 2. Exécution in-memory via le moteur PowerShell officiel (System.Management.Automation)
+                // Élimine 100% des erreurs d'encodage console (accents français, arabe et émojis intacts)
+                using (PowerShell ps = PowerShell.Create()) {
+                    ps.AddScript(script);
+                    ps.Invoke();
                 }
             } catch (Exception ex) {
                 MessageBox.Show("Erreur de lancement : " + ex.Message, "REDADZDOptimiser", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -186,6 +195,7 @@ $compileArgs = @(
     "/optimize+",
     "/platform:anycpu",
     "/win32manifest:`"$manifestPath`"",
+    "/r:`"$smaPath`"",
     "/r:System.dll,System.Windows.Forms.dll",
     "/out:`"$outputExe`"",
     "`"$tempSrc`""
@@ -238,7 +248,7 @@ et n'installe aucun fichier caché sur votre ordinateur.
     Write-Host " - Le code PowerShell est 100% protégé, compressé et chiffré dans le binaire." -ForegroundColor White
     Write-Host " - Le client n'a accès à AUCUN script (.ps1, .psm1)." -ForegroundColor White
     Write-Host " - À l'exécution, tout tourne directement en mémoire RAM (Zero-Disk)." -ForegroundColor White
-    Write-Host " - Vous n'avez qu'à donner le fichier du dossier 'Release_Client' à votre client !`n" -ForegroundColor White
+    Write-Host " - Encodage Unicode HD natif : Accents, Arabe et Émojis parfaitement nets.`n" -ForegroundColor White
 } else {
     Write-Error "Échec de la compilation (Code sortie: $($proc.ExitCode))"
 }
