@@ -1106,8 +1106,8 @@ function Apply-Preset {
             if ($script:CbRegClean)           { $script:CbRegClean.Checked = $false }
             if ($script:CbRegBackup)          { $script:CbRegBackup.Checked = $true }
             if ($script:CbRegAggressive)      { $script:CbRegAggressive.Checked = $false }
-            # 7. Maintenance (DISM + SFC)
-            if ($script:CbDISM)               { $script:CbDISM.Checked = $true }
+            # 7. Maintenance (SFC scannow local rapide, DISM réservé au profil Max)
+            if ($script:CbDISM)               { $script:CbDISM.Checked = $false }
             if ($script:CbSFC)                { $script:CbSFC.Checked = $true }
             if ($script:CbChkdsk)             { $script:CbChkdsk.Checked = $false }
         }
@@ -3102,7 +3102,7 @@ $yPos = 14
 $cardRepair = New-ModernCard -Title "Vérification et Restauration de l'intégrité système" -Location (New-Object System.Drawing.Point(12, $yPos)) -Size (New-Object System.Drawing.Size(890, 220)) -AccentLineColor $colors.AccentColor
 $repairTab.Scroll.Controls.Add($cardRepair)
 
-$script:CbDISM = New-ModernCheckBox -Text "DISM /RestoreHealth (Vérifie et répare l'image Windows via le magasin de composants)" -Location (New-Object System.Drawing.Point(20, 44)) -Checked $true
+$script:CbDISM = New-ModernCheckBox -Text "DISM /RestoreHealth (Vérifie et répare l'image Windows via le magasin de composants)" -Location (New-Object System.Drawing.Point(20, 44)) -Checked $false
 $cardRepair.Controls.Add($script:CbDISM)
 
 $script:CbSFC = New-ModernCheckBox -Text "SFC /Scannow (Analyse et répare automatiquement les fichiers système protégés)" -Location (New-Object System.Drawing.Point(20, 72)) -Checked $true
@@ -3510,33 +3510,53 @@ function Start-Optimization {
     Append-Log "  Langue active : $($script:CurrentLang)" "INFO"
     Append-Log "==================================================" "INFO"
 
+    $hasDism = [bool]($script:CbDISM -and $script:CbDISM.Checked)
+    $hasSfc = [bool]($script:CbSFC -and $script:CbSFC.Checked)
+    $hasChkdsk = [bool]($script:CbChkdsk -and $script:CbChkdsk.Checked)
+
     $params = @{
-        Language          = $script:CurrentLang
-        DryRun            = $DryRun
-        SkipRestorePoint  = (-not $script:CbRestorePoint.Checked)
-        SkipApps          = (-not $script:CbApps.Checked)
-        SkipServices      = (-not $script:CbServices.Checked)
-        SkipTasks         = (-not $script:CbTasks.Checked)
-        SkipPrivacy       = (-not ($script:CbPrivacyReg.Checked -or $script:CbGPO.Checked -or $script:CbHosts.Checked -or $script:CbFirewall.Checked))
-        SkipCleanup       = (-not ($script:CbDisk.Checked -or $script:CbRegClean.Checked))
-        SkipRepair        = (-not ($script:CbDISM.Checked -or $script:CbSFC.Checked -or $script:CbChkdsk.Checked))
-        OptimizeRAM       = $true
-        StopBloatProcesses = ($script:CbAutoKillOnOptimize -and $script:CbAutoKillOnOptimize.Checked)
-        OptimizeCPU       = ($script:CbPowerPlan.Checked -or $script:CbForegroundPriority.Checked -or $script:CbDisableCoreParking.Checked)
+        Language                 = $script:CurrentLang
+        DryRun                   = $DryRun
+        CreateRestorePoint       = [bool]($script:CbRestorePoint -and $script:CbRestorePoint.Checked)
+        RemoveApps               = [bool]($script:CbApps -and $script:CbApps.Checked)
+        AppsAllUsers             = [bool]($script:CbAppsAllUsers -and $script:CbAppsAllUsers.Checked)
+        ConfigureServices        = [bool]($script:CbServices -and $script:CbServices.Checked)
+        DisableTelemetryServices = [bool]($script:CbServicesSC -and $script:CbServicesSC.Checked)
+        DisableTasks             = [bool]($script:CbTasks -and $script:CbTasks.Checked)
+        PrivacyRegistry          = [bool]($script:CbPrivacyReg -and $script:CbPrivacyReg.Checked)
+        DisableTelemetryGPO      = [bool]($script:CbGPO -and $script:CbGPO.Checked)
+        BlockHosts               = [bool]($script:CbHosts -and $script:CbHosts.Checked)
+        FirewallBlock            = [bool]($script:CbFirewall -and $script:CbFirewall.Checked)
+        DiskCleanup              = [bool]($script:CbDisk -and $script:CbDisk.Checked)
+        CleanRecycleBin          = [bool]($script:CbDiskRecycle -and $script:CbDiskRecycle.Checked)
+        CleanWinUpdate           = [bool]($script:CbDiskWinUpdate -and $script:CbDiskWinUpdate.Checked)
+        RegistryCleanup          = [bool]($script:CbRegClean -and $script:CbRegClean.Checked)
+        RegCleanAggressive       = [bool]($script:CbRegAggressive -and $script:CbRegAggressive.Checked)
+        SystemRepair             = [bool]($hasDism -or $hasSfc -or $hasChkdsk)
+        RunDISM                  = $hasDism
+        RunSFC                   = $hasSfc
+        RunChkdsk                = $hasChkdsk
+        OptimizeCPU              = [bool](($script:CbPowerPlan -and $script:CbPowerPlan.Checked) -or ($script:CbForegroundPriority -and $script:CbForegroundPriority.Checked) -or ($script:CbDisableCoreParking -and $script:CbDisableCoreParking.Checked))
+        HighPerformancePower     = [bool]($script:CbPowerPlan -and $script:CbPowerPlan.Checked)
+        ForegroundPriority       = [bool]($script:CbForegroundPriority -and $script:CbForegroundPriority.Checked)
+        DisableCoreParking       = [bool]($script:CbDisableCoreParking -and $script:CbDisableCoreParking.Checked)
+        StopBloatProcesses       = [bool]($script:CbAutoKillOnOptimize -and $script:CbAutoKillOnOptimize.Checked)
+        OptimizeRAM              = $true
     }
 
-    Set-REDADZDOptimiserConfig -BackupRegistry ($script:CbPrivacyBackup.Checked -or $script:CbHostsBackup.Checked -or $script:CbRegBackup.Checked)
+    $backupNeeded = [bool](($script:CbPrivacyBackup -and $script:CbPrivacyBackup.Checked) -or ($script:CbHostsBackup -and $script:CbHostsBackup.Checked) -or ($script:CbRegBackup -and $script:CbRegBackup.Checked))
+    Set-REDADZDOptimiserConfig -BackupRegistry $backupNeeded
 
     try {
         [System.Windows.Forms.Application]::DoEvents()
         $results = Invoke-REDADZDOptimiser @params
 
         Append-Log "=== RÉSUMÉ DE L'OPÉRATION ===" "INFO"
-        if ($results.Apps) { Append-Log "Apps : $($results.Apps.Removed) supprimées, $($results.Apps.Failed) échecs, $($results.Apps.Skipped) ignorées" "SUCCESS" }
-        if ($results.Services) { Append-Log "Services : $($results.Services.Changed) modifiés, $($results.Services.Failed) échecs" "SUCCESS" }
-        if ($results.Tasks) { Append-Log "Tâches : $($results.Tasks.Disabled) désactivées, $($results.Tasks.Failed) échecs" "SUCCESS" }
+        if ($results.Apps) { Append-Log "Apps : $($results.Apps.Removed) supprimées, $($results.Apps.Failed) protégées, $($results.Apps.Skipped) ignorées" "SUCCESS" }
+        if ($results.Services) { Append-Log "Services : $($results.Services.Changed) modifiés, $($results.Services.Failed) protégés, $($results.Services.Skipped) déjà configurés" "SUCCESS" }
+        if ($results.Tasks) { Append-Log "Tâches : $($results.Tasks.Disabled) désactivées, $($results.Tasks.Failed) protégées" "SUCCESS" }
         if ($results.PrivacyRegistry) { Append-Log "Registre : $($results.PrivacyRegistry.Applied) clés appliquées, $($results.PrivacyRegistry.Failed) échecs" "SUCCESS" }
-        if ($results.DiskCleanup) { Append-Log "Disque : ~$($results.DiskCleanup.FreedMB) MB libérés" "SUCCESS" }
+        if ($results.DiskCleanup) { Append-Log "Disque : ~$($results.DiskCleanup.FreedMB) Mo libérés" "SUCCESS" }
         if ($results.RegistryCleanup) { Append-Log "Registre nettoyé : $($results.RegistryCleanup.Cleaned) clés orphelines" "SUCCESS" }
         if ($results.SystemRepair) { Append-Log "DISM : $($results.SystemRepair.DISM) | SFC : $($results.SystemRepair.SFC) | Chkdsk : $($results.SystemRepair.Chkdsk)" "SUCCESS" }
         if ($results.RestorePoint) { Append-Log "Point de restauration : CRÉÉ ✓" "SUCCESS" }
@@ -3547,7 +3567,7 @@ function Start-Optimization {
         Append-Log "" "INFO"
         Append-Log "✅ OPÉRATION TERMINÉE AVEC SUCCÈS - Redémarrage recommandé" "SUCCESS"
     } catch {
-        Append-Log "ERREUR FATALE LORS DE L'EXÉCUTION : $_" "ERROR"
+        Append-Log "ERREUR LORS DE L'EXÉCUTION : $_" "ERROR"
     } finally {
         Set-RunningState -Running $false
     }

@@ -414,11 +414,14 @@ function Invoke-NativeCommandWithProgress {
             return @{ ExitCode = -2; Output = ($outLines -join "`n"); Cancelled = $true; TimedOut = $false }
         }
 
+        $readSomething = $false
+
         if ($proc.StandardOutput.Peek() -ne -1) {
             $line = $proc.StandardOutput.ReadLine()
             if ($line -and $line.Trim()) {
                 $trimmed = $line.Trim()
                 $outLines += $trimmed
+                $readSomething = $true
 
                 # Extraire le pourcentage pour la barre de progression
                 if ($trimmed -match '(\d{1,3}(?:\.\d)?)\s*%') {
@@ -430,8 +433,16 @@ function Invoke-NativeCommandWithProgress {
                     }
                 }
             }
-        } else {
-            Start-Sleep -Milliseconds 80
+        }
+
+        # Vider également le flux d'erreur standard pour éviter tout blocage du tampon système
+        if ($proc.StandardError.Peek() -ne -1) {
+            $null = $proc.StandardError.ReadLine()
+            $readSomething = $true
+        }
+
+        if (-not $readSomething) {
+            Start-Sleep -Milliseconds 60
             # Pompage des événements pour éviter que l'UI WinForms ne gèle
             try { [System.Windows.Forms.Application]::DoEvents() } catch { }
         }
@@ -463,6 +474,15 @@ function New-SystemRestorePoint {
     Write-Log "Création du point de restauration: $Name" "INFO"
 
     try {
+        if (-not (Get-Command 'Checkpoint-Computer' -ErrorAction SilentlyContinue)) {
+            Write-Log "Fonction de restauration système non disponible sur cette édition de Windows." "WARN"
+            return $false
+        }
+        # Débloquer la limite Windows de 24h entre points de restauration
+        try {
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore" -Name "SystemRestorePointCreationFrequency" -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+        } catch { }
+
         Checkpoint-Computer -Description $Description -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
         Write-Log "Point de restauration créé avec succès" "SUCCESS"
         return $true
@@ -497,6 +517,7 @@ function Remove-ProvisionedApps {
     $skipped = 0
 
     foreach ($appName in $AppNames) {
+        if ($script:Config -and $script:Config.CancelRequested) { break }
         Write-ProgressBar "Suppression apps provisionnées" ($removed + $failed + $skipped + 1) $AppNames.Count "Traitement: $appName"
 
         try {
@@ -613,7 +634,21 @@ function Set-ServicesState {
                 }
             }
 
-            Set-Service -Name $svc.Name -StartupType $targetStartup -ErrorAction Stop
+            try {
+                Set-Service -Name $svc.Name -StartupType $targetStartup -ErrorAction Stop
+            } catch {
+                if ($targetStartup -eq "Disabled") {
+                    & sc.exe config $svc.Name start= disabled > $null 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Log "Service configuré (via SC): $($svc.Name) = $targetStartup" "SUCCESS"
+                        $changed++
+                        continue
+                    }
+                }
+                Write-Log "Service $($svc.Name) protégé par le système" "DEBUG"
+                $failed++
+                continue
+            }
 
             if ($Action -in @("Enable","Auto","Manual") -and $targetStartup -ne "Disabled") {
                 Start-Service -Name $svc.Name -ErrorAction SilentlyContinue
@@ -622,7 +657,7 @@ function Set-ServicesState {
             Write-Log "Service configuré: $($svc.Name) = $targetStartup" "SUCCESS"
             $changed++
         } catch {
-            Write-Log "Service $($svc.Name) protégé ou non modifiable: $_" "WARN"
+            Write-Log "Service $($svc.Name) non accessible: $_" "DEBUG"
             $failed++
         }
     }
@@ -642,14 +677,25 @@ function Disable-ScheduledTasks {
     $notFound = 0
 
     foreach ($taskPath in $TaskPaths) {
+        if ($script:Config -and $script:Config.CancelRequested) { break }
         Write-ProgressBar "Désactivation tâches planifiées" ($disabled + $failed + $notFound + 1) $TaskPaths.Count "Traitement: $taskPath"
 
         try {
             $taskDir = Split-Path $taskPath
+            if (-not $taskDir.EndsWith('\')) { $taskDir += '\' }
             $taskName = Split-Path $taskPath -Leaf
             $task = Get-ScheduledTask -TaskPath $taskDir -TaskName $taskName -ErrorAction SilentlyContinue
 
             if (-not $task) {
+                # Tentative directe via schtasks.exe si le wrapper CIM/WMI n'a pas accès
+                if (-not $script:Config.DryRun) {
+                    & schtasks.exe /Change /TN "$taskPath" /Disable > $null 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Log "Tâche désactivée: $taskPath" "SUCCESS"
+                        $disabled++
+                        continue
+                    }
+                }
                 Write-Log "Tâche absente ou non installée: $taskPath" "DEBUG"
                 $notFound++
                 continue
@@ -667,11 +713,23 @@ function Disable-ScheduledTasks {
                 continue
             }
 
-            Disable-ScheduledTask -TaskPath $taskDir -TaskName $taskName -ErrorAction Stop
-            Write-Log "Tâche désactivée: $taskPath" "SUCCESS"
-            $disabled++
+            try {
+                Disable-ScheduledTask -TaskPath $taskDir -TaskName $taskName -ErrorAction Stop
+                Write-Log "Tâche désactivée: $taskPath" "SUCCESS"
+                $disabled++
+            } catch {
+                # Fallback via schtasks.exe
+                & schtasks.exe /Change /TN "$taskPath" /Disable > $null 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Log "Tâche désactivée: $taskPath" "SUCCESS"
+                    $disabled++
+                } else {
+                    Write-Log "Tâche $taskPath protégée par le système" "DEBUG"
+                    $failed++
+                }
+            }
         } catch {
-            Write-Log "Tâche $taskPath protégée ou non modifiable: $_" "WARN"
+            Write-Log "Tâche $taskPath non accessible: $_" "DEBUG"
             $failed++
         }
     }
@@ -685,7 +743,11 @@ function Enable-ScheduledTasks {
     $enabled = 0
     foreach ($taskPath in $TaskPaths) {
         try {
-            Enable-ScheduledTask -TaskPath (Split-Path $taskPath) -TaskName (Split-Path $taskPath -Leaf) -ErrorAction SilentlyContinue
+            $taskDir = Split-Path $taskPath
+            if (-not $taskDir.EndsWith('\')) { $taskDir += '\' }
+            $taskName = Split-Path $taskPath -Leaf
+            Enable-ScheduledTask -TaskPath $taskDir -TaskName $taskName -ErrorAction SilentlyContinue
+            & schtasks.exe /Change /TN "$taskPath" /Enable > $null 2>&1
             $enabled++
         } catch { }
     }
@@ -702,6 +764,7 @@ function Set-PrivacyRegistry {
     $failed = 0
 
     foreach ($setting in $Settings) {
+        if ($script:Config -and $script:Config.CancelRequested) { break }
         Write-ProgressBar "Configuration vie privée (Registre)" ($applied + $failed + 1) $Settings.Count "Traitement: $($setting.Name)"
 
         try {
@@ -763,6 +826,7 @@ function Invoke-DiskCleanup {
     $failed = 0
 
     foreach ($item in $Paths) {
+        if ($script:Config -and $script:Config.CancelRequested) { break }
         Write-ProgressBar "Nettoyage disque" ($cleaned + $failed + 1) $Paths.Count "Nettoyage: $($item.Description)"
 
         try {
@@ -1156,6 +1220,14 @@ function Block-TelemetryHosts {
             return
         }
 
+        # Déverrouiller l'attribut lecture seule si présent
+        try {
+            $hItem = Get-Item $hostsPath -ErrorAction SilentlyContinue
+            if ($hItem -and $hItem.IsReadOnly) {
+                $hItem.IsReadOnly = $false
+            }
+        } catch { }
+
         $hostsContent = Get-Content -Path $hostsPath -Raw -ErrorAction SilentlyContinue
         if (-not $hostsContent) { return }
 
@@ -1178,14 +1250,18 @@ function Block-TelemetryHosts {
 $($newEntries -join "`r`n")
 # === REDADZDOptimiser Telemetry Block End ===
 "@
-                Add-Content -Path $hostsPath -Value $blockSection -Encoding UTF8 -ErrorAction SilentlyContinue
-                Write-Log "Domaines télémétrie bloqués dans hosts" "SUCCESS"
+                try {
+                    Add-Content -Path $hostsPath -Value $blockSection -Encoding UTF8 -ErrorAction Stop
+                    Write-Log "Domaines télémétrie bloqués dans hosts" "SUCCESS"
+                } catch {
+                    Write-Log "Le fichier hosts est protégé par le système ou l'antivirus (écriture ignorée sans impact)." "WARN"
+                }
             } else {
                 Write-Log "[DRY-RUN] Bloquerait $($telemetryDomains.Count) domaines dans hosts" "INFO"
             }
         }
     } catch {
-        Write-Log "Fichier hosts inaccessible: $_" "WARN"
+        Write-Log "Fichier hosts protégé: $_" "WARN"
     }
 }
 
@@ -2226,28 +2302,86 @@ Set-Alias -Name Get-WinOptimizerConfig -Value Get-REDADZDOptimiserConfig -ErrorA
 $script:WinOptimizerConfig = $script:REDADZDOptimiserConfig
 
 function Invoke-REDADZDOptimiser {
+    [CmdletBinding()]
     param(
-        [switch]$CreateRestorePoint = $true,
-        [switch]$RemoveApps = $true,
-        [switch]$ConfigureServices = $true,
-        [switch]$DisableTasks = $true,
-        [switch]$PrivacyRegistry = $true,
-        [switch]$DiskCleanup = $true,
-        [switch]$RegistryCleanup = $false,
-        [switch]$SystemRepair = $true,
-        [switch]$BlockHosts = $true,
-        [switch]$FirewallBlock = $true,
-        [switch]$DisableTelemetryGPO = $true,
-        [switch]$DisableTelemetryServices = $true,
-        [switch]$OptimizeRAM = $false,
-        [switch]$StopBloatProcesses = $false,
-        [switch]$OptimizeCPU = $false,
-        [switch]$DryRun,
-        [switch]$Verbose
+        [bool]$CreateRestorePoint       = $true,
+        [bool]$RemoveApps               = $true,
+        [bool]$AppsAllUsers             = $true,
+        [bool]$ConfigureServices        = $true,
+        [bool]$DisableTasks             = $true,
+        [bool]$PrivacyRegistry          = $true,
+        [bool]$DiskCleanup              = $true,
+        [bool]$CleanRecycleBin          = $true,
+        [bool]$CleanWinUpdate           = $true,
+        [bool]$RegistryCleanup          = $false,
+        [bool]$RegCleanAggressive       = $false,
+        [bool]$SystemRepair             = $false,
+        [bool]$RunDISM                  = $false,
+        [bool]$RunSFC                   = $true,
+        [bool]$RunChkdsk                = $false,
+        [bool]$BlockHosts               = $true,
+        [bool]$FirewallBlock            = $true,
+        [bool]$DisableTelemetryGPO      = $true,
+        [bool]$DisableTelemetryServices = $true,
+        [bool]$OptimizeRAM              = $false,
+        [bool]$StopBloatProcesses       = $false,
+        [bool]$OptimizeCPU              = $false,
+        [bool]$HighPerformancePower     = $true,
+        [bool]$ForegroundPriority       = $true,
+        [bool]$DisableCoreParking       = $false,
+        [bool]$DryRun                   = $false,
+        [bool]$VerboseOutput            = $false,
+        [string]$Language               = "FR",
+
+        # Paramètres de rétro-compatibilité
+        [switch]$SkipRestorePoint,
+        [switch]$SkipApps,
+        [switch]$SkipServices,
+        [switch]$SkipTasks,
+        [switch]$SkipPrivacy,
+        [switch]$SkipCleanup,
+        [switch]$SkipRepair,
+        [switch]$SkipHostsBlock,
+        [switch]$SkipFirewall,
+        [switch]$SkipGPO,
+        [switch]$SkipSCServices,
+        [switch]$SkipRegistry,
+        [switch]$SkipDiskCleanup,
+        [switch]$EnableRegistryCleanup
     )
 
+    # Prise en compte de la rétro-compatibilité
+    if ($PSBoundParameters.ContainsKey('SkipRestorePoint') -and $SkipRestorePoint) { $CreateRestorePoint = $false }
+    if ($PSBoundParameters.ContainsKey('SkipApps') -and $SkipApps) { $RemoveApps = $false }
+    if ($PSBoundParameters.ContainsKey('SkipServices') -and $SkipServices) { $ConfigureServices = $false }
+    if ($PSBoundParameters.ContainsKey('SkipTasks') -and $SkipTasks) { $DisableTasks = $false }
+    if ($PSBoundParameters.ContainsKey('SkipPrivacy') -and $SkipPrivacy) {
+        $PrivacyRegistry = $false
+        $DisableTelemetryGPO = $false
+        $BlockHosts = $false
+        $FirewallBlock = $false
+        $DisableTelemetryServices = $false
+    }
+    if ($PSBoundParameters.ContainsKey('SkipCleanup') -and $SkipCleanup) {
+        $DiskCleanup = $false
+        $RegistryCleanup = $false
+    }
+    if ($PSBoundParameters.ContainsKey('SkipRepair') -and $SkipRepair) {
+        $SystemRepair = $false
+        $RunDISM = $false
+        $RunSFC = $false
+        $RunChkdsk = $false
+    }
+    if ($PSBoundParameters.ContainsKey('SkipHostsBlock') -and $SkipHostsBlock) { $BlockHosts = $false }
+    if ($PSBoundParameters.ContainsKey('SkipFirewall') -and $SkipFirewall) { $FirewallBlock = $false }
+    if ($PSBoundParameters.ContainsKey('SkipGPO') -and $SkipGPO) { $DisableTelemetryGPO = $false }
+    if ($PSBoundParameters.ContainsKey('SkipSCServices') -and $SkipSCServices) { $DisableTelemetryServices = $false }
+    if ($PSBoundParameters.ContainsKey('SkipRegistry') -and $SkipRegistry) { $PrivacyRegistry = $false }
+    if ($PSBoundParameters.ContainsKey('SkipDiskCleanup') -and $SkipDiskCleanup) { $DiskCleanup = $false }
+    if ($PSBoundParameters.ContainsKey('EnableRegistryCleanup') -and $EnableRegistryCleanup) { $RegistryCleanup = $true }
+
     if ($DryRun) { $script:Config.DryRun = $true }
-    if ($Verbose) { $script:Config.VerboseOutput = $true }
+    if ($VerbosePreference -eq 'Continue' -or $VerboseOutput) { $script:Config.VerboseOutput = $true }
 
     $startTime = Get-Date
     Write-Log "=== DÉBUT REDADZDOPTIMISER ===" "INFO"
@@ -2267,7 +2401,7 @@ function Invoke-REDADZDOptimiser {
     if ($RemoveApps) {
         if ($script:Config.CancelRequested) { Write-Log "Optimisation interrompue par l'utilisateur." "WARN"; return $results }
         Write-Log "--- Étape 2/12: Suppression apps provisionnées ---" "INFO"
-        $results.Apps = Remove-ProvisionedApps -AllUsers:$true
+        $results.Apps = Remove-ProvisionedApps -AllUsers:$AppsAllUsers
     }
 
     # 3. Services Windows
@@ -2323,28 +2457,28 @@ function Invoke-REDADZDOptimiser {
     if ($DiskCleanup) {
         if ($script:Config.CancelRequested) { Write-Log "Optimisation interrompue par l'utilisateur." "WARN"; return $results }
         Write-Log "--- Étape 10/12: Nettoyage disque ---" "INFO"
-        $results.DiskCleanup = Invoke-DiskCleanup -IncludeRecycleBin -IncludeWindowsUpdate
+        $results.DiskCleanup = Invoke-DiskCleanup -IncludeRecycleBin:$CleanRecycleBin -IncludeWindowsUpdate:$CleanWinUpdate
     }
 
     # 11. Nettoyage registre (optionnel)
     if ($RegistryCleanup) {
         if ($script:Config.CancelRequested) { Write-Log "Optimisation interrompue par l'utilisateur." "WARN"; return $results }
         Write-Log "--- Étape 11/12: Nettoyage registre ---" "INFO"
-        $results.RegistryCleanup = Invoke-RegistryCleanup -BackupFirst $true -Aggressive $false
+        $results.RegistryCleanup = Invoke-RegistryCleanup -BackupFirst $true -Aggressive:$RegCleanAggressive
     }
 
     # 12. Réparation système
-    if ($SystemRepair) {
+    if ($SystemRepair -and ($RunDISM -or $RunSFC -or $RunChkdsk)) {
         if ($script:Config.CancelRequested) { Write-Log "Optimisation interrompue par l'utilisateur." "WARN"; return $results }
         Write-Log "--- Étape 12/12: Réparation système ---" "INFO"
-        $results.SystemRepair = Invoke-SystemRepair -RunDISM -RunSFC -RunChkdsk:$false
+        $results.SystemRepair = Invoke-SystemRepair -RunDISM:$RunDISM -RunSFC:$RunSFC -RunChkdsk:$RunChkdsk
     }
 
     # Optimisation Processeur & Énergie
     if ($OptimizeCPU) {
         if ($script:Config.CancelRequested) { Write-Log "Optimisation interrompue par l'utilisateur." "WARN"; return $results }
         Write-Log "--- Optimisations Processeur & Énergie ---" "INFO"
-        $results.CPU = Optimize-CPU -DryRun:$DryRun
+        $results.CPU = Optimize-CPU -HighPerformancePower:$HighPerformancePower -ForegroundPriority:$ForegroundPriority -DisableCoreParking:$DisableCoreParking -DryRun:$DryRun
     }
 
     # Nettoyage des processus d'arrière-plan inutiles
