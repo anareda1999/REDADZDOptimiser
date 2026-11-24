@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     REDADZDOptimiser GUI - Interface graphique professionnelle Windows (FR / EN / AR)
     Thème moderne épuré & professionnel (Windows 11 Fluent / Slate & Pure White)
@@ -1161,6 +1161,110 @@ function Apply-Preset {
     }
 }
 
+function Get-CurrentGuiProfile {
+    return @{
+        CbRestorePoint       = [bool]($script:CbRestorePoint -and $script:CbRestorePoint.Checked)
+        CbApps               = [bool]($script:CbApps -and $script:CbApps.Checked)
+        CbAppsAllUsers       = [bool]($script:CbAppsAllUsers -and $script:CbAppsAllUsers.Checked)
+        CbServices           = [bool]($script:CbServices -and $script:CbServices.Checked)
+        CbServicesSC         = [bool]($script:CbServicesSC -and $script:CbServicesSC.Checked)
+        CbTasks              = [bool]($script:CbTasks -and $script:CbTasks.Checked)
+        CbAutoKillOnOptimize = [bool]($script:CbAutoKillOnOptimize -and $script:CbAutoKillOnOptimize.Checked)
+        CbPowerPlan          = [bool]($script:CbPowerPlan -and $script:CbPowerPlan.Checked)
+        CbForegroundPriority = [bool]($script:CbForegroundPriority -and $script:CbForegroundPriority.Checked)
+        CbDisableCoreParking = [bool]($script:CbDisableCoreParking -and $script:CbDisableCoreParking.Checked)
+        CbPrivacyReg         = [bool]($script:CbPrivacyReg -and $script:CbPrivacyReg.Checked)
+        CbPrivacyBackup      = [bool]($script:CbPrivacyBackup -and $script:CbPrivacyBackup.Checked)
+        CbGPO                = [bool]($script:CbGPO -and $script:CbGPO.Checked)
+        CbHosts              = [bool]($script:CbHosts -and $script:CbHosts.Checked)
+        CbHostsBackup        = [bool]($script:CbHostsBackup -and $script:CbHostsBackup.Checked)
+        CbFirewall           = [bool]($script:CbFirewall -and $script:CbFirewall.Checked)
+        CbDisk               = [bool]($script:CbDisk -and $script:CbDisk.Checked)
+        CbDiskRecycle        = [bool]($script:CbDiskRecycle -and $script:CbDiskRecycle.Checked)
+        CbDiskWinUpdate      = [bool]($script:CbDiskWinUpdate -and $script:CbDiskWinUpdate.Checked)
+        CbRegClean           = [bool]($script:CbRegClean -and $script:CbRegClean.Checked)
+        CbRegBackup          = [bool]($script:CbRegBackup -and $script:CbRegBackup.Checked)
+        CbRegAggressive      = [bool]($script:CbRegAggressive -and $script:CbRegAggressive.Checked)
+        CbDISM               = [bool]($script:CbDISM -and $script:CbDISM.Checked)
+        CbSFC                = [bool]($script:CbSFC -and $script:CbSFC.Checked)
+        CbChkdsk             = [bool]($script:CbChkdsk -and $script:CbChkdsk.Checked)
+    }
+}
+
+function Apply-GuiProfile {
+    param([Parameter(Mandatory = $true)]$ProfileObj)
+    $vars = @(
+        "CbRestorePoint","CbApps","CbAppsAllUsers","CbServices","CbServicesSC","CbTasks",
+        "CbAutoKillOnOptimize","CbPowerPlan","CbForegroundPriority","CbDisableCoreParking",
+        "CbPrivacyReg","CbPrivacyBackup","CbGPO","CbHosts","CbHostsBackup","CbFirewall",
+        "CbDisk","CbDiskRecycle","CbDiskWinUpdate","CbRegClean","CbRegBackup","CbRegAggressive",
+        "CbDISM","CbSFC","CbChkdsk"
+    )
+    foreach ($name in $vars) {
+        $prop = $ProfileObj.PSObject.Properties[$name]
+        if ($prop) {
+            $ctrl = Get-Variable -Name $name -Scope Script -ValueOnly -ErrorAction SilentlyContinue
+            if ($ctrl) { $ctrl.Checked = [bool]$prop.Value }
+        }
+    }
+}
+
+$script:IsDarkTheme = $false
+function Toggle-AppTheme {
+    $script:IsDarkTheme = -not $script:IsDarkTheme
+    $dark = $script:IsDarkTheme
+    $oldCard = $script:colors.CardBack
+    $oldBack = $script:colors.BackColor
+    $oldFore = $script:colors.ForeColor
+    $oldMuted = $script:colors.MutedColor
+
+    if ($dark) {
+        $script:colors.SidebarBack   = [System.Drawing.Color]::FromArgb(15, 23, 42)
+        $script:colors.NavHoverBack  = [System.Drawing.Color]::FromArgb(30, 41, 59)
+        $script:colors.NavMutedFore  = [System.Drawing.Color]::FromArgb(148, 163, 184)
+        $script:colors.BackColor     = [System.Drawing.Color]::FromArgb(15, 23, 42)
+        $script:colors.CardBack      = [System.Drawing.Color]::FromArgb(30, 41, 59)
+        $script:colors.HeaderBack    = [System.Drawing.Color]::FromArgb(30, 41, 59)
+        $script:colors.BottomBack    = [System.Drawing.Color]::FromArgb(30, 41, 59)
+        $script:colors.BorderColor   = [System.Drawing.Color]::FromArgb(51, 65, 85)
+        $script:colors.ForeColor     = [System.Drawing.Color]::FromArgb(241, 245, 249)
+        $script:colors.MutedColor    = [System.Drawing.Color]::FromArgb(148, 163, 184)
+    } else {
+        $script:colors.SidebarBack   = [System.Drawing.Color]::FromArgb(248, 250, 252)
+        $script:colors.NavHoverBack  = [System.Drawing.Color]::FromArgb(241, 245, 249)
+        $script:colors.NavMutedFore  = [System.Drawing.Color]::FromArgb(100, 116, 139)
+        $script:colors.BackColor     = [System.Drawing.Color]::FromArgb(241, 245, 249)
+        $script:colors.CardBack      = [System.Drawing.Color]::FromArgb(255, 255, 255)
+        $script:colors.HeaderBack    = [System.Drawing.Color]::FromArgb(255, 255, 255)
+        $script:colors.BottomBack    = [System.Drawing.Color]::FromArgb(255, 255, 255)
+        $script:colors.BorderColor   = [System.Drawing.Color]::FromArgb(226, 232, 240)
+        $script:colors.ForeColor     = [System.Drawing.Color]::FromArgb(15, 23, 42)
+        $script:colors.MutedColor    = [System.Drawing.Color]::FromArgb(100, 116, 139)
+    }
+
+    function Update-ControlThemeRecursive([System.Windows.Forms.Control]$c) {
+        if ($c -eq $script:LogBox) { return }
+        if ($c.BackColor -eq $oldCard) { $c.BackColor = $script:colors.CardBack }
+        elseif ($c.BackColor -eq $oldBack) { $c.BackColor = $script:colors.BackColor }
+        if ($c.ForeColor -eq $oldFore) { $c.ForeColor = $script:colors.ForeColor }
+        elseif ($c.ForeColor -eq $oldMuted) { $c.ForeColor = $script:colors.MutedColor }
+        foreach ($child in $c.Controls) { Update-ControlThemeRecursive $child }
+        $c.Invalidate()
+    }
+
+    if ($form) {
+        $form.BackColor = $script:colors.BackColor
+        $form.ForeColor = $script:colors.ForeColor
+        if ($sidebar) { $sidebar.BackColor = $script:colors.SidebarBack }
+        if ($topHeader) { $topHeader.BackColor = $script:colors.HeaderBack }
+        if ($bottomBar) { $bottomBar.BackColor = $script:colors.BottomBack }
+        if ($presetRow) { $presetRow.BackColor = $script:colors.SidebarBack }
+        if ($script:lblPageTitle) { $script:lblPageTitle.ForeColor = $script:colors.ForeColor }
+        if ($script:BtnThemeToggle) { $script:BtnThemeToggle.Text = if ($dark) { "☀️" } else { "🌙" } }
+        Update-ControlThemeRecursive $form
+    }
+}
+
 # ════════════════════════════════════════════════════════════════════════
 # APPLICATION DYNAMIQUE DE LA LANGUE (STABLE & PROPRE)
 # ════════════════════════════════════════════════════════════════════════
@@ -1714,12 +1818,19 @@ $topHeader.Add_Paint({
     $pen.Dispose()
 })
 
-# Panneau de droite pour Admin Badge + Langue (Largeur fixe 380px, Dock: Right)
+# Panneau de droite pour Admin Badge + Langue + Thème (Largeur fixe 420px, Dock: Right)
 $headerRight = New-Object System.Windows.Forms.Panel
 $headerRight.Dock = [System.Windows.Forms.DockStyle]::Right
-$headerRight.Width = 380
+$headerRight.Width = 420
 $headerRight.BackColor = [System.Drawing.Color]::Transparent
 $topHeader.Controls.Add($headerRight)
+
+# Bouton bascule Thème Clair / Sombre
+$script:BtnThemeToggle = New-ModernButton -Text "🌙" -Size (New-Object System.Drawing.Size(34, 26)) -Location (New-Object System.Drawing.Point(20, 12)) -Click {
+    Toggle-AppTheme
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$script:BtnThemeToggle.Font = $fonts.Normal
+$headerRight.Controls.Add($script:BtnThemeToggle)
 
 # Badge Administrateur
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -1730,7 +1841,7 @@ $adminBadge.ForeColor = if ($isAdmin) { $colors.AdminOkFore } else { $colors.Adm
 $adminBadge.BackColor = if ($isAdmin) { $colors.AdminOkBack } else { $colors.AdminErrBack }
 $adminBadge.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 $adminBadge.Size = New-Object System.Drawing.Size(195, 26)
-$adminBadge.Location = New-Object System.Drawing.Point(175, 12)
+$adminBadge.Location = New-Object System.Drawing.Point(210, 12)
 $adminBadge.Add_Paint({
     param($s, $e)
     $borderCol = if ($isAdmin) { $script:colors.AdminOkBorder } else { $script:colors.AdminErrBorder }
@@ -1749,7 +1860,7 @@ $script:LangCombo.ForeColor = $colors.ForeColor
 $script:LangCombo.Font = $fonts.Normal
 $script:LangCombo.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 $script:LangCombo.Size = New-Object System.Drawing.Size(135, 26)
-$script:LangCombo.Location = New-Object System.Drawing.Point(30, 12)
+$script:LangCombo.Location = New-Object System.Drawing.Point(64, 12)
 $script:LangCombo.Add_SelectedIndexChanged({
     if (-not $script:SuppressLangEvent) {
         $sel = switch ($this.SelectedIndex) {
@@ -1875,8 +1986,50 @@ $lblPresetDesc.Text = "(Recommandé : Débloat, télémétrie, nettoyage & CPU)"
 $lblPresetDesc.Font = $fonts.Small
 $lblPresetDesc.ForeColor = $colors.MutedColor
 $lblPresetDesc.Location = New-Object System.Drawing.Point(450, 9)
-$lblPresetDesc.AutoSize = $true
+$lblPresetDesc.Size = New-Object System.Drawing.Size(275, 18)
+$lblPresetDesc.AutoEllipsis = $true
 $presetRow.Controls.Add($lblPresetDesc)
+
+$profileFlow = New-Object System.Windows.Forms.FlowLayoutPanel
+$profileFlow.Dock = [System.Windows.Forms.DockStyle]::Right
+$profileFlow.Width = 215
+$profileFlow.Height = 30
+$profileFlow.FlowDirection = [System.Windows.Forms.FlowDirection]::RightToLeft
+$profileFlow.BackColor = [System.Drawing.Color]::Transparent
+$presetRow.Controls.Add($profileFlow)
+
+$btnImportProfile = New-ModernButton -Text "📥 Importer" -Size (New-Object System.Drawing.Size(96, 26)) -Location (New-Object System.Drawing.Point(0, 0)) -Click {
+    $openDlg = New-Object System.Windows.Forms.OpenFileDialog
+    $openDlg.Filter = "Profil REDADZD (*.json)|*.json|Tous fichiers (*.*)|*.*"
+    if ($openDlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+        try {
+            $jsonRaw = [System.IO.File]::ReadAllText($openDlg.FileName, [System.Text.Encoding]::UTF8)
+            $prof = $jsonRaw | ConvertFrom-Json
+            Apply-GuiProfile -ProfileObj $prof
+            Append-Log "Profil importé avec succès : $($openDlg.FileName)" "SUCCESS"
+        } catch {
+            [System.Windows.Forms.MessageBox]::Show("Impossible de lire le profil JSON : $_", "Erreur", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        }
+    }
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$btnImportProfile.Font = $fonts.Small
+$btnImportProfile.Margin = New-Object System.Windows.Forms.Padding(4, 1, 0, 1)
+$profileFlow.Controls.Add($btnImportProfile)
+
+$btnExportProfile = New-ModernButton -Text "📤 Exporter" -Size (New-Object System.Drawing.Size(96, 26)) -Location (New-Object System.Drawing.Point(0, 0)) -Click {
+    $saveDlg = New-Object System.Windows.Forms.SaveFileDialog
+    $saveDlg.Filter = "Profil REDADZD (*.json)|*.json"
+    $saveDlg.FileName = "REDADZD_Profil_$(Get-Date -Format 'yyyyMMdd').json"
+    if ($saveDlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+        $prof = Get-CurrentGuiProfile
+        $json = $prof | ConvertTo-Json -Depth 3
+        [System.IO.File]::WriteAllText($saveDlg.FileName, $json, [System.Text.Encoding]::UTF8)
+        Append-Log "Profil exporté : $($saveDlg.FileName)" "SUCCESS"
+    }
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$btnExportProfile.Font = $fonts.Small
+$btnExportProfile.Margin = New-Object System.Windows.Forms.Padding(4, 1, 0, 1)
+$profileFlow.Controls.Add($btnExportProfile)
 
 # Ligne 2 : Actions principales et Copyright (Dock: Fill, 46px)
 $actionRow = New-Object System.Windows.Forms.Panel
@@ -3099,6 +3252,100 @@ $script:TabControl.TabPages.Add($repairTab.Page)
 
 $yPos = 14
 
+# Statut officiel des licences Windows & Office (en haut pour visibilité immédiate)
+$cardLicense = New-ModernCard -Title "🔑 Statut Officiel des Licences Windows & Office" -Location (New-Object System.Drawing.Point(12, $yPos)) -Size (New-Object System.Drawing.Size(890, 155)) -AccentLineColor $colors.IndigoAccent
+$repairTab.Scroll.Controls.Add($cardLicense)
+
+$script:LblLicenseStatus = New-Object System.Windows.Forms.Label
+$script:LblLicenseStatus.Text = "Chargement du statut officiel des licences Windows et Office..."
+$script:LblLicenseStatus.Font = $fonts.Small
+$script:LblLicenseStatus.ForeColor = $colors.ForeColor
+$script:LblLicenseStatus.Location = New-Object System.Drawing.Point(20, 42)
+$script:LblLicenseStatus.Size = New-Object System.Drawing.Size(845, 58)
+$cardLicense.Controls.Add($script:LblLicenseStatus)
+
+$script:RefreshLicenseStatus = {
+    try {
+        $lics = Get-SystemLicenseStatus
+        if ($lics -and $lics.Count -gt 0) {
+            $lines = $lics | ForEach-Object { "• $($_.Name) (Clé: *****-$($_.PartialProductKey)) : $($_.StatusText)" }
+            $script:LblLicenseStatus.Text = ($lines -join "`n")
+        } else {
+            $script:LblLicenseStatus.Text = "Aucune licence active ou clé partielle détectée via WMI."
+        }
+    } catch {
+        $script:LblLicenseStatus.Text = "Erreur lecture statut licence : $_"
+    }
+}
+
+$btnLicRefresh = New-ModernButton -Text "🔄 Actualiser statut" -Size (New-Object System.Drawing.Size(175, 32)) -Location (New-Object System.Drawing.Point(20, 108)) -Click $script:RefreshLicenseStatus -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$cardLicense.Controls.Add($btnLicRefresh)
+
+$btnLicKey = New-ModernButton -Text "🔑 Saisir une clé produit" -Size (New-Object System.Drawing.Size(195, 32)) -Location (New-Object System.Drawing.Point(208, 108)) -Click {
+    $keyForm = New-Object System.Windows.Forms.Form
+    $keyForm.Text = "Saisir une clé produit officielle Windows"
+    $keyForm.Size = New-Object System.Drawing.Size(430, 170)
+    $keyForm.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterParent
+    $keyForm.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+    $keyForm.MaximizeBox = $false; $keyForm.MinimizeBox = $false
+    $lblK = New-Object System.Windows.Forms.Label; $lblK.Text = "Clé produit (XXXXX-XXXXX-XXXXX-XXXXX-XXXXX) :"; $lblK.Location = New-Object System.Drawing.Point(16, 16); $lblK.AutoSize = $true
+    $txtK = New-Object System.Windows.Forms.TextBox; $txtK.Location = New-Object System.Drawing.Point(16, 42); $txtK.Size = New-Object System.Drawing.Size(380, 26)
+    $btnOk = New-Object System.Windows.Forms.Button; $btnOk.Text = "Appliquer (slmgr)"; $btnOk.Location = New-Object System.Drawing.Point(256, 84); $btnOk.Size = New-Object System.Drawing.Size(140, 30); $btnOk.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $keyForm.Controls.AddRange(@($lblK, $txtK, $btnOk))
+    $keyForm.AcceptButton = $btnOk
+    if ($keyForm.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+        $k = $txtK.Text.Trim()
+        if ($k -match '^[A-Za-z0-9]{5}(-[A-Za-z0-9]{5}){4}$') {
+            Start-Process "cscript.exe" -ArgumentList "//nologo `"$env:WINDIR\System32\slmgr.vbs`" /ipk $k" -Wait -NoNewWindow
+            Start-Process "cscript.exe" -ArgumentList "//nologo `"$env:WINDIR\System32\slmgr.vbs`" /ato" -Wait -NoNewWindow
+            & $script:RefreshLicenseStatus
+            Append-Log "Clé produit soumise via slmgr.vbs." "INFO"
+        } else {
+            [System.Windows.Forms.MessageBox]::Show("Format de clé invalide (attendu : 25 caractères séparés par des tirets).", "Format invalide", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        }
+    }
+} -BackColor $colors.AccentColor -HoverColor $colors.AccentHover -PressColor $colors.AccentPress
+$cardLicense.Controls.Add($btnLicKey)
+
+$btnLicSettings = New-ModernButton -Text "⚙️ Paramètres d'activation" -Size (New-Object System.Drawing.Size(205, 32)) -Location (New-Object System.Drawing.Point(416, 108)) -Click {
+    try { Start-Process "ms-settings:activation" | Out-Null } catch {}
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$cardLicense.Controls.Add($btnLicSettings)
+
+& $script:RefreshLicenseStatus
+
+$yPos += 170
+
+# Rollback en 1 clic (Sauvegardes .reg / hosts / services)
+$cardRollback = New-ModernCard -Title "🔄 Restauration Rapide / Rollback (Sécurité Client)" -Location (New-Object System.Drawing.Point(12, $yPos)) -Size (New-Object System.Drawing.Size(890, 120)) -AccentLineColor $colors.WarningColor
+$repairTab.Scroll.Controls.Add($cardRollback)
+
+$script:LblBackupInfo = New-Object System.Windows.Forms.Label
+$script:LblBackupInfo.Text = "Restaure les sauvegardes registre (.reg), le fichier hosts et réactive les services modifiés."
+$script:LblBackupInfo.Font = $fonts.Small
+$script:LblBackupInfo.ForeColor = $colors.MutedColor
+$script:LblBackupInfo.Location = New-Object System.Drawing.Point(20, 42)
+$script:LblBackupInfo.Size = New-Object System.Drawing.Size(580, 55)
+$cardRollback.Controls.Add($script:LblBackupInfo)
+
+$btnRollback = New-ModernButton -Text "🔄 Restaurer l'état précédent" -Size (New-Object System.Drawing.Size(230, 38)) -Location (New-Object System.Drawing.Point(635, 48)) -Click {
+    $sum = Get-REDADZDBackupSummary
+    $confirmMsg = "Voulez-vous restaurer l'état précédent ?`n`nSauvegardes détectées :`n• Clés registre (.reg) : $($sum.RegBackupCount)`n• Sauvegardes hosts : $($sum.HostsBackupCount)"
+    if ([System.Windows.Forms.MessageBox]::Show($confirmMsg, "Confirmation Rollback", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question) -eq [System.Windows.Forms.DialogResult]::Yes) {
+        $rb = Invoke-REDADZDRollback
+        Append-Log "Rollback terminé : $($rb.RegRestored) .reg restauré(s), Hosts=$($rb.HostsRestored), $($rb.ServicesRestored) service(s) réactivé(s)." "SUCCESS"
+        [System.Windows.Forms.MessageBox]::Show(
+            "Restauration terminée !`n`n• Registres importés : $($rb.RegRestored)`n• Fichier hosts restauré : $($rb.HostsRestored)`n• Services réactivés : $($rb.ServicesRestored)",
+            "Rollback Terminé",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+    }
+} -BackColor $colors.WarningColor -HoverColor $colors.WarningHover -PressColor $colors.WarningPress
+$cardRollback.Controls.Add($btnRollback)
+
+$yPos += 135
+
 $cardRepair = New-ModernCard -Title "Vérification et Restauration de l'intégrité système" -Location (New-Object System.Drawing.Point(12, $yPos)) -Size (New-Object System.Drawing.Size(890, 220)) -AccentLineColor $colors.AccentColor
 $repairTab.Scroll.Controls.Add($cardRepair)
 
@@ -3206,6 +3453,20 @@ $btnClearLog.Add_Paint({
     $p.Dispose()
 })
 
+$btnExportReport = New-ModernButton -Text "📄 Rapport Client (HTML)" -Size (New-Object System.Drawing.Size(195, 32)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
+    $saveDlg = New-Object System.Windows.Forms.SaveFileDialog
+    $saveDlg.Filter = "Rapport HTML (*.html)|*.html"
+    $saveDlg.FileName = "REDADZD_Rapport_Client_$(Get-Date -Format 'yyyyMMdd_HHmmss').html"
+    if ($saveDlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+        $out = Export-REDADZDClientReport -OutputPath $saveDlg.FileName -Results $script:LastResults -Diag $script:CurrentDiag -LogLines $script:LogLines
+        Append-Log "Rapport client exporté : $out" "SUCCESS"
+        if ([System.Windows.Forms.MessageBox]::Show("Rapport client généré avec succès !`nVoulez-vous l'ouvrir maintenant dans votre navigateur ?", "Rapport Client", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Information) -eq [System.Windows.Forms.DialogResult]::Yes) {
+            Start-Process $out | Out-Null
+        }
+    }
+} -BackColor $colors.AccentColor -HoverColor $colors.AccentHover -PressColor $colors.AccentPress
+
+$logToolbar.Controls.Add($btnExportReport)
 $logToolbar.Controls.Add($btnSaveLog)
 $logToolbar.Controls.Add($btnClearLog)
 
@@ -3351,6 +3612,20 @@ $btnAboutRestore.Add_Paint({
     $p.Dispose()
 })
 $cardAboutApp.Controls.Add($btnAboutRestore)
+
+$btnCheckUpdate = New-ModernButton -Text "🔍 Vérifier MAJ" -Size (New-Object System.Drawing.Size(175, 34)) -Location (New-Object System.Drawing.Point(690, 122)) -Click {
+    $upd = Test-REDADZDUpdate -CurrentVersion "2.1.0"
+    if (-not $upd.Success) {
+        [System.Windows.Forms.MessageBox]::Show("Vérification hors-ligne ou dépôt inaccessible :`n$($upd.Error)", "Mise à jour", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    } elseif ($upd.UpdateAvailable) {
+        if ([System.Windows.Forms.MessageBox]::Show("Nouvelle version disponible : v$($upd.Latest) (Actuelle : v$($upd.Current))`nOuvrir la page de téléchargement ?", "Mise à jour disponible", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Information) -eq [System.Windows.Forms.DialogResult]::Yes) {
+            Start-Process $upd.Url | Out-Null
+        }
+    } else {
+        [System.Windows.Forms.MessageBox]::Show("Vous utilisez déjà la dernière version (v$($upd.Current)).", "À jour", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    }
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$cardAboutApp.Controls.Add($btnCheckUpdate)
 
 $yAbout += 190
 
@@ -3550,6 +3825,7 @@ function Start-Optimization {
     try {
         [System.Windows.Forms.Application]::DoEvents()
         $results = Invoke-REDADZDOptimiser @params
+        $script:LastResults = $results
 
         Append-Log "=== RÉSUMÉ DE L'OPÉRATION ===" "INFO"
         if ($results.Apps) { Append-Log "Apps : $($results.Apps.Removed) supprimées, $($results.Apps.Failed) protégées, $($results.Apps.Skipped) ignorées" "SUCCESS" }

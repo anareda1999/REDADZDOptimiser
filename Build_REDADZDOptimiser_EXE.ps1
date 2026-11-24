@@ -53,6 +53,19 @@ if (-not (Test-Path $coreFile) -or -not (Test-Path $guiFile)) {
     exit 1
 }
 
+Write-Host "[0/5] Pré-vérifications automatiques (Syntaxe AST & Smoke Test)..." -ForegroundColor Yellow
+foreach ($srcFile in @($coreFile, $guiFile)) {
+    $parseErrors = $null
+    $null = [System.Management.Automation.Language.Parser]::ParseFile($srcFile, [ref]$null, [ref]$parseErrors)
+    if ($parseErrors -and $parseErrors.Count -gt 0) {
+        Write-Error "Erreur de syntaxe dans $srcFile : $($parseErrors[0].Message) (ligne $($parseErrors[0].Extent.StartLineNumber))"
+        exit 1
+    }
+}
+Import-Module $coreFile -Force -ErrorAction Stop
+$smokeDiag = Get-REDADZDBackupSummary
+Write-Host "      Syntaxe AST valide (0 erreur) et module Core chargé avec succès." -ForegroundColor Green
+
 Write-Host "[1/5] Lecture et fusion des sources en un bundle unique..." -ForegroundColor Yellow
 $coreCode = [System.IO.File]::ReadAllText($coreFile, [System.Text.Encoding]::UTF8)
 $guiCode  = [System.IO.File]::ReadAllText($guiFile, [System.Text.Encoding]::UTF8)

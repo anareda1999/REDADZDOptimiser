@@ -2509,6 +2509,287 @@ function Invoke-REDADZDOptimiser {
     return $results
 }
 
+# ════════════════════════════════════════════════════════════════════════
+# ROLLBACK, RAPPORT CLIENT, STATUT LICENCE & MISE À JOUR
+# ════════════════════════════════════════════════════════════════════════
+
+function Get-REDADZDBackupSummary {
+    $logDir = Split-Path -Path $script:Config.LogPath -Parent
+    $regFiles = @()
+    if ($logDir -and (Test-Path $logDir)) {
+        $regFiles = @(Get-ChildItem -Path $logDir -Filter "*_regbackup_*.reg" -ErrorAction SilentlyContinue) +
+                    @(Get-ChildItem -Path $logDir -Filter "*_uninstall_backup.reg" -ErrorAction SilentlyContinue)
+    }
+    $hostsDir = "$env:WINDIR\System32\drivers\etc"
+    $hostsBackups = @()
+    if (Test-Path $hostsDir) {
+        $hostsBackups = @(Get-ChildItem -Path $hostsDir -Filter "hosts.redadzdoptimiser_backup_*" -ErrorAction SilentlyContinue)
+    }
+    return @{
+        RegBackupCount   = $regFiles.Count
+        HostsBackupCount = $hostsBackups.Count
+        RegFiles         = $regFiles
+        HostsBackups     = $hostsBackups
+    }
+}
+
+function Invoke-REDADZDRollback {
+    Write-Log "=== DÉMARRAGE ROLLBACK / RESTAURATION ÉTAT PRÉCÉDENT ===" "INFO"
+    $summary = Get-REDADZDBackupSummary
+    $regRestored = 0
+    $regFailed   = 0
+    $hostsRestored = $false
+    $servicesRestored = 0
+
+    # 1. Restauration des sauvegardes registre (.reg)
+    foreach ($rf in ($summary.RegFiles | Sort-Object LastWriteTime -Descending)) {
+        try {
+            $proc = Start-Process -FilePath "reg.exe" -ArgumentList "import `"$($rf.FullName)`"" -Wait -NoNewWindow -PassThru -ErrorAction Stop
+            if ($proc.ExitCode -eq 0) {
+                $regRestored++
+                Write-Log "Registre restauré : $($rf.Name)" "SUCCESS"
+            } else {
+                $regFailed++
+                Write-Log "Échec import registre ($($rf.Name)) : code $($proc.ExitCode)" "WARN"
+            }
+        } catch {
+            $regFailed++
+            Write-Log "Erreur import registre ($($rf.Name)) : $_" "WARN"
+        }
+    }
+
+    # 2. Restauration du fichier hosts
+    $hostsPath = "$env:WINDIR\System32\drivers\etc\hosts"
+    $latestHosts = $summary.HostsBackups | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if ($latestHosts -and (Test-Path $latestHosts.FullName)) {
+        try {
+            $hItem = Get-Item $hostsPath -ErrorAction SilentlyContinue
+            if ($hItem -and $hItem.IsReadOnly) { Set-ItemProperty -Path $hostsPath -Name IsReadOnly -Value $false -ErrorAction SilentlyContinue }
+            Copy-Item -Path $latestHosts.FullName -Destination $hostsPath -Force -ErrorAction Stop
+            $hostsRestored = $true
+            Write-Log "Fichier hosts restauré depuis $($latestHosts.Name)" "SUCCESS"
+        } catch {
+            Write-Log "Impossible de restaurer le fichier hosts : $_" "WARN"
+        }
+    } elseif (Test-Path $hostsPath) {
+        try {
+            $raw = Get-Content -Path $hostsPath -Raw -ErrorAction SilentlyContinue
+            if ($raw -and $raw -match "# === REDADZDOptimiser Telemetry Block Start ===") {
+                $cleaned = [regex]::Replace($raw, "(?s)\r?\n?# === REDADZDOptimiser Telemetry Block Start ===.*?# === REDADZDOptimiser Telemetry Block End ===\r?\n?", "")
+                Set-Content -Path $hostsPath -Value $cleaned -Encoding UTF8 -ErrorAction Stop
+                $hostsRestored = $true
+                Write-Log "Bloc télémétrie retiré du fichier hosts" "SUCCESS"
+            }
+        } catch {
+            Write-Log "Nettoyage hosts impossible : $_" "WARN"
+        }
+    }
+
+    # 3. Réactivation des services non critiques mis en manuel/auto si désactivés
+    $restoreServices = @("WSearch", "SysMain", "PrintNotify", "Spooler", "MapsBroker", "WerSvc")
+    foreach ($svcName in $restoreServices) {
+        try {
+            $svc = Get-Service -Name $svcName -ErrorAction SilentlyContinue
+            if ($svc -and $svc.StartType -eq "Disabled") {
+                Set-Service -Name $svcName -StartupType Manual -ErrorAction SilentlyContinue
+                $servicesRestored++
+            }
+        } catch { }
+    }
+    if ($servicesRestored -gt 0) {
+        Write-Log "$servicesRestored service(s) réactivé(s) en mode Manuel" "SUCCESS"
+    }
+
+    Write-Log "=== FIN ROLLBACK : $regRestored clé(s) .reg, Hosts=$hostsRestored, $servicesRestored service(s) ===" "INFO"
+    return @{
+        RegRestored      = $regRestored
+        RegFailed        = $regFailed
+        HostsRestored    = $hostsRestored
+        ServicesRestored = $servicesRestored
+    }
+}
+
+function Get-SystemLicenseStatus {
+    $items = @()
+    try {
+        $products = Get-CimInstance -ClassName SoftwareLicensingProduct -ErrorAction Stop |
+            Where-Object { $_.PartialProductKey -and ($_.Name -match "Windows|Office") }
+
+        foreach ($p in $products) {
+            $statusText = switch ([int]$p.LicenseStatus) {
+                0 { "Sans licence" }
+                1 { "Activé ✓" }
+                2 { "Période de grâce initiale" }
+                3 { "Période de grâce supplémentaire" }
+                4 { "Grâce non authentique" }
+                5 { "Mode notification" }
+                6 { "Grâce étendue" }
+                default { "Inconnu ($($p.LicenseStatus))" }
+            }
+            $items += [PSCustomObject]@{
+                Name              = $p.Name
+                Description       = $p.Description
+                PartialProductKey = $p.PartialProductKey
+                LicenseStatus     = [int]$p.LicenseStatus
+                StatusText        = $statusText
+                IsActivated       = ([int]$p.LicenseStatus -eq 1)
+            }
+        }
+    } catch {
+        Write-Log "Lecture statut licence impossible : $_" "WARN"
+    }
+    return $items
+}
+
+function Export-REDADZDClientReport {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$OutputPath,
+        [hashtable]$Results = $null,
+        [object]$Diag = $null,
+        [string[]]$LogLines = @()
+    )
+
+    if (-not $Diag) {
+        try { $Diag = Get-SystemHardwareHealthAndDiagnostics } catch { $Diag = $null }
+    }
+    $licenses = Get-SystemLicenseStatus
+    $osInfo = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue
+    $pcName = $env:COMPUTERNAME
+    $dateStr = Get-Date -Format "dd/MM/yyyy HH:mm"
+
+    $diagHtml = "<p style='color:#64748B;'>Diagnostic matériel non exécuté.</p>"
+    if ($Diag) {
+        $diagHtml = @"
+        <div class="grid">
+            <div class="card"><h3>Processeur (CPU)</h3><p><strong>$($Diag.CPU.Name)</strong><br>$($Diag.CPU.Cores) cœurs / $($Diag.CPU.Threads) threads • $($Diag.CPU.SpeedMHz) MHz<br>Santé : <span class="badge">$($Diag.CPU.Health)</span></p></div>
+            <div class="card"><h3>Mémoire Vive (RAM)</h3><p><strong>$($Diag.RAM.TotalGB) Go</strong> ($($Diag.RAM.UsagePercent)% utilisée)<br>$($Diag.RAM.FreeGB) Go libres • $($Diag.RAM.SpeedMHz) MHz<br>Santé : <span class="badge">$($Diag.RAM.Health)</span></p></div>
+            <div class="card"><h3>Stockage (Disque C:)</h3><p><strong>$($Diag.Disk.Model)</strong> ($($Diag.Disk.Type))<br>$($Diag.Disk.FreeGB) Go libres / $($Diag.Disk.TotalGB) Go ($($Diag.Disk.FreePercent)% libre)<br>S.M.A.R.T. : $($Diag.Disk.SmartStatus) • <span class="badge">$($Diag.Disk.Health)</span></p></div>
+            <div class="card"><h3>Batterie</h3><p><strong>$($Diag.Battery.StatusText)</strong><br>Charge : $($Diag.Battery.ChargePercent)%<br>Santé : <span class="badge">$($Diag.Battery.HealthText)</span></p></div>
+        </div>
+        <p style="margin-top:12px;"><strong>Profil recommandé :</strong> $($Diag.Recommendation.Title) (Score système : $($Diag.Recommendation.Score)/100)</p>
+"@
+    }
+
+    $resRows = ""
+    if ($Results) {
+        if ($Results.Apps)            { $resRows += "<tr><td>Applications Bloatware</td><td>$($Results.Apps.Removed) supprimée(s), $($Results.Apps.Skipped) ignorée(s)</td></tr>" }
+        if ($Results.Services)        { $resRows += "<tr><td>Services Windows</td><td>$($Results.Services.Changed) optimisé(s), $($Results.Services.Skipped) déjà conformes</td></tr>" }
+        if ($Results.Tasks)           { $resRows += "<tr><td>Tâches planifiées</td><td>$($Results.Tasks.Disabled) désactivée(s)</td></tr>" }
+        if ($Results.PrivacyRegistry) { $resRows += "<tr><td>Confidentialité & Registre</td><td>$($Results.PrivacyRegistry.Applied) paramètre(s) appliqué(s)</td></tr>" }
+        if ($Results.DiskCleanup)     { $resRows += "<tr><td>Nettoyage Disque</td><td>~$($Results.DiskCleanup.FreedMB) Mo libérés</td></tr>" }
+        if ($Results.RegistryCleanup) { $resRows += "<tr><td>Nettoyage Registre</td><td>$($Results.RegistryCleanup.Cleaned) entrée(s) orpheline(s)</td></tr>" }
+        if ($Results.SystemRepair)    { $resRows += "<tr><td>Intégrité Système</td><td>DISM: $($Results.SystemRepair.DISM) | SFC: $($Results.SystemRepair.SFC)</td></tr>" }
+        if ($Results.RestorePoint)    { $resRows += "<tr><td>Point de restauration</td><td>Créé avec succès ✓</td></tr>" }
+        if ($Results.CPU)             { $resRows += "<tr><td>Processeur & Énergie</td><td>Plan=$($Results.CPU.PowerPlan) | Priorité=$($Results.CPU.PrioritySeparation)</td></tr>" }
+        if ($Results.RAM)             { $resRows += "<tr><td>Optimisation RAM</td><td>~$($Results.RAM.FreedMB) Mo libérés</td></tr>" }
+    }
+    if (-not $resRows) {
+        $resRows = "<tr><td colspan='2' style='color:#64748B;'>Aucune session d'optimisation exécutée durant cette session.</td></tr>"
+    }
+
+    $licRows = ""
+    foreach ($l in $licenses) {
+        $licRows += "<tr><td>$($l.Name)</td><td>*****-$($l.PartialProductKey)</td><td><strong>$($l.StatusText)</strong></td></tr>"
+    }
+    if (-not $licRows) {
+        $licRows = "<tr><td colspan='3' style='color:#64748B;'>Aucune licence détectée ou accès WMI restreint.</td></tr>"
+    }
+
+    $recentLogs = ($LogLines | Select-Object -Last 35) -join "`n"
+    $recentLogsEsc = [System.Net.WebUtility]::HtmlEncode($recentLogs)
+
+    $html = @"
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport d'Intervention REDADZDOptimiser - $pcName</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background:#F8FAFC; color:#0F172A; margin:0; padding:32px; }
+  .container { max-width:960px; margin:0 auto; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:32px; box-shadow:0 4px 20px rgba(15,23,42,0.06); }
+  .header { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #2563EB; padding-bottom:16px; margin-bottom:24px; }
+  .header h1 { margin:0; font-size:22px; color:#1E293B; }
+  .meta { text-align:right; font-size:13px; color:#64748B; }
+  h2 { font-size:16px; color:#2563EB; margin:24px 0 12px; border-left:4px solid #2563EB; padding-left:10px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .card { background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:14px; }
+  .card h3 { margin:0 0 6px; font-size:14px; color:#334155; }
+  .card p { margin:0; font-size:13px; line-height:1.5; }
+  .badge { display:inline-block; background:#ECFDF5; color:#047857; border:1px solid #A7F3D0; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:10px 12px; border-bottom:1px solid #E2E8F0; }
+  th { background:#F1F5F9; color:#334155; }
+  pre { background:#0F172A; color:#F1F5F9; padding:14px; border-radius:8px; font-size:12px; overflow-x:auto; white-space:pre-wrap; }
+  .footer { margin-top:28px; padding-top:14px; border-top:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:12px; color:#64748B; }
+  .print-btn { background:#2563EB; color:#FFF; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; }
+  @media print { .print-btn { display:none; } body { padding:0; background:#FFF; } .container { border:none; box-shadow:none; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>⚡ REDADZDOptimiser — Rapport d'Intervention Client</h1>
+      <div style="font-size:13px;color:#64748B;margin-top:4px;">Poste : <strong>$pcName</strong> • $($osInfo.Caption) (Build $($osInfo.BuildNumber))</div>
+    </div>
+    <div class="meta">
+      <div>Date : $dateStr</div>
+      <div style="margin-top:6px;"><button class="print-btn" onclick="window.print()">🖨️ Imprimer / Sauvegarder en PDF</button></div>
+    </div>
+  </div>
+
+  <h2>🩺 Diagnostic & Santé Matérielle</h2>
+  $diagHtml
+
+  <h2>⚡ Résumé des Optimisations Appliquées</h2>
+  <table>
+    <thead><tr><th>Catégorie</th><th>Résultat</th></tr></thead>
+    <tbody>$resRows</tbody>
+  </table>
+
+  <h2>🔑 Statut Officiel des Licences Windows & Office</h2>
+  <table>
+    <thead><tr><th>Produit</th><th>Clé partielle</th><th>Statut</th></tr></thead>
+    <tbody>$licRows</tbody>
+  </table>
+
+  <h2>📋 Extrait du Journal d'Exécution</h2>
+  <pre>$recentLogsEsc</pre>
+
+  <div class="footer">
+    <span>© 2026 REDADZDOptimiser • Anagou Reda</span>
+    <span>Support Technique : 0542439514</span>
+  </div>
+</div>
+</body>
+</html>
+"@
+
+    [System.IO.File]::WriteAllText($OutputPath, $html, [System.Text.Encoding]::UTF8)
+    Write-Log "Rapport client HTML exporté : $OutputPath" "SUCCESS"
+    return $OutputPath
+}
+
+function Test-REDADZDUpdate {
+    param(
+        [string]$CurrentVersion = "2.1.0",
+        [string]$RepoApiUrl = "https://api.github.com/repos/AnagouReda/REDADZDOptimiser/releases/latest"
+    )
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        $headers = @{ "User-Agent" = "REDADZDOptimiser/$CurrentVersion" }
+        $resp = Invoke-RestMethod -Uri $RepoApiUrl -Headers $headers -TimeoutSec 6 -ErrorAction Stop
+        $latest = ($resp.tag_name -replace '^v', '').Trim()
+        if ($latest -and ([version]$latest -gt [version]$CurrentVersion)) {
+            return @{ Success = $true; UpdateAvailable = $true; Current = $CurrentVersion; Latest = $latest; Url = $resp.html_url }
+        }
+        return @{ Success = $true; UpdateAvailable = $false; Current = $CurrentVersion; Latest = $latest; Url = $resp.html_url }
+    } catch {
+        return @{ Success = $false; UpdateAvailable = $false; Current = $CurrentVersion; Error = $_.Exception.Message }
+    }
+}
+
 # ─── Export des fonctions publiques ─────────────────────────────────────
 Export-ModuleMember -Function @(
     'Write-Log',
@@ -2552,7 +2833,12 @@ Export-ModuleMember -Function @(
     'Get-REDADZDOptimiserConfig',
     'Get-WinOptimizerConfig',
     'Set-REDADZDOptimiserConfig',
-    'Get-REDADZDOptimiserConfig'
+    'Get-REDADZDOptimiserConfig',
+    'Get-REDADZDBackupSummary',
+    'Invoke-REDADZDRollback',
+    'Get-SystemLicenseStatus',
+    'Export-REDADZDClientReport',
+    'Test-REDADZDUpdate'
 )
 
 # ─── Export des variables de config (lecture seule) ─────────────────────
