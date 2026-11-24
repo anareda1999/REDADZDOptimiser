@@ -585,9 +585,19 @@ $script:I18N = @{
         PerfLiveNotice      = "● مراقبة حية مستمرة • 1.5 ثانية"
         PerfRamTip          = "فائدة : تنظيف الذاكرة يفرغ بأمان الكاش الخامل في الخلفية دون إغلاق أي من برامجك."
         GbPerfKill          = "إغلاق العمليات غير الضرورية في الخلفية"
-        LblPerfKill         = "إنهاء العمليات المعلقة والمهدرة للموارد بأمان لتحرير أنوية المعالج."
-        BtnKillUseless      = "⚡ إنهاء العمليات غير المجدية الآن"
-        BtnKillUselessDone  = "✓ تم إنهاء {0} عملية غير ضرورية بنجاح !"
+        PerfKillInfo        = "إغلاق فوري للعمليات الخلفية المستهلكة للموارد (Phone Link، Game Bar، شريط الأخبار والودجات، تتبع Microsoft) مع الحماية الكاملة لعمليات النظام الأساسية."
+        PerfKillTargets     = "العمليات المستهدفة: PhoneExperienceHost, GameBarPresenceWriter, Widgets, Cortana, NewsAndInterests, FeedbackHub, Edge (idle)"
+        BtnKillProcesses    = "🛑 إنهاء العمليات غير الضرورية"
+        BtnKillProcessesDone= "✓ تم إنهاء {0} عملية غير ضرورية في الخلفية بنجاح !"
+        CbAutoKillOnOptimize= "تضمين إغلاق العمليات غير الضرورية تلقائياً أثناء التحسين الشامل"
+        GbPerfCpu           = "تحسينات المعالج (CPU) وخطط الطاقة"
+        CbPowerPlan         = "تفعيل خطة الطاقة 'الأداء العالي' / 'الأداء الأقصى' (High / Ultimate Performance)"
+        SubPowerPlan        = "إلغاء قيود توفير الطاقة وإطلاق التردد الأقصى للمعالج باستمرار."
+        CbForegroundPriority= "منح الأولوية القصوى لمعالجة النوافذ النشطة (Win32PrioritySeparation = 0x26)"
+        SubForegroundPriority= "تخصيص 3 أضعاف موارد المعالج للعبة أو البرنامج المفتوح حالياً لضمان سرعة واستجابة فورية."
+        CbDisableCoreParking= "تعطيل ركن الأنوية (Core Parking) لتشغيل كافة أنوية وخيوط المعالج بكفاءة 100%"
+        BtnApplyCpu         = "⚡ تطبيق إعدادات المعالج والطاقة"
+        BtnApplyCpuDone     = "✓ تم تطبيق إعدادات المعالج والطاقة بنجاح !"
 
         GbApps              = "تطبيقات النظام غير الضرورية للإزالة"
         CbApps              = "إزالة التطبيقات المثبتة مسبقاً (Xbox, Bing, Solitaire, Feedback, الخرائط، إلخ)"
@@ -1203,7 +1213,8 @@ function Update-HeaderForActivePage {
         }
     }
 }
-
+
+
 function Apply-Language {
     param([string]$Lang)
 
@@ -1273,6 +1284,41 @@ function Apply-Language {
     if ($lblTasksCount) { $lblTasksCount.Text = "$($script:TasksToDisable.Count) " + $strings.LblTasksSuffix }
 
     # Onglet 2 : Performances
+    try {
+        $m = Get-SystemPerformanceMetrics
+        if ($m) {
+            if ($lblRamMetric) {
+                $lblRamMetric.Text = ($strings.PerfRamFormat -f $m.UsedRamGB, $m.TotalRamGB, [int]$m.RamPercent)
+            }
+            if ($lblCpuMetric) {
+                $lblCpuMetric.Text = ($strings.PerfCpuFormat -f [math]::Round([double]$m.CpuPercent, 1), $m.ProcessCount)
+            }
+        }
+    } catch {
+        if ($lblRamMetric) {
+            $lblRamMetric.Text = switch ($Lang) {
+                "AR" { "استهلاك الذاكرة (RAM) : جاري الحساب..." }
+                "EN" { "RAM Memory Usage: Calculating..." }
+                default { "Mémoire Vive (RAM) : Calcul en cours..." }
+            }
+        }
+        if ($lblCpuMetric) {
+            $lblCpuMetric.Text = switch ($Lang) {
+                "AR" { "استهلاك المعالج (CPU) : جاري الحساب..." }
+                "EN" { "Processor (CPU) Usage: Calculating..." }
+                default { "Processeur (CPU) : Calcul en cours..." }
+            }
+        }
+    }
+
+    # Réinitialisation du défilement horizontal sur toutes les pages pour éviter tout décalage
+    if ($script:NavPages) {
+        foreach ($pg in $script:NavPages) {
+            if ($pg) {
+                $pg.AutoScrollPosition = New-Object System.Drawing.Point(0, 0)
+            }
+        }
+    }
     if ($cardPerfMonitor -and $cardPerfMonitor.Tag) { $cardPerfMonitor.Tag.Header.Text = $strings.GbPerfMonitor }
     if ($btnFlushRam) { $btnFlushRam.Text = $strings.BtnFlushRam }
     if ($lblPerfLiveNotice) { $lblPerfLiveNotice.Text = $strings.PerfLiveNotice }
@@ -1487,14 +1533,30 @@ function New-PresetButton {
 }
 
 # ────────────────────────────────────────────────────────────────────────
-# 1. NAVIGATION RAIL VERTICAL GAUCHE (STYLE KUDU)
+# ────────────────────────────────────────────────────────────────────────
+# 1. ARCHITECTURE SÉCURISÉE SANS CHEVAUCHEMENT (ROOT TABLELAYOUT)
 # ────────────────────────────────────────────────────────────────────────
 
+# Layout racine à 2 colonnes strictes : Colonne 0 (Sidebar 74px) | Colonne 1 (MainPanel 100%)
+# Élimine 100% de tout risque de chevauchement entre la barre latérale et l'espace de travail
+$rootLayout = New-Object System.Windows.Forms.TableLayoutPanel
+$rootLayout.Dock = [System.Windows.Forms.DockStyle]::Fill
+$rootLayout.ColumnCount = 2
+$rootLayout.RowCount = 1
+$rootLayout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Absolute, 74))) | Out-Null
+$rootLayout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null
+$rootLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null
+$rootLayout.BackColor = $colors.BackColor
+$rootLayout.Padding = New-Object System.Windows.Forms.Padding(0)
+$rootLayout.Margin = New-Object System.Windows.Forms.Padding(0)
+$form.Controls.Add($rootLayout)
+
+# ── Colonne 0 : Rail de navigation vertical gauche (Style Kudu) ─────────
 $sidebarPanel = New-Object System.Windows.Forms.Panel
-$sidebarPanel.Dock = [System.Windows.Forms.DockStyle]::Left
-$sidebarPanel.Width = 74
+$sidebarPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
 $sidebarPanel.BackColor = $colors.SidebarBack
-$form.Controls.Add($sidebarPanel)
+$sidebarPanel.Margin = New-Object System.Windows.Forms.Padding(0)
+$rootLayout.Controls.Add($sidebarPanel, 0, 0)
 
 # Ligne séparatrice droite fine (1px)
 $sidebarPanel.Add_Paint({
@@ -1593,13 +1655,11 @@ function New-NavIconButton {
         $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 
         if ($s.Tag.IsActive) {
-            # Fond actif ambre doux
             $brush = New-Object System.Drawing.SolidBrush($script:colors.NavActiveBack)
             $rect = New-Object System.Drawing.Rectangle(4, 2, $s.Width - 8, $s.Height - 4)
             $g.FillRectangle($brush, $rect)
             $brush.Dispose()
 
-            # Indicateur vertical Kudu sur le bord gauche (Ambre vif)
             $barBrush = New-Object System.Drawing.SolidBrush($script:colors.NavActiveBar)
             $g.FillRectangle($barBrush, 0, 7, 3.5, $s.Height - 14)
             $barBrush.Dispose()
@@ -1619,20 +1679,20 @@ function New-NavIconButton {
 }
 
 # ────────────────────────────────────────────────────────────────────────
-# 2. CONTENEUR PRINCIPAL DROIT (HEADER + CANVAS + BARRE D'ACTION)
+# 2. COLONNE 1 : CONTENEUR PRINCIPAL DROIT (HEADER + CANVAS + BARRE D'ACTION)
 # ────────────────────────────────────────────────────────────────────────
 
 $rightMainPanel = New-Object System.Windows.Forms.Panel
 $rightMainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
 $rightMainPanel.BackColor = $colors.BackColor
-$form.Controls.Add($rightMainPanel)
+$rightMainPanel.Margin = New-Object System.Windows.Forms.Padding(0)
+$rootLayout.Controls.Add($rightMainPanel, 1, 0)
 
 # 2.1. HEADER SUPÉRIEUR ÉPURÉ STYLE KUDU (Dock: Top, 84px)
 $topHeader = New-Object System.Windows.Forms.Panel
 $topHeader.Dock = [System.Windows.Forms.DockStyle]::Top
 $topHeader.Height = 84
 $topHeader.BackColor = $colors.CardBack
-$topHeader.Padding = New-Object System.Windows.Forms.Padding(28, 10, 24, 10)
 $rightMainPanel.Controls.Add($topHeader)
 
 $topHeader.Add_Paint({
@@ -1642,34 +1702,14 @@ $topHeader.Add_Paint({
     $pen.Dispose()
 })
 
-# Eyebrow Kudu (YOUR WORKSPACE)
-$script:lblEyebrow = New-Object System.Windows.Forms.Label
-$script:lblEyebrow.Text = "ⓘ ESPACE DE TRAVAIL  •  REDADZDOptimiser"
-$script:lblEyebrow.Font = $fonts.Eyebrow
-$script:lblEyebrow.ForeColor = $colors.NavMutedFore
-$script:lblEyebrow.AutoSize = $true
-$script:lblEyebrow.Location = New-Object System.Drawing.Point(28, 12)
-$topHeader.Controls.Add($script:lblEyebrow)
+# Panneau de droite pour Admin Badge + Langue (Largeur fixe 380px, Dock: Right)
+$headerRight = New-Object System.Windows.Forms.Panel
+$headerRight.Dock = [System.Windows.Forms.DockStyle]::Right
+$headerRight.Width = 380
+$headerRight.BackColor = [System.Drawing.Color]::Transparent
+$topHeader.Controls.Add($headerRight)
 
-# Titre Principal Kudu (Grand & Gras)
-$script:lblPageTitle = New-Object System.Windows.Forms.Label
-$script:lblPageTitle.Text = "Suppression des Bloatwares"
-$script:lblPageTitle.Font = $fonts.HeroTitle
-$script:lblPageTitle.ForeColor = [System.Drawing.Color]::FromArgb(15, 23, 42) # Slate 900
-$script:lblPageTitle.AutoSize = $true
-$script:lblPageTitle.Location = New-Object System.Drawing.Point(26, 28)
-$topHeader.Controls.Add($script:lblPageTitle)
-
-# Sous-titre descriptif Kudu
-$script:lblPageDesc = New-Object System.Windows.Forms.Label
-$script:lblPageDesc.Text = "Supprimez les applications préinstallées inutiles et désactivez la télémétrie Windows."
-$script:lblPageDesc.Font = $fonts.Small
-$script:lblPageDesc.ForeColor = $colors.MutedColor
-$script:lblPageDesc.AutoSize = $true
-$script:lblPageDesc.Location = New-Object System.Drawing.Point(28, 58)
-$topHeader.Controls.Add($script:lblPageDesc)
-
-# Badge Administrateur (Pill moderne vert pastel ou rouge pastel)
+# Badge Administrateur
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 $adminBadge = New-Object System.Windows.Forms.Label
 $adminBadge.Text = if ($isAdmin) { "✓ ADMINISTRATEUR (Élevé)" } else { "⚠ NON-ADMIN (Droits limités)" }
@@ -1678,8 +1718,7 @@ $adminBadge.ForeColor = if ($isAdmin) { $colors.AdminOkFore } else { $colors.Adm
 $adminBadge.BackColor = if ($isAdmin) { $colors.AdminOkBack } else { $colors.AdminErrBack }
 $adminBadge.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 $adminBadge.Size = New-Object System.Drawing.Size(195, 26)
-$adminBadge.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
-$adminBadge.Location = New-Object System.Drawing.Point(($form.Width - 74 - 230), 14)
+$adminBadge.Location = New-Object System.Drawing.Point(175, 12)
 $adminBadge.Add_Paint({
     param($s, $e)
     $borderCol = if ($isAdmin) { $script:colors.AdminOkBorder } else { $script:colors.AdminErrBorder }
@@ -1687,20 +1726,9 @@ $adminBadge.Add_Paint({
     $e.Graphics.DrawRectangle($p, 0, 0, $s.Width - 1, $s.Height - 1)
     $p.Dispose()
 })
-$topHeader.Controls.Add($adminBadge)
+$headerRight.Controls.Add($adminBadge)
 
-# Version Windows
-$winVer = [System.Environment]::OSVersion.Version
-$verLabel = New-Object System.Windows.Forms.Label
-$verLabel.Text = "Windows $($winVer.Major).$($winVer.Minor) Build $($winVer.Build)"
-$verLabel.Font = $fonts.Small
-$verLabel.ForeColor = $colors.DisabledColor
-$verLabel.AutoSize = $true
-$verLabel.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
-$verLabel.Location = New-Object System.Drawing.Point(($form.Width - 74 - 230), 48)
-$topHeader.Controls.Add($verLabel)
-
-# Sélecteur de Langue dynamique
+# Sélecteur de Langue
 $script:LangCombo = New-Object System.Windows.Forms.ComboBox
 $script:LangCombo.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 $script:LangCombo.Items.AddRange(@("🇫🇷 Français", "🇬🇧 English", "🇸🇦 العربية"))
@@ -1708,9 +1736,8 @@ $script:LangCombo.BackColor = [System.Drawing.Color]::White
 $script:LangCombo.ForeColor = $colors.ForeColor
 $script:LangCombo.Font = $fonts.Normal
 $script:LangCombo.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$script:LangCombo.Size = New-Object System.Drawing.Size(130, 26)
-$script:LangCombo.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
-$script:LangCombo.Location = New-Object System.Drawing.Point(($form.Width - 74 - 375), 14)
+$script:LangCombo.Size = New-Object System.Drawing.Size(135, 26)
+$script:LangCombo.Location = New-Object System.Drawing.Point(30, 12)
 $script:LangCombo.Add_SelectedIndexChanged({
     if (-not $script:SuppressLangEvent) {
         $sel = switch ($this.SelectedIndex) {
@@ -1722,12 +1749,54 @@ $script:LangCombo.Add_SelectedIndexChanged({
         Apply-Language -Lang $sel
     }
 })
-$topHeader.Controls.Add($script:LangCombo)
+$headerRight.Controls.Add($script:LangCombo)
 
-# 2.2. BARRE BASSE PERSISTANTE (PRÉRÉGLAGES + ACTIONS + PROGRESSION) (Dock: Bottom, 70px)
+# Version Windows
+$winVer = [System.Environment]::OSVersion.Version
+$verLabel = New-Object System.Windows.Forms.Label
+$verLabel.Text = "Windows $($winVer.Major).$($winVer.Minor) Build $($winVer.Build)"
+$verLabel.Font = $fonts.Small
+$verLabel.ForeColor = $colors.DisabledColor
+$verLabel.Size = New-Object System.Drawing.Size(340, 20)
+$verLabel.Location = New-Object System.Drawing.Point(30, 48)
+$verLabel.TextAlign = [System.Drawing.ContentAlignment]::MiddleRight
+$headerRight.Controls.Add($verLabel)
+
+# Panneau de gauche pour Titres & Eyebrow (Dock: Fill)
+$headerLeft = New-Object System.Windows.Forms.Panel
+$headerLeft.Dock = [System.Windows.Forms.DockStyle]::Fill
+$headerLeft.BackColor = [System.Drawing.Color]::Transparent
+$headerLeft.Padding = New-Object System.Windows.Forms.Padding(24, 8, 12, 8)
+$topHeader.Controls.Add($headerLeft)
+
+$script:lblEyebrow = New-Object System.Windows.Forms.Label
+$script:lblEyebrow.Text = "ⓘ ESPACE DE TRAVAIL  •  REDADZDOptimiser"
+$script:lblEyebrow.Font = $fonts.Eyebrow
+$script:lblEyebrow.ForeColor = $colors.NavMutedFore
+$script:lblEyebrow.AutoSize = $true
+$script:lblEyebrow.Location = New-Object System.Drawing.Point(24, 10)
+$headerLeft.Controls.Add($script:lblEyebrow)
+
+$script:lblPageTitle = New-Object System.Windows.Forms.Label
+$script:lblPageTitle.Text = "Suppression des Bloatwares"
+$script:lblPageTitle.Font = New-Object System.Drawing.Font("Segoe UI", 16.5, [System.Drawing.FontStyle]::Bold)
+$script:lblPageTitle.ForeColor = [System.Drawing.Color]::FromArgb(15, 23, 42)
+$script:lblPageTitle.AutoSize = $true
+$script:lblPageTitle.Location = New-Object System.Drawing.Point(22, 26)
+$headerLeft.Controls.Add($script:lblPageTitle)
+
+$script:lblPageDesc = New-Object System.Windows.Forms.Label
+$script:lblPageDesc.Text = "Supprimez les applications préinstallées inutiles et désactivez la télémétrie Windows."
+$script:lblPageDesc.Font = $fonts.Small
+$script:lblPageDesc.ForeColor = $colors.MutedColor
+$script:lblPageDesc.AutoSize = $true
+$script:lblPageDesc.Location = New-Object System.Drawing.Point(24, 56)
+$headerLeft.Controls.Add($script:lblPageDesc)
+
+# 2.2. BARRE BASSE EN 2 LIGNES DISTINCTES (PRÉRÉGLAGES AU-DESSUS, ACTIONS EN-DESSOUS) (Dock: Bottom, 88px)
 $bottomBar = New-Object System.Windows.Forms.Panel
 $bottomBar.Dock = [System.Windows.Forms.DockStyle]::Bottom
-$bottomBar.Height = 70
+$bottomBar.Height = 88
 $bottomBar.BackColor = $colors.CardBack
 $rightMainPanel.Controls.Add($bottomBar)
 
@@ -1738,7 +1807,7 @@ $bottomBar.Add_Paint({
     $pen.Dispose()
 })
 
-# Barre de progression moderne fluide (Dock: Top)
+# Barre de progression moderne fluide (Dock: Top, 4px)
 $script:ProgressBar = New-Object System.Windows.Forms.ProgressBar
 $script:ProgressBar.Dock = [System.Windows.Forms.DockStyle]::Top
 $script:ProgressBar.Height = 4
@@ -1747,68 +1816,80 @@ $script:ProgressBar.ForeColor = $colors.AccentColor
 $script:ProgressBar.BackColor = $colors.BorderColor
 $bottomBar.Controls.Add($script:ProgressBar)
 
-# Contenu de la barre basse
-$bottomContent = New-Object System.Windows.Forms.Panel
-$bottomContent.Dock = [System.Windows.Forms.DockStyle]::Fill
-$bottomContent.BackColor = [System.Drawing.Color]::Transparent
-$bottomBar.Controls.Add($bottomContent)
+# Ligne 1 : Bandeau des Préréglages (Dock: Top, 38px, fond doux)
+$presetRow = New-Object System.Windows.Forms.Panel
+$presetRow.Dock = [System.Windows.Forms.DockStyle]::Top
+$presetRow.Height = 38
+$presetRow.BackColor = [System.Drawing.Color]::FromArgb(248, 250, 252)
+$presetRow.Padding = New-Object System.Windows.Forms.Padding(16, 4, 16, 4)
+$bottomBar.Controls.Add($presetRow)
 
-# Groupe Préréglages à gauche
+$presetRow.Add_Paint({
+    param($s, $e)
+    $p = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+    $e.Graphics.DrawLine($p, 0, $s.Height - 1, $s.Width, $s.Height - 1)
+    $p.Dispose()
+})
+
 $lblPresetTitle = New-Object System.Windows.Forms.Label
 $lblPresetTitle.Text = "⚡ Préréglages :"
 $lblPresetTitle.Font = $fonts.SubTitle
 $lblPresetTitle.ForeColor = $colors.ForeColor
-$lblPresetTitle.Location = New-Object System.Drawing.Point(18, 9)
+$lblPresetTitle.Location = New-Object System.Drawing.Point(16, 8)
 $lblPresetTitle.AutoSize = $true
-$bottomContent.Controls.Add($lblPresetTitle)
+$presetRow.Controls.Add($lblPresetTitle)
 
-$script:BtnPresetMin = New-PresetButton -Text "🌱 Minimal" -Location (New-Object System.Drawing.Point(130, 6)) -Click {
+$script:BtnPresetMin = New-PresetButton -Text "🌱 Minimal" -Location (New-Object System.Drawing.Point(125, 4)) -Click {
     Apply-Preset -Preset "Minimal"
 }
 $script:BtnPresetMin.Size = New-Object System.Drawing.Size(100, 28)
-$bottomContent.Controls.Add($script:BtnPresetMin)
+$presetRow.Controls.Add($script:BtnPresetMin)
 
-$script:BtnPresetStd = New-PresetButton -Text "⚡ Standard" -Location (New-Object System.Drawing.Point(236, 6)) -Click {
+$script:BtnPresetStd = New-PresetButton -Text "⚡ Standard" -Location (New-Object System.Drawing.Point(232, 4)) -Click {
     Apply-Preset -Preset "Standard"
 }
 $script:BtnPresetStd.Size = New-Object System.Drawing.Size(108, 28)
-$bottomContent.Controls.Add($script:BtnPresetStd)
+$presetRow.Controls.Add($script:BtnPresetStd)
 
-$script:BtnPresetMax = New-PresetButton -Text "🚀 Max" -Location (New-Object System.Drawing.Point(350, 6)) -Click {
+$script:BtnPresetMax = New-PresetButton -Text "🚀 Max" -Location (New-Object System.Drawing.Point(348, 4)) -Click {
     Apply-Preset -Preset "Max"
 }
 $script:BtnPresetMax.Size = New-Object System.Drawing.Size(92, 28)
-$bottomContent.Controls.Add($script:BtnPresetMax)
+$presetRow.Controls.Add($script:BtnPresetMax)
 
 $lblPresetDesc = New-Object System.Windows.Forms.Label
 $lblPresetDesc.Text = "(Recommandé : Débloat, télémétrie, nettoyage & CPU)"
 $lblPresetDesc.Font = $fonts.Small
 $lblPresetDesc.ForeColor = $colors.MutedColor
-$lblPresetDesc.Location = New-Object System.Drawing.Point(450, 12)
+$lblPresetDesc.Location = New-Object System.Drawing.Point(450, 9)
 $lblPresetDesc.AutoSize = $true
-$bottomContent.Controls.Add($lblPresetDesc)
+$presetRow.Controls.Add($lblPresetDesc)
 
-# Copyright & Auteur (Anagou Reda 0542439514)
+# Ligne 2 : Actions principales et Copyright (Dock: Fill, 46px)
+$actionRow = New-Object System.Windows.Forms.Panel
+$actionRow.Dock = [System.Windows.Forms.DockStyle]::Fill
+$actionRow.BackColor = [System.Drawing.Color]::Transparent
+$bottomBar.Controls.Add($actionRow)
+
 $copyrightLabel = New-Object System.Windows.Forms.Label
 $copyrightLabel.Text = "© 2026 REDADZDOptimiser • Anagou Reda  |  Tél : 0542439514"
 $copyrightLabel.Font = $fonts.Small
 $copyrightLabel.ForeColor = $colors.MutedColor
-$copyrightLabel.Location = New-Object System.Drawing.Point(18, 42)
+$copyrightLabel.Location = New-Object System.Drawing.Point(16, 14)
 $copyrightLabel.AutoSize = $true
-$bottomContent.Controls.Add($copyrightLabel)
+$actionRow.Controls.Add($copyrightLabel)
 
-# Boutons d'action alignés à droite
 $actionFlow = New-Object System.Windows.Forms.FlowLayoutPanel
 $actionFlow.Dock = [System.Windows.Forms.DockStyle]::Right
-$actionFlow.Width = 530
-$actionFlow.Height = 56
+$actionFlow.Width = 510
+$actionFlow.Height = 44
 $actionFlow.FlowDirection = [System.Windows.Forms.FlowDirection]::RightToLeft
 $actionFlow.BackColor = [System.Drawing.Color]::Transparent
-$actionFlow.Padding = New-Object System.Windows.Forms.Padding(8, 8, 16, 8)
-$bottomContent.Controls.Add($actionFlow)
+$actionFlow.Padding = New-Object System.Windows.Forms.Padding(4, 4, 16, 4)
+$actionRow.Controls.Add($actionFlow)
 
 # Bouton ANNULER
-$script:BtnCancel = New-ModernButton -Text "✕ Annuler" -Size (New-Object System.Drawing.Size(108, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
+$script:BtnCancel = New-ModernButton -Text "✕ Annuler" -Size (New-Object System.Drawing.Size(105, 36)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
     $script:CancelToken = $true
     Set-REDADZDOptimiserConfig -CancelRequested $true
     Append-Log ($script:I18N[$script:CurrentLang].CancelPrompt) "WARN"
@@ -1817,18 +1898,18 @@ $script:BtnCancel.Enabled = $false
 $actionFlow.Controls.Add($script:BtnCancel)
 
 # Bouton SIMULATION DRY-RUN
-$script:BtnDryRun = New-ModernButton -Text "🔍 Simulation" -Size (New-Object System.Drawing.Size(150, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
+$script:BtnDryRun = New-ModernButton -Text "🔍 Simulation" -Size (New-Object System.Drawing.Size(145, 36)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
     Start-Optimization -DryRun $true
 } -BackColor $colors.WarningColor -HoverColor $colors.WarningHover -PressColor $colors.WarningPress
 $actionFlow.Controls.Add($script:BtnDryRun)
 
 # Bouton OPTIMISER MAINTENANT
-$script:BtnRun = New-ModernButton -Text "▶ OPTIMISER MAINTENANT" -Size (New-Object System.Drawing.Size(215, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
+$script:BtnRun = New-ModernButton -Text "▶ OPTIMISER MAINTENANT" -Size (New-Object System.Drawing.Size(205, 36)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
     Start-Optimization -DryRun $false
 } -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress
 $actionFlow.Controls.Add($script:BtnRun)
 
-# 2.3. CONTENEUR DES PAGES DE VUES (CANVAS CENTRAL)
+# 2.3. CONTENEUR CENTRAL DES VUES (CANVAS)
 $script:ViewContainer = New-Object System.Windows.Forms.Panel
 $script:ViewContainer.Dock = [System.Windows.Forms.DockStyle]::Fill
 $script:ViewContainer.BackColor = $colors.BackColor
@@ -1840,7 +1921,7 @@ $script:NavButtons = @()
 $script:NavPages = New-Object System.Collections.Generic.List[System.Windows.Forms.Panel]
 $script:ActiveNavIndex = 0
 
-# Objet de compatibilité TabControl pour tout code historique
+# Objet de compatibilité TabControl
 $script:TabControl = [PSCustomObject]@{
     TabPages = [PSCustomObject]@{
         Add = { param($p) }
@@ -1861,6 +1942,7 @@ function Select-NavPage {
         $page.Visible = $isActive
         if ($isActive) {
             $page.BringToFront()
+            $page.AutoScrollPosition = New-Object System.Drawing.Point(0, 0)
         }
         if ($btn -and $btn.Tag) {
             $btn.Tag.IsActive = $isActive
@@ -1871,7 +1953,7 @@ function Select-NavPage {
     Update-HeaderForActivePage
 }
 
-# Fonction de création de page (remplace New-TabPage avec compatibilité totale)
+# Fonction de création de page (verrouillage anti-décalage horizontal)
 function New-TabPage {
     param(
         [string]$Title,
@@ -1883,6 +1965,12 @@ function New-TabPage {
     $page.BackColor = $script:colors.BackColor
     $page.Padding = New-Object System.Windows.Forms.Padding(16, 12, 16, 20)
     $page.Visible = ($script:NavPages.Count -eq 0)
+
+    # Verrouillage strict du défilement horizontal (anti-décalage RTL et arabe)
+    $page.HorizontalScroll.Maximum = 0
+    $page.HorizontalScroll.Visible = $false
+    $page.HorizontalScroll.Enabled = $false
+    $page.AutoScrollPosition = New-Object System.Drawing.Point(0, 0)
 
     $script:ViewContainer.Controls.Add($page)
     $script:NavPages.Add($page)
@@ -1990,7 +2078,7 @@ $script:TabControl.TabPages.Add($perfTab.Page)
 $yPosPerf = 14
 
 # ── Carte 1: Surveillance des Ressources (RAM & CPU) ──
-$cardPerfMonitor = New-ModernCard -Title "Surveillance des Ressources en temps réel" -Location (New-Object System.Drawing.Point(12, $yPosPerf)) -Size (New-Object System.Drawing.Size(890, 215)) -AccentLineColor $colors.SuccessColor
+$cardPerfMonitor = New-ModernCard -Title "Surveillance des Ressources en temps réel" -Location (New-Object System.Drawing.Point(12, $yPosPerf)) -Size (New-Object System.Drawing.Size(860, 215)) -AccentLineColor $colors.SuccessColor
 $perfTab.Scroll.Controls.Add($cardPerfMonitor)
 
 # RAM
@@ -2004,14 +2092,14 @@ $cardPerfMonitor.Controls.Add($lblRamMetric)
 
 $pbRam = New-Object System.Windows.Forms.ProgressBar
 $pbRam.Location = New-Object System.Drawing.Point(20, 70)
-$pbRam.Size = New-Object System.Drawing.Size(610, 22)
+$pbRam.Size = New-Object System.Drawing.Size(570, 22)
 $pbRam.Minimum = 0
 $pbRam.Maximum = 100
 $pbRam.Value = 0
 $pbRam.Style = [System.Windows.Forms.ProgressBarStyle]::Continuous
 $cardPerfMonitor.Controls.Add($pbRam)
 
-$btnFlushRam = New-ModernButton -Text "🚀 Vider le cache & RAM" -Size (New-Object System.Drawing.Size(225, 48)) -Location (New-Object System.Drawing.Point(645, 44)) -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress -Click {
+$btnFlushRam = New-ModernButton -Text "🚀 Vider le cache & RAM" -Size (New-Object System.Drawing.Size(235, 48)) -Location (New-Object System.Drawing.Point(605, 44)) -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress -Click {
     if ($script:IsRunning) { return }
     $origText = $btnFlushRam.Text
     $btnFlushRam.Enabled = $false
@@ -2049,7 +2137,7 @@ $cardPerfMonitor.Controls.Add($lblCpuMetric)
 
 $pbCpu = New-Object System.Windows.Forms.ProgressBar
 $pbCpu.Location = New-Object System.Drawing.Point(20, 132)
-$pbCpu.Size = New-Object System.Drawing.Size(610, 22)
+$pbCpu.Size = New-Object System.Drawing.Size(570, 22)
 $pbCpu.Minimum = 0
 $pbCpu.Maximum = 100
 $pbCpu.Value = 0
@@ -2060,8 +2148,8 @@ $lblPerfLiveNotice = New-Object System.Windows.Forms.Label
 $lblPerfLiveNotice.Text = "● Surveillance continue en direct • 1.5s"
 $lblPerfLiveNotice.Font = $fonts.Small
 $lblPerfLiveNotice.ForeColor = $colors.MutedColor
-$lblPerfLiveNotice.Location = New-Object System.Drawing.Point(645, 134)
-$lblPerfLiveNotice.Size = New-Object System.Drawing.Size(225, 20)
+$lblPerfLiveNotice.Location = New-Object System.Drawing.Point(605, 134)
+$lblPerfLiveNotice.Size = New-Object System.Drawing.Size(235, 20)
 $cardPerfMonitor.Controls.Add($lblPerfLiveNotice)
 
 $lblRamTip = New-Object System.Windows.Forms.Label
@@ -2075,7 +2163,7 @@ $cardPerfMonitor.Controls.Add($lblRamTip)
 $yPosPerf += 230
 
 # ── Carte 2: Fermeture des Processus d'Arrière-Plan ──
-$cardPerfKill = New-ModernCard -Title "Nettoyeur de Processus d'Arrière-Plan Inutiles" -Location (New-Object System.Drawing.Point(12, $yPosPerf)) -Size (New-Object System.Drawing.Size(890, 175)) -AccentLineColor $colors.ErrorColor
+$cardPerfKill = New-ModernCard -Title "Nettoyeur de Processus d'Arrière-Plan Inutiles" -Location (New-Object System.Drawing.Point(12, $yPosPerf)) -Size (New-Object System.Drawing.Size(860, 175)) -AccentLineColor $colors.ErrorColor
 $perfTab.Scroll.Controls.Add($cardPerfKill)
 
 $lblKillInfo = New-Object System.Windows.Forms.Label
@@ -2094,7 +2182,7 @@ $lblKillTargets.Location = New-Object System.Drawing.Point(20, 80)
 $lblKillTargets.Size = New-Object System.Drawing.Size(850, 20)
 $cardPerfKill.Controls.Add($lblKillTargets)
 
-$btnKillProcesses = New-ModernButton -Text "🛑 Fermer les processus inutiles" -Size (New-Object System.Drawing.Size(260, 42)) -Location (New-Object System.Drawing.Point(20, 112)) -BackColor $colors.ErrorColor -HoverColor $colors.ErrorHover -PressColor $colors.ErrorPress -Click {
+$btnKillProcesses = New-ModernButton -Text "🛑 Fermer les processus inutiles" -Size (New-Object System.Drawing.Size(250, 40)) -Location (New-Object System.Drawing.Point(20, 112)) -BackColor $colors.ErrorColor -HoverColor $colors.ErrorHover -PressColor $colors.ErrorPress -Click {
     if ($script:IsRunning) { return }
     $origText = $btnKillProcesses.Text
     $btnKillProcesses.Enabled = $false
@@ -2117,13 +2205,13 @@ $btnKillProcesses = New-ModernButton -Text "🛑 Fermer les processus inutiles" 
 }
 $cardPerfKill.Controls.Add($btnKillProcesses)
 
-$script:CbAutoKillOnOptimize = New-ModernCheckBox -Text "Inclure la fermeture des processus inutiles lors de l'Optimisation Globale" -Location (New-Object System.Drawing.Point(300, 122)) -Checked $true
+$script:CbAutoKillOnOptimize = New-ModernCheckBox -Text "Inclure la fermeture des processus inutiles lors de l'Optimisation Globale" -Location (New-Object System.Drawing.Point(285, 120)) -Checked $true
 $cardPerfKill.Controls.Add($script:CbAutoKillOnOptimize)
 
 $yPosPerf += 190
 
 # ── Carte 3: Optimisations Processeur & Énergie ──
-$cardPerfCpu = New-ModernCard -Title "Optimisations Processeur (CPU) & Alimentation" -Location (New-Object System.Drawing.Point(12, $yPosPerf)) -Size (New-Object System.Drawing.Size(890, 235)) -AccentLineColor $colors.IndigoAccent
+$cardPerfCpu = New-ModernCard -Title "Optimisations Processeur (CPU) & Alimentation" -Location (New-Object System.Drawing.Point(12, $yPosPerf)) -Size (New-Object System.Drawing.Size(860, 235)) -AccentLineColor $colors.IndigoAccent
 $perfTab.Scroll.Controls.Add($cardPerfCpu)
 
 $script:CbPowerPlan = New-ModernCheckBox -Text "Activer le plan d'alimentation 'Performances Élevées' / 'Performances Optimales'" -Location (New-Object System.Drawing.Point(20, 40)) -Checked $true
