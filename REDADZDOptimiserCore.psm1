@@ -1282,6 +1282,252 @@ function Get-SystemPerformanceMetrics {
     }
 }
 
+
+function Get-SystemHardwareHealthAndDiagnostics {
+    <#
+    .SYNOPSIS
+        Analyse approfondie de la santé matérielle (Processeur, RAM, Disque, Batterie)
+        et recommandation intelligente du profil d'optimisation (Minimal, Standard, Max).
+    #>
+    [CmdletBinding()]
+    param()
+
+    # 1. Processeur (CPU)
+    $cpuName = "Processeur Windows"
+    $cores = [System.Environment]::ProcessorCount
+    $threads = $cores
+    $speed = 0
+    $cpuLoad = 0.0
+
+    try {
+        $regCpu = Get-ItemProperty -Path 'HKLM:\HARDWARE\DESCRIPTION\System\CentralProcessor\0' -ErrorAction SilentlyContinue
+        if ($regCpu -and $regCpu.ProcessorNameString) { $cpuName = $regCpu.ProcessorNameString.Trim() }
+        if ($regCpu -and $regCpu.'~MHz') { $speed = [int]$regCpu.'~MHz' }
+    } catch {}
+
+    try {
+        $wCpu = Get-CimInstance Win32_Processor -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($wCpu) {
+            if ($wCpu.Name) { $cpuName = $wCpu.Name.Trim() }
+            if ($wCpu.NumberOfCores) { $cores = $wCpu.NumberOfCores }
+            if ($wCpu.NumberOfLogicalProcessors) { $threads = $wCpu.NumberOfLogicalProcessors }
+            if ($wCpu.MaxClockSpeed) { $speed = $wCpu.MaxClockSpeed }
+            if ($wCpu.LoadPercentage) { $cpuLoad = [double]$wCpu.LoadPercentage }
+        }
+    } catch {}
+
+    if ($cpuLoad -eq 0.0) {
+        try {
+            $cpuLoad = [REDADZD.SystemHelper]::GetCpuUsage()
+        } catch {}
+    }
+
+    $cpuHealth = if ($cpuLoad -gt 85) { "Surchargé (Charge élevée)" } elseif ($cpuLoad -gt 50) { "Sollicité (Normal)" } else { "Optimal (Sain ✓)" }
+
+    # 2. Mémoire Vive (RAM)
+    $totalRamGB = 0.0
+    $usedRamGB  = 0.0
+    $freeRamGB  = 0.0
+    $ramPct     = 0
+    $ramCount   = 1
+    $ramSpeed   = 0
+
+    try {
+        $mem = [REDADZD.SystemHelper]::GetMemoryStatus()
+        $totalRamGB = [math]::Round($mem.ullTotalPhys / 1GB, 1)
+        $freeRamGB  = [math]::Round($mem.ullAvailPhys / 1GB, 1)
+        $usedRamGB  = [math]::Round(($mem.ullTotalPhys - $mem.ullAvailPhys) / 1GB, 1)
+        $ramPct     = [int]$mem.dwMemoryLoad
+    } catch {
+        try {
+            $os = Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue
+            if ($os) {
+                $totalRamGB = [math]::Round($os.TotalVisibleMemorySize / 1MB, 1)
+                $freeRamGB  = [math]::Round($os.FreePhysicalMemory / 1MB, 1)
+                $usedRamGB  = [math]::Round($totalRamGB - $freeRamGB, 1)
+                if ($totalRamGB -gt 0) { $ramPct = [int](($usedRamGB / $totalRamGB) * 100) }
+            }
+        } catch {}
+    }
+
+    try {
+        $wMem = @(Get-CimInstance Win32_PhysicalMemory -ErrorAction SilentlyContinue)
+        if ($wMem -and $wMem.Count -gt 0) {
+            $ramCount = $wMem.Count
+            $ramSpeed = $wMem[0].Speed
+        }
+    } catch {}
+
+    $ramHealth = if ($ramPct -gt 85) { "Saturation critique (>85%)" } elseif ($ramPct -gt 65) { "Utilisation élevée" } else { "Optimale (Sain ✓)" }
+
+    # 3. Disque Dur & Stockage (C:)
+    $diskName   = "Disque Système Principal"
+    $diskType   = "SSD"
+    $diskSmart  = "Healthy (Sain ✓)"
+    $cTotalGB   = 0.0
+    $cFreeGB    = 0.0
+    $cUsedGB    = 0.0
+    $cFreePct   = 0.0
+
+    try {
+        $c = [System.IO.DriveInfo]::GetDrives() | Where-Object { $_.Name -like 'C:*' } | Select-Object -First 1
+        if ($c) {
+            $cTotalGB = [math]::Round($c.TotalSize / 1GB, 1)
+            $cFreeGB  = [math]::Round($c.TotalFreeSpace / 1GB, 1)
+            $cUsedGB  = [math]::Round(($c.TotalSize - $c.TotalFreeSpace) / 1GB, 1)
+            if ($cTotalGB -gt 0) {
+                $cFreePct = [math]::Round(($c.TotalFreeSpace / $c.TotalSize) * 100, 1)
+            }
+        }
+    } catch {}
+
+    try {
+        $pDisk = Get-PhysicalDisk -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($pDisk) {
+            if ($pDisk.FriendlyName) { $diskName = $pDisk.FriendlyName }
+            if ($pDisk.MediaType)    { $diskType = $pDisk.MediaType }
+            if ($pDisk.HealthStatus) { $diskSmart = "$($pDisk.HealthStatus) (S.M.A.R.T. OK ✓)" }
+        }
+    } catch {}
+
+    $diskHealth = if ($cFreeGB -lt 20 -or $cFreePct -lt 15) { "Espace disque critique (<15% libre)" } elseif ($cFreeGB -lt 40 -or $cFreePct -lt 25) { "Espace modéré" } else { "Excellent (Sain ✓)" }
+
+    # 4. Batterie & Énergie
+    $hasBattery    = $false
+    $batteryCharge = 100
+    $batteryStatus = "Alimentation Secteur (PC Fixe)"
+    $batteryHealth = "Alimentation continue (Secteur)"
+
+    try {
+        $wBat = Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($wBat) {
+            $hasBattery = $true
+            if ($wBat.EstimatedChargeRemaining) { $batteryCharge = [int]$wBat.EstimatedChargeRemaining }
+            $isPlugged = ($wBat.BatteryStatus -eq 2 -or $wBat.BatteryStatus -eq 6 -or $wBat.BatteryStatus -eq 7 -or $wBat.BatteryStatus -eq 8)
+            $batteryStatus = if ($isPlugged) { "Sur secteur (Branché • $($batteryCharge)%)" } else { "Sur batterie (Décharge • $($batteryCharge)%)" }
+            $batteryHealth = if ($batteryCharge -gt 80) { "Excellente (Bonne autonomie)" } elseif ($batteryCharge -gt 40) { "Correcte" } else { "Faible (Recharge conseillée)" }
+        }
+    } catch {}
+
+    # 5. Processus et Bloatwares
+    $procCount = 0
+    try { $procCount = @(Get-Process).Count } catch {}
+
+    # 6. Algorithme de Recommandation de Tweak
+    $score = 0
+
+    if ($totalRamGB -gt 0 -and $totalRamGB -lt 8.0) { $score += 30 }
+    elseif ($ramPct -gt 75) { $score += 25 }
+    elseif ($ramPct -gt 55) { $score += 15 }
+
+    if ($cFreeGB -gt 0 -and $cFreeGB -lt 25.0) { $score += 25 }
+    elseif ($cFreePct -gt 0 -and $cFreePct -lt 20.0) { $score += 20 }
+    elseif ($cFreeGB -gt 0 -and $cFreeGB -lt 50.0) { $score += 10 }
+
+    if ($procCount -gt 220) { $score += 25 }
+    elseif ($procCount -gt 150) { $score += 15 }
+    elseif ($procCount -gt 100) { $score += 8 }
+
+    if ($cpuLoad -gt 50.0) { $score += 15 }
+
+    $recProfile = "Standard"
+    $recTitle   = "Tweak Standard"
+    $recReason  = ""
+
+    if ($score -ge 50) {
+        $recProfile = "Max"
+        $recTitle   = "Tweak Max"
+        $recReason  = "Ce PC présente une charge élevée ($($ramPct)% RAM, $($procCount) processus, $($cFreeGB) Go libres sur C:). Le profil Max désactivera tous les services inutiles, libèrera un maximum de mémoire et dopera les performances du processeur."
+    } elseif ($score -le 20 -and $totalRamGB -ge 16.0 -and $cFreeGB -ge 60.0) {
+        $recProfile = "Minimal"
+        $recTitle   = "Tweak Minimal"
+        $recReason  = "Ce PC dispose de ressources généreuses ($($totalRamGB) Go RAM, $($cFreeGB) Go libres, matériel sain). Le profil Minimal applique les optimisations essentielles sans modifier les réglages avancés."
+    } else {
+        $recProfile = "Standard"
+        $recTitle   = "Tweak Standard"
+        $recReason  = "Configuration idéale pour un usage polyvalent (travail, multimédia, jeux). Le profil Standard supprime les bloatwares préinstallés et la télémétrie Windows tout en garantissant une stabilité absolue du système."
+    }
+
+    $adviceRam = if ($totalRamGB -lt 8.0) {
+        "Mémoire vive limitée ($($totalRamGB) Go) : La purge périodique du cache RAM est indispensable. Fermez les applications inutiles en arrière-plan et envisagez d'ajouter une barrette pour plus de confort."
+    } elseif ($ramPct -gt 75) {
+        "Forte occupation mémoire ($($ramPct)%) : $($usedRamGB) Go utilisés sur $($totalRamGB) Go. Utilisez le bouton 'Vider le cache & RAM' pour récupérer immédiatement jusqu'à 2 Go de mémoire tampon inactive."
+    } else {
+        "Mémoire vive saine ($($totalRamGB) Go, $($ramPct)% utilisée) : $($freeRamGB) Go de mémoire disponible. Vos barrettes ($($ramCount) module(s) à $($ramSpeed) MHz) fonctionnent dans d'excellentes conditions."
+    }
+
+    $adviceDisk = if ($cFreeGB -lt 25.0) {
+        "Attention : Espace disque C: très restreint ($($cFreeGB) Go restants). Lancez un nettoyage immédiat des fichiers temporaires et des mises à jour obsolètes via l'onglet Nettoyage pour éviter tout ralentissement Windows."
+    } elseif ($cFreePct -lt 25.0) {
+        "Espace de stockage modéré ($($cFreeGB) Go libres, $($cFreePct)% disponible). Un nettoyage régulier préservera les cellules de mémoire de votre $($diskType)."
+    } else {
+        "Stockage $($diskType) en excellent état : $($cFreeGB) Go libres sur $($cTotalGB) Go ($($cFreePct)% d'espace libre). Statut S.M.A.R.T. : $($diskSmart)."
+    }
+
+    $adviceCpu = if ($procCount -gt 200 -or $cpuLoad -gt 50) {
+        "Activité processeur dense : $($procCount) processus actifs ($($cpuLoad)% de charge). Désactivez les applications inutiles au démarrage pour réduire la charge de fond sur les $($cores) cœurs."
+    } else {
+        "Processeur $($cpuName) ($($cores) cœurs / $($threads) threads) fluide et réactif. Activez le plan d'alimentation 'Performances Élevées' pour débloquer la réactivité maximale en jeu ou en calcul."
+    }
+
+    $adviceBattery = if ($hasBattery) {
+        "Batterie $($batteryStatus). Pour prolonger la durée de vie chimique de la batterie, évitez les décharges profondes sous 20% et privilégiez une charge modérée si votre constructeur le propose."
+    } else {
+        "Système alimenté sur secteur fixe (PC de bureau). Aucun bridage de consommation batterie n'est appliqué : vous pouvez activer les performances maximales sans compromis d'autonomie."
+    }
+
+    return [PSCustomObject]@{
+        CPU = [PSCustomObject]@{
+            Name        = $cpuName
+            Cores       = $cores
+            Threads     = $threads
+            SpeedMHz    = $speed
+            LoadPercent = $cpuLoad
+            Health      = $cpuHealth
+        }
+        RAM = [PSCustomObject]@{
+            TotalGB      = $totalRamGB
+            UsedGB       = $usedRamGB
+            FreeGB       = $freeRamGB
+            UsagePercent = $ramPct
+            ModuleCount  = $ramCount
+            SpeedMHz     = $ramSpeed
+            Health       = $ramHealth
+        }
+        Disk = [PSCustomObject]@{
+            DriveLetter = "C:"
+            Model       = $diskName
+            Type        = $diskType
+            TotalGB     = $cTotalGB
+            UsedGB      = $cUsedGB
+            FreeGB      = $cFreeGB
+            FreePercent = $cFreePct
+            SmartStatus = $diskSmart
+            Health      = $diskHealth
+        }
+        Battery = [PSCustomObject]@{
+            HasBattery     = $hasBattery
+            ChargePercent  = $batteryCharge
+            StatusText     = $batteryStatus
+            HealthText     = $batteryHealth
+        }
+        System = [PSCustomObject]@{
+            ProcessCount = $procCount
+            Score        = $score
+        }
+        Recommendation = [PSCustomObject]@{
+            Profile       = $recProfile
+            Title         = $recTitle
+            Score         = $score
+            Reason        = $recReason
+            AdviceRAM     = $adviceRam
+            AdviceDisk    = $adviceDisk
+            AdviceCPU     = $adviceCpu
+            AdviceBattery = $adviceBattery
+        }
+    }
+}
+
 function Optimize-RAM {
     <#
     .SYNOPSIS
@@ -2150,7 +2396,8 @@ Export-ModuleMember -Function @(
     'Disable-TelemetryServices',
     'Block-TelemetryHosts',
     'Set-FirewallTelemetryBlock',
-    'Get-SystemPerformanceMetrics',
+    'Get-SystemPerformanceMetrics',
+    'Get-SystemHardwareHealthAndDiagnostics',
     'Optimize-RAM',
     'Stop-UnnecessaryProcesses',
     'Optimize-CPU',

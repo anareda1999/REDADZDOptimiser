@@ -78,6 +78,9 @@ $script:I18N = @{
         AdminErr            = "⚠ NON-ADMIN (Droits limités)"
         AdminMsgBox         = "Ce programme requiert les privilèges Administrateur pour appliquer les optimisations !"
 
+        TabDiag             = "🩺 Diagnostic & Santé"
+        TitleDiag           = "Diagnostic Matériel & Recommandation d'Optimisation"
+        DescDiag            = "Analyse approfondie de la santé des composants (RAM, Disque, CPU, Batterie) et sélection automatique du profil idéal."
         TabDebloat          = "🗑️ Débloat"
         TabPerf             = "⚡ Performance"
         TabSoftware         = "📦 Logiciels"
@@ -276,6 +279,9 @@ $script:I18N = @{
         AdminErr            = "⚠ NON-ADMIN (Limited Rights)"
         AdminMsgBox         = "This utility requires Administrator privileges to apply system optimizations!"
 
+        TabDiag             = "🩺 Diagnostics & Health"
+        TitleDiag           = "Hardware Diagnostics & Optimization Recommendation"
+        DescDiag            = "Deep component health analysis (RAM, Disk, CPU, Battery) and automatic recommendation of the ideal profile."
         TabDebloat          = "🗑️ Debloat"
         TabPerf             = "⚡ Performance"
         TabSoftware         = "📦 Software"
@@ -1172,42 +1178,46 @@ function Update-HeaderForActivePage {
 
     switch ($idx) {
         0 {
+            $script:lblPageTitle.Text = $strings.TitleDiag
+            $script:lblPageDesc.Text  = $strings.DescDiag
+        }
+        1 {
             $script:lblPageTitle.Text = $strings.TitleDebloat
             $script:lblPageDesc.Text  = $strings.DescDebloat
         }
-        1 {
+        2 {
             $script:lblPageTitle.Text = $strings.TitlePerf
             $script:lblPageDesc.Text  = $strings.DescPerf
         }
-        2 {
+        3 {
             $script:lblPageTitle.Text = $strings.TitleSoftware
             $script:lblPageDesc.Text  = $strings.DescSoftware
         }
-        3 {
+        4 {
             $script:lblPageTitle.Text = $strings.TitleNetwork
             $script:lblPageDesc.Text  = $strings.DescNetwork
         }
-        4 {
+        5 {
             $script:lblPageTitle.Text = $strings.TitleStartup
             $script:lblPageDesc.Text  = $strings.DescStartup
         }
-        5 {
+        6 {
             $script:lblPageTitle.Text = $strings.TitlePrivacy
             $script:lblPageDesc.Text  = $strings.DescPrivacy
         }
-        6 {
+        7 {
             $script:lblPageTitle.Text = $strings.TitleCleanup
             $script:lblPageDesc.Text  = $strings.DescCleanup
         }
-        7 {
+        8 {
             $script:lblPageTitle.Text = $strings.TitleRepair
             $script:lblPageDesc.Text  = $strings.DescRepair
         }
-        8 {
+        9 {
             $script:lblPageTitle.Text = $strings.TitleLogs
             $script:lblPageDesc.Text  = $strings.DescLogs
         }
-        9 {
+        10 {
             $script:lblPageTitle.Text = $strings.TitleAbout
             $script:lblPageDesc.Text  = $strings.DescAbout
         }
@@ -1257,6 +1267,7 @@ function Apply-Language {
     }
 
     # Titres des onglets
+    if ($diagTab -and $diagTab.Page)         { $diagTab.Page.Text = $strings.TabDiag }
     if ($debloatTab -and $debloatTab.Page)   { $debloatTab.Page.Text = $strings.TabDebloat }
     if ($perfTab -and $perfTab.Page)         { $perfTab.Page.Text = $strings.TabPerf }
     if ($softwareTab -and $softwareTab.Page) { $softwareTab.Page.Text = $strings.TabSoftware }
@@ -1433,6 +1444,7 @@ function Apply-Language {
     # Infobulles de la barre latérale de navigation Kudu
     if ($script:NavButtons -and $script:NavToolTip) {
         $tips = @(
+            $strings.TabDiag,
             $strings.TabDebloat,
             $strings.TabPerf,
             $strings.TabSoftware,
@@ -1593,7 +1605,7 @@ $logoBadge.Add_Paint({
     $sf.Dispose()
 })
 $logoBadge.Add_Click({
-    Select-NavPage -Index 9
+    Select-NavPage -Index 10
 })
 $sidebarTop.Controls.Add($logoBadge)
 $script:NavToolTip.SetToolTip($logoBadge, "REDADZDOptimiser Professional")
@@ -1846,7 +1858,8 @@ $script:BtnPresetMin.Size = New-Object System.Drawing.Size(100, 28)
 $presetRow.Controls.Add($script:BtnPresetMin)
 
 $script:BtnPresetStd = New-PresetButton -Text "⚡ Standard" -Location (New-Object System.Drawing.Point(232, 4)) -Click {
-    Apply-Preset -Preset "Standard"
+    Run-DiagnosticScan
+    Apply-Preset -Preset (if ($script:CurrentDiag -and $script:CurrentDiag.Recommendation) { $script:CurrentDiag.Recommendation.Profile } else { "Standard" })
 }
 $script:BtnPresetStd.Size = New-Object System.Drawing.Size(108, 28)
 $presetRow.Controls.Add($script:BtnPresetStd)
@@ -1980,6 +1993,7 @@ function New-TabPage {
 
 # Création des 9 boutons de modules dans le rail de navigation
 $navItems = @(
+    @{ Icon = "🩺"; Tip = "Diagnostic & Santé" },
     @{ Icon = "🗑️"; Tip = "Débloat" },
     @{ Icon = "⚡"; Tip = "Performance & RAM" },
     @{ Icon = "📦"; Tip = "Logiciels" },
@@ -2001,9 +2015,297 @@ for ($n = 0; $n -lt $navItems.Count; $n++) {
 }
 
 # Bouton 10 : Gear (Paramètres / À propos & Support) en bas du rail
-$gearNavBtn = New-NavIconButton -Index 9 -Icon "⚙️" -TooltipText "À propos & Support" -Location (New-Object System.Drawing.Point(10, 6))
+$gearNavBtn = New-NavIconButton -Index 10 -Icon "⚙️" -TooltipText "À propos & Support" -Location (New-Object System.Drawing.Point(10, 6))
 $sidebarBottom.Controls.Add($gearNavBtn)
 $script:NavButtons += $gearNavBtn
+
+# ════════════════════════════════════════════════════════════════════════
+# ONGLET 0 : DIAGNOSTIC DU PC, RECOMMANDATION TWEAK & SANTÉ MATÉRIELLE
+# ════════════════════════════════════════════════════════════════════════
+$diagTab = New-TabPage -Title "🩺 Diagnostic & Santé"
+
+$yDiag = 14
+
+# ── 1. Carte de Recommandation Intelligente du Profil ──
+$cardRec = New-ModernCard -Title "Recommandation Intelligente du Profil d'Optimisation" -Location (New-Object System.Drawing.Point(12, $yDiag)) -Size (New-Object System.Drawing.Size(860, 205)) -AccentLineColor $colors.AccentColor
+$diagTab.Scroll.Controls.Add($cardRec)
+
+$lblRecHeaderBadge = New-Object System.Windows.Forms.Label
+$lblRecHeaderBadge.Text = "ANALYSE DU SYSTÈME EN DIRECT"
+$lblRecHeaderBadge.Font = $fonts.Badge
+$lblRecHeaderBadge.ForeColor = $colors.AccentColor
+$lblRecHeaderBadge.Location = New-Object System.Drawing.Point(20, 38)
+$lblRecHeaderBadge.AutoSize = $true
+$cardRec.Controls.Add($lblRecHeaderBadge)
+
+$script:PillRecProfile = New-Object System.Windows.Forms.Label
+$script:PillRecProfile.Text = "Profil Conseillé : ⚡ Tweak Standard"
+$script:PillRecProfile.Font = New-Object System.Drawing.Font("Segoe UI", 12.5, [System.Drawing.FontStyle]::Bold)
+$script:PillRecProfile.ForeColor = [System.Drawing.Color]::White
+$script:PillRecProfile.BackColor = $colors.AccentColor
+$script:PillRecProfile.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+$script:PillRecProfile.Size = New-Object System.Drawing.Size(340, 34)
+$script:PillRecProfile.Location = New-Object System.Drawing.Point(20, 58)
+$cardRec.Controls.Add($script:PillRecProfile)
+
+$script:PillRecScore = New-Object System.Windows.Forms.Label
+$script:PillRecScore.Text = "Score de saturation : 30/100"
+$script:PillRecScore.Font = $fonts.Badge
+$script:PillRecScore.ForeColor = $colors.ForeColor
+$script:PillRecScore.BackColor = [System.Drawing.Color]::FromArgb(241, 245, 249)
+$script:PillRecScore.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+$script:PillRecScore.Size = New-Object System.Drawing.Size(220, 34)
+$script:PillRecScore.Location = New-Object System.Drawing.Point(375, 58)
+$cardRec.Controls.Add($script:PillRecScore)
+
+$script:LblRecReason = New-Object System.Windows.Forms.Label
+$script:LblRecReason.Text = "Analyse en cours... Veuillez patienter quelques instants."
+$script:LblRecReason.Font = $fonts.Normal
+$script:LblRecReason.ForeColor = $colors.ForeColor
+$script:LblRecReason.Location = New-Object System.Drawing.Point(20, 98)
+$script:LblRecReason.Size = New-Object System.Drawing.Size(820, 48)
+$script:LblRecReason.AutoSize = $false
+$cardRec.Controls.Add($script:LblRecReason)
+
+$script:BtnApplyRec = New-ModernButton -Text "⚡ Appliquer le profil recommandé" -Size (New-Object System.Drawing.Size(275, 38)) -Location (New-Object System.Drawing.Point(20, 152)) -Click {
+    if ($script:CurrentDiag -and $script:CurrentDiag.Recommendation) {
+        $p = $script:CurrentDiag.Recommendation.Profile
+        Apply-Preset -Preset $p
+        [System.Windows.Forms.MessageBox]::Show(
+            "Le profil recommandé '$($script:CurrentDiag.Recommendation.Title)' a été sélectionné et activé avec succès !`nToutes les cases associées sont désormais prêtes.",
+            "Recommandation Appliquée",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+    }
+} -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress
+$cardRec.Controls.Add($script:BtnApplyRec)
+
+$script:BtnQuickRun = New-ModernButton -Text "▶ Lancer l'Optimisation" -Size (New-Object System.Drawing.Size(210, 38)) -Location (New-Object System.Drawing.Point(305, 152)) -Click {
+    Start-Optimization -DryRun $false
+} -BackColor $colors.AccentColor -HoverColor $colors.AccentHover -PressColor $colors.AccentPress
+$cardRec.Controls.Add($script:BtnQuickRun)
+
+$script:BtnRescan = New-ModernButton -Text "🔄 Réanalyser le PC" -Size (New-Object System.Drawing.Size(185, 38)) -Location (New-Object System.Drawing.Point(525, 152)) -Click {
+    Run-DiagnosticScan
+} -BackColor $colors.CardBack -HoverColor $colors.NavHoverBack -PressColor $colors.BorderColor -ForeColor $colors.ForeColor
+$script:BtnRescan.Add_Paint({
+    param($s, $e)
+    $p = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+    $e.Graphics.DrawRectangle($p, 0, 0, $s.Width - 1, $s.Height - 1)
+    $p.Dispose()
+})
+$cardRec.Controls.Add($script:BtnRescan)
+
+$yDiag += 220
+
+# ── 2. Carte des Conseils Personnalisés par Composant ──
+$cardAdvice = New-ModernCard -Title "Conseils Personnalisés par Composant (RAM, Disque, Processeur & Batterie)" -Location (New-Object System.Drawing.Point(12, $yDiag)) -Size (New-Object System.Drawing.Size(860, 245)) -AccentLineColor $colors.WarningColor
+$diagTab.Scroll.Controls.Add($cardAdvice)
+
+# Ligne 1 : RAM
+$lblIconRam = New-Object System.Windows.Forms.Label
+$lblIconRam.Text = "🧠 Mémoire RAM :"
+$lblIconRam.Font = $fonts.SubTitle
+$lblIconRam.ForeColor = $colors.AccentColor
+$lblIconRam.Location = New-Object System.Drawing.Point(20, 42)
+$lblIconRam.Size = New-Object System.Drawing.Size(155, 20)
+$cardAdvice.Controls.Add($lblIconRam)
+
+$script:LblAdviceRam = New-Object System.Windows.Forms.Label
+$script:LblAdviceRam.Text = "Calcul des conseils RAM en cours..."
+$script:LblAdviceRam.Font = $fonts.Small
+$script:LblAdviceRam.ForeColor = $colors.ForeColor
+$script:LblAdviceRam.Location = New-Object System.Drawing.Point(180, 42)
+$script:LblAdviceRam.Size = New-Object System.Drawing.Size(660, 36)
+$cardAdvice.Controls.Add($script:LblAdviceRam)
+
+# Ligne 2 : Disque
+$lblIconDisk = New-Object System.Windows.Forms.Label
+$lblIconDisk.Text = "💽 Disque Dur (C:) :"
+$lblIconDisk.Font = $fonts.SubTitle
+$lblIconDisk.ForeColor = $colors.WarningColor
+$lblIconDisk.Location = New-Object System.Drawing.Point(20, 88)
+$lblIconDisk.Size = New-Object System.Drawing.Size(155, 20)
+$cardAdvice.Controls.Add($lblIconDisk)
+
+$script:LblAdviceDisk = New-Object System.Windows.Forms.Label
+$script:LblAdviceDisk.Text = "Calcul des conseils Disque en cours..."
+$script:LblAdviceDisk.Font = $fonts.Small
+$script:LblAdviceDisk.ForeColor = $colors.ForeColor
+$script:LblAdviceDisk.Location = New-Object System.Drawing.Point(180, 88)
+$script:LblAdviceDisk.Size = New-Object System.Drawing.Size(660, 36)
+$cardAdvice.Controls.Add($script:LblAdviceDisk)
+
+# Ligne 3 : Processeur
+$lblIconCpu = New-Object System.Windows.Forms.Label
+$lblIconCpu.Text = "💻 Processeur (CPU) :"
+$lblIconCpu.Font = $fonts.SubTitle
+$lblIconCpu.ForeColor = $colors.CyanAccent
+$lblIconCpu.Location = New-Object System.Drawing.Point(20, 134)
+$lblIconCpu.Size = New-Object System.Drawing.Size(155, 20)
+$cardAdvice.Controls.Add($lblIconCpu)
+
+$script:LblAdviceCpu = New-Object System.Windows.Forms.Label
+$script:LblAdviceCpu.Text = "Calcul des conseils CPU en cours..."
+$script:LblAdviceCpu.Font = $fonts.Small
+$script:LblAdviceCpu.ForeColor = $colors.ForeColor
+$script:LblAdviceCpu.Location = New-Object System.Drawing.Point(180, 134)
+$script:LblAdviceCpu.Size = New-Object System.Drawing.Size(660, 36)
+$cardAdvice.Controls.Add($script:LblAdviceCpu)
+
+# Ligne 4 : Batterie
+$lblIconBat = New-Object System.Windows.Forms.Label
+$lblIconBat.Text = "🔋 Batterie / Secteur :"
+$lblIconBat.Font = $fonts.SubTitle
+$lblIconBat.ForeColor = $colors.SuccessColor
+$lblIconBat.Location = New-Object System.Drawing.Point(20, 180)
+$lblIconBat.Size = New-Object System.Drawing.Size(155, 20)
+$cardAdvice.Controls.Add($lblIconBat)
+
+$script:LblAdviceBat = New-Object System.Windows.Forms.Label
+$script:LblAdviceBat.Text = "Calcul des conseils Batterie en cours..."
+$script:LblAdviceBat.Font = $fonts.Small
+$script:LblAdviceBat.ForeColor = $colors.ForeColor
+$script:LblAdviceBat.Location = New-Object System.Drawing.Point(180, 180)
+$script:LblAdviceBat.Size = New-Object System.Drawing.Size(660, 36)
+$cardAdvice.Controls.Add($script:LblAdviceBat)
+
+$yDiag += 260
+
+# ── 3. Carte d'État de Santé Détaillé des Composants Matériels ──
+$cardHwHealth = New-ModernCard -Title "État de Santé Détaillé des Composants (S.M.A.R.T., Batterie, RAM & CPU)" -Location (New-Object System.Drawing.Point(12, $yDiag)) -Size (New-Object System.Drawing.Size(860, 275)) -AccentLineColor $colors.SuccessColor
+$diagTab.Scroll.Controls.Add($cardHwHealth)
+
+# Block A : Disque Dur (Top Left)
+$lblHwDiskHeader = New-Object System.Windows.Forms.Label
+$lblHwDiskHeader.Text = "💽 Santé Disque & Stockage :"
+$lblHwDiskHeader.Font = $fonts.SubTitle
+$lblHwDiskHeader.ForeColor = $colors.ForeColor
+$lblHwDiskHeader.Location = New-Object System.Drawing.Point(20, 42)
+$lblHwDiskHeader.AutoSize = $true
+$cardHwHealth.Controls.Add($lblHwDiskHeader)
+
+$script:LblHwDiskInfo = New-Object System.Windows.Forms.Label
+$script:LblHwDiskInfo.Text = "Lecture S.M.A.R.T. et espace..."
+$script:LblHwDiskInfo.Font = $fonts.Small
+$script:LblHwDiskInfo.ForeColor = $colors.MutedColor
+$script:LblHwDiskInfo.Location = New-Object System.Drawing.Point(20, 68)
+$script:LblHwDiskInfo.Size = New-Object System.Drawing.Size(395, 65)
+$cardHwHealth.Controls.Add($script:LblHwDiskInfo)
+
+# Block B : Batterie & Alimentation (Top Right)
+$lblHwBatHeader = New-Object System.Windows.Forms.Label
+$lblHwBatHeader.Text = "🔋 Santé Batterie & Alimentation :"
+$lblHwBatHeader.Font = $fonts.SubTitle
+$lblHwBatHeader.ForeColor = $colors.ForeColor
+$lblHwBatHeader.Location = New-Object System.Drawing.Point(440, 42)
+$lblHwBatHeader.AutoSize = $true
+$cardHwHealth.Controls.Add($lblHwBatHeader)
+
+$script:LblHwBatInfo = New-Object System.Windows.Forms.Label
+$script:LblHwBatInfo.Text = "Vérification alimentation..."
+$script:LblHwBatInfo.Font = $fonts.Small
+$script:LblHwBatInfo.ForeColor = $colors.MutedColor
+$script:LblHwBatInfo.Location = New-Object System.Drawing.Point(440, 68)
+$script:LblHwBatInfo.Size = New-Object System.Drawing.Size(395, 65)
+$cardHwHealth.Controls.Add($script:LblHwBatInfo)
+
+# Block C : Mémoire RAM (Bottom Left)
+$lblHwRamHeader = New-Object System.Windows.Forms.Label
+$lblHwRamHeader.Text = "🧠 Santé Mémoire Vive (RAM) :"
+$lblHwRamHeader.Font = $fonts.SubTitle
+$lblHwRamHeader.ForeColor = $colors.ForeColor
+$lblHwRamHeader.Location = New-Object System.Drawing.Point(20, 145)
+$lblHwRamHeader.AutoSize = $true
+$cardHwHealth.Controls.Add($lblHwRamHeader)
+
+$script:LblHwRamInfo = New-Object System.Windows.Forms.Label
+$script:LblHwRamInfo.Text = "Lecture modules RAM..."
+$script:LblHwRamInfo.Font = $fonts.Small
+$script:LblHwRamInfo.ForeColor = $colors.MutedColor
+$script:LblHwRamInfo.Location = New-Object System.Drawing.Point(20, 172)
+$script:LblHwRamInfo.Size = New-Object System.Drawing.Size(395, 80)
+$cardHwHealth.Controls.Add($script:LblHwRamInfo)
+
+# Block D : Processeur (CPU) (Bottom Right)
+$lblHwCpuHeader = New-Object System.Windows.Forms.Label
+$lblHwCpuHeader.Text = "💻 Santé Processeur (CPU) :"
+$lblHwCpuHeader.Font = $fonts.SubTitle
+$lblHwCpuHeader.ForeColor = $colors.ForeColor
+$lblHwCpuHeader.Location = New-Object System.Drawing.Point(440, 145)
+$lblHwCpuHeader.AutoSize = $true
+$cardHwHealth.Controls.Add($lblHwCpuHeader)
+
+$script:LblHwCpuInfo = New-Object System.Windows.Forms.Label
+$script:LblHwCpuInfo.Text = "Lecture cœurs et fréquences..."
+$script:LblHwCpuInfo.Font = $fonts.Small
+$script:LblHwCpuInfo.ForeColor = $colors.MutedColor
+$script:LblHwCpuInfo.Location = New-Object System.Drawing.Point(440, 172)
+$script:LblHwCpuInfo.Size = New-Object System.Drawing.Size(395, 80)
+$cardHwHealth.Controls.Add($script:LblHwCpuInfo)
+
+# ── Fonctions de Diagnostic et Mise à jour de l'UI ──
+function Update-DiagnosticUI {
+    param($Diag)
+    if (-not $Diag) { return }
+
+    # Mise à jour de la recommandation
+    $rec = $Diag.Recommendation
+    if ($script:PillRecProfile) {
+        $script:PillRecProfile.Text = "Profil Conseillé : " + $rec.Title
+        $script:PillRecProfile.BackColor = switch ($rec.Profile) {
+            "Max"     { $script:colors.PurpleAccent }
+            "Minimal" { $script:colors.SuccessColor }
+            default   { $script:colors.AccentColor }
+        }
+    }
+    if ($script:PillRecScore) {
+        $script:PillRecScore.Text = "Score de besoin : $($rec.Score)/100"
+    }
+    if ($script:LblRecReason) {
+        $script:LblRecReason.Text = $rec.Reason
+    }
+    if ($script:BtnApplyRec) {
+        $script:BtnApplyRec.Text = "⚡ Activer le profil $($rec.Title)"
+    }
+
+    # Mise à jour des conseils personnalisés
+    if ($script:LblAdviceRam)  { $script:LblAdviceRam.Text  = $rec.AdviceRAM }
+    if ($script:LblAdviceDisk) { $script:LblAdviceDisk.Text = $rec.AdviceDisk }
+    if ($script:LblAdviceCpu)  { $script:LblAdviceCpu.Text  = $rec.AdviceCPU }
+    if ($script:LblAdviceBat)  { $script:LblAdviceBat.Text  = $rec.AdviceBattery }
+
+    # Mise à jour de l'état de santé
+    if ($script:LblHwDiskInfo) {
+        $d = $Diag.Disk
+        $script:LblHwDiskInfo.Text = "• Modèle : $($d.Model)`n• Type : $($d.Type) | S.M.A.R.T. : $($d.SmartStatus)`n• Espace C: : $($d.FreeGB) Go libres / $($d.TotalGB) Go ($($d.FreePercent)% libre)`n• État : $($d.Health)"
+    }
+    if ($script:LblHwBatInfo) {
+        $b = $Diag.Battery
+        $script:LblHwBatInfo.Text = "• Statut : $($b.StatusText)`n• Niveau de charge : $($b.ChargePercent)%`n• État de santé : $($b.HealthText)"
+    }
+    if ($script:LblHwRamInfo) {
+        $r = $Diag.RAM
+        $script:LblHwRamInfo.Text = "• Capacité totale : $($r.TotalGB) Go ($($r.UsagePercent)% utilisée)`n• Mémoire libre : $($r.FreeGB) Go disponibles`n• Barrettes : $($r.ModuleCount) module(s) détecté(s) à $($r.SpeedMHz) MHz`n• Santé : $($r.Health)"
+    }
+    if ($script:LblHwCpuInfo) {
+        $c = $Diag.CPU
+        $script:LblHwCpuInfo.Text = "• Modèle : $($c.Name)`n• Cœurs / Threads : $($c.Cores) cœurs physiques / $($c.Threads) threads`n• Vitesse de base : $($c.SpeedMHz) MHz`n• Santé : $($c.Health)"
+    }
+}
+
+function Run-DiagnosticScan {
+    try {
+        Append-Log "🩺 Démarrage du scan matériel et analyse de santé système..." "INFO"
+        $diag = Get-SystemHardwareHealthAndDiagnostics
+        $script:CurrentDiag = $diag
+        Update-DiagnosticUI -Diag $diag
+        Append-Log "✓ Diagnostic terminé : Profil recommandé = $($diag.Recommendation.Title) (Score: $($diag.Recommendation.Score)/100)" "SUCCESS"
+    } catch {
+        Append-Log "Erreur lors du scan matériel : $_" "WARN"
+    }
+}
 
 # ONGLET 1 : DÉBLOAT
 # ────────────────────────────────────────────────────────────────────────
@@ -2298,7 +2600,7 @@ $btnInstallApps = New-ModernButton -Text "🚀 Installer les applications coché
     $origText = $btnInstallApps.Text
     $btnInstallApps.Enabled = $false
     $btnInstallApps.Text = $script:I18N[$script:CurrentLang].BtnInstallingApps
-    Select-NavPage -Index 8
+    Select-NavPage -Index 9
     [System.Windows.Forms.Application]::DoEvents()
     try {
         Append-Log "Démarrage de l'installation de $($selected.Count) application(s) via Winget..." "INFO"
@@ -3198,7 +3500,7 @@ function Start-Optimization {
     Set-REDADZDOptimiserConfig -CancelRequested $false
 
     # Basculer sur l'onglet Logs
-    Select-NavPage -Index 8
+    Select-NavPage -Index 9
 
     Set-RunningState -Running $true
 
@@ -3311,8 +3613,11 @@ $form.Add_Shown({
         } catch {}
     }
 
-    # Application du préréglage Standard par défaut
-    Apply-Preset -Preset "Standard"
+    # Lancement du diagnostic initial et recommandation intelligente
+    Run-DiagnosticScan
+    $initPreset = if ($script:CurrentDiag -and $script:CurrentDiag.Recommendation) { $script:CurrentDiag.Recommendation.Profile } else { "Standard" }
+    Apply-Preset -Preset $initPreset
+    Select-NavPage -Index 0
 
     # Chargement initial des programmes de démarrage
     try { Update-StartupList } catch {}
