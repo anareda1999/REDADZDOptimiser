@@ -2337,9 +2337,9 @@ $cbFirefox = New-ModernCheckBox -Text "Mozilla Firefox" -Location (New-Object Sy
 $cbFirefox.Tag = "Mozilla.Firefox"
 $cardBrowsers.Controls.Add($cbFirefox); $script:AppCheckBoxes += $cbFirefox
 
-$cbOperaGX = New-ModernCheckBox -Text "Opera GX Gaming Browser" -Location (New-Object System.Drawing.Point(450, 72)) -Checked $false
-$cbOperaGX.Tag = "Opera.OperaGX"
-$cardBrowsers.Controls.Add($cbOperaGX); $script:AppCheckBoxes += $cbOperaGX
+$cbDuckDuckGo = New-ModernCheckBox -Text "DuckDuckGo Browser (Confidentialité maximale)" -Location (New-Object System.Drawing.Point(450, 72)) -Checked $false
+$cbDuckDuckGo.Tag = "DuckDuckGo.DesktopBrowser"
+$cardBrowsers.Controls.Add($cbDuckDuckGo); $script:AppCheckBoxes += $cbDuckDuckGo
 
 $yPosSoft += 145
 
@@ -2403,9 +2403,9 @@ $cbLibreOffice = New-ModernCheckBox -Text "LibreOffice (Suite bureautique compl�
 $cbLibreOffice.Tag = "TheDocumentFoundation.LibreOffice"
 $cardDevOffice.Controls.Add($cbLibreOffice); $script:AppCheckBoxes += $cbLibreOffice
 
-$cbAdobeReader = New-ModernCheckBox -Text "Adobe Acrobat Reader" -Location (New-Object System.Drawing.Point(450, 42)) -Checked $false
-$cbAdobeReader.Tag = "Adobe.Acrobat.Reader.64-bit"
-$cardDevOffice.Controls.Add($cbAdobeReader); $script:AppCheckBoxes += $cbAdobeReader
+$cbFoxitReader = New-ModernCheckBox -Text "Foxit PDF Reader (Rapide & Léger)" -Location (New-Object System.Drawing.Point(450, 42)) -Checked $false
+$cbFoxitReader.Tag = "Foxit.FoxitReader"
+$cardDevOffice.Controls.Add($cbFoxitReader); $script:AppCheckBoxes += $cbFoxitReader
 
 $cbAnyDesk = New-ModernCheckBox -Text "AnyDesk (Accès et assistance à distance)" -Location (New-Object System.Drawing.Point(450, 72)) -Checked $false
 $cbAnyDesk.Tag = "AnyDeskSoftwareGmbH.AnyDesk"
