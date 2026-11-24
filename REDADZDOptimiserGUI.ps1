@@ -87,6 +87,42 @@ $script:I18N = @{
         TabCleanup          = "🧹 Nettoyage"
         TabRepair           = "🔧 Maintenance"
         TabLogs             = "📋 Journal"
+        TabAbout            = "⚙️ À propos & Support"
+
+        # Titres & Eyebrows Header Style Kudu
+        EyebrowCommon       = "ⓘ ESPACE DE TRAVAIL  •  REDADZDOptimiser"
+        TitleDebloat        = "Suppression des Bloatwares"
+        DescDebloat         = "Supprimez les applications préinstallées inutiles et désactivez la télémétrie Windows."
+        TitlePerf           = "Optimisation des Performances & RAM"
+        DescPerf            = "Surveillez les ressources en direct, videz le cache mémoire et tuez les processus inutiles."
+        TitleSoftware       = "Installation Rapide de Logiciels"
+        DescSoftware        = "Installez vos navigateurs, outils système, streaming et bureautique en un seul clic via Winget."
+        TitleNetwork        = "Optimiseur Réseau & DNS Gaming"
+        DescNetwork         = "Basculez vers les serveurs DNS les plus rapides et réduisez la latence paquets (Ping TCP/IP)."
+        TitleStartup        = "Gestionnaire des Applications au Démarrage"
+        DescStartup         = "Cochez les applications superflues au démarrage pour les désactiver ou réactivez celles requises."
+        TitlePrivacy        = "Confidentialité & Sécurité Windows"
+        DescPrivacy         = "Bloquez la collecte de données, le pistage publicitaire, les requêtes Cortana et les serveurs Microsoft."
+        TitleCleanup        = "Nettoyage du Disque & Registre"
+        DescCleanup         = "Libérez de l'espace de stockage en nettoyant les fichiers temporaires, la corbeille et le registre."
+        TitleRepair         = "Maintenance & Restauration Système"
+        DescRepair          = "Vérifiez et réparez les fichiers système protégés avec les outils officiels DISM et SFC."
+        TitleLogs           = "Journal d'Exécution en Direct"
+        DescLogs            = "Suivez chaque étape d'optimisation en temps réel avec coloration syntaxique et export."
+        TitleAbout          = "À propos de REDADZDOptimiser"
+        DescAbout           = "Centre d'optimisation Windows 10/11, conçu avec soin. Vérifiez l'état du système et rencontrez l'auteur."
+
+        # Carte About & Support
+        AboutAppTitle       = "REDADZDOptimiser v2.0 Professional"
+        AboutAppSub         = "Licence Open Source & Protection  •  Développé par Anagou Reda"
+        AboutStatusReady    = "✓ Votre système Windows est prêt et optimisable"
+        BtnCheckState       = "🔄 Vérifier l'état système"
+        BtnGithub           = "🌐 Dépôt GitHub ↗"
+        BtnRestoreSec       = "🛡️ Point de Restauration"
+        AboutSupportTitle   = "Support & Auteur : Anagou Reda"
+        AboutSupportDesc    = "Besoin d'une assistance technique, d'un tweak sur-mesure ou d'une maintenance professionnelle ? Contactez le créateur."
+        BtnCallAuthor       = "📞 Tél : 0542439514"
+        AboutSpecsTitle     = "Spécifications du Système Windows Détecté"
 
         # Préréglages d'optimisation & Copyright
         PresetLabel         = "⚡ Préréglages :"
@@ -249,6 +285,42 @@ $script:I18N = @{
         TabCleanup          = "🧹 Cleanup"
         TabRepair           = "🔧 Maintenance"
         TabLogs             = "📋 Logs"
+        TabAbout            = "⚙️ About & Support"
+
+        # Headers & Eyebrows Kudu Style
+        EyebrowCommon       = "ⓘ YOUR WORKSPACE  •  REDADZDOptimiser"
+        TitleDebloat        = "Bloatware Removal"
+        DescDebloat         = "Remove non-essential preinstalled apps and disable background telemetry services."
+        TitlePerf           = "Performance & RAM Optimization"
+        DescPerf            = "Monitor live resources, clear RAM cache, and terminate unwanted background processes."
+        TitleSoftware       = "Essential Software Installer"
+        DescSoftware        = "Batch install web browsers, utilities, gaming, and productivity tools with one click via Winget."
+        TitleNetwork        = "Network & Gaming DNS Optimizer"
+        DescNetwork         = "Switch to lightning-fast DNS providers and reduce online gaming packet latency."
+        TitleStartup        = "Startup Applications Manager"
+        DescStartup         = "Check non-essential startup apps to disable them, or re-enable apps you need."
+        TitlePrivacy        = "Windows Privacy & Security"
+        DescPrivacy         = "Block diagnostic data collection, advertising tracking, Cortana searches, and telemetry hosts."
+        TitleCleanup        = "Disk Storage & Cache Cleanup"
+        DescCleanup         = "Free up valuable storage space by cleaning temporary files, recycle bin, and obsolete registry keys."
+        TitleRepair         = "System Maintenance & Component Repair"
+        DescRepair          = "Analyze and restore corrupt Windows image components with official DISM and SFC tools."
+        TitleLogs           = "Execution Live Log"
+        DescLogs            = "Track every optimization action live with syntax highlighting and exportable log files."
+        TitleAbout          = "About REDADZDOptimiser"
+        DescAbout           = "Windows 10/11 optimization center, thoughtfully made. Check your system health and meet the author."
+
+        # About & Support Cards
+        AboutAppTitle       = "REDADZDOptimiser v2.0 Professional"
+        AboutAppSub         = "Open Source License & Protected  •  Developed by Anagou Reda"
+        AboutStatusReady    = "✓ Your Windows system is ready for optimization"
+        BtnCheckState       = "🔄 Check System State"
+        BtnGithub           = "🌐 GitHub Repository ↗"
+        BtnRestoreSec       = "🛡️ System Restore Point"
+        AboutSupportTitle   = "Support & Creator : Anagou Reda"
+        AboutSupportDesc    = "Need technical assistance, custom tweaks, or IT maintenance for your PC or organization? Contact the creator directly."
+        BtnCallAuthor       = "📞 Phone: 0542439514"
+        AboutSpecsTitle     = "Detected Windows System Specifications"
 
         # Optimization Presets & Copyright
         PresetLabel         = "⚡ Presets:"
@@ -411,6 +483,42 @@ $script:I18N = @{
         TabCleanup          = "🧹 التنظيف"
         TabRepair           = "🔧 الصيانة"
         TabLogs             = "📋 السجل"
+        TabAbout            = "⚙️ حول البرنامج والدعم"
+
+        # العناوين ونمط Kudu
+        EyebrowCommon       = "ⓘ مساحة العمل  •  REDADZDOptimiser"
+        TitleDebloat        = "حذف التطبيقات الزائدة"
+        DescDebloat         = "تخلص من التطبيقات المثبتة مسبقاً وعطل خدمات التتبع الخاملة."
+        TitlePerf           = "تحسين أداء النظام والذاكرة"
+        DescPerf            = "راقب استهلاك الموارد المباشر، فرغ كاش الذاكرة وأغلق العمليات الزائدة."
+        TitleSoftware       = "تثبيت البرامج الأساسية"
+        DescSoftware        = "ثبت المتصفحات والأدوات المساعدة وبرامج الألعاب والمكتب بضغطة واحدة عبر Winget."
+        TitleNetwork        = "تحسين الشبكة و DNS للألعاب"
+        DescNetwork         = "اختر أسرع خوادم DNS وقلل زمن استجابة حزم البيانات في الألعاب (Ping)."
+        TitleStartup        = "إدارة برامج بدء التشغيل"
+        DescStartup         = "حدد البرامج غير الضرورية لتعطيلها أو أعد تفعيل ما تحتاجه لتسريع الإقلاع."
+        TitlePrivacy        = "الخصوصية وأمان ويندوز"
+        DescPrivacy         = "احظر جمع البيانات التشخيصية والإعلانات الموجهة وخوادم التتبع لـ Microsoft."
+        TitleCleanup        = "تنظيف القرص وسجل النظام"
+        DescCleanup         = "وفر مساحة تخزين كبيرة عبر مسح الملفات المؤقتة وسلة المحذوفات ومفاتيح السجل المعزولة."
+        TitleRepair         = "صيانة وإصلاح صورة ويندوز"
+        DescRepair          = "افحص وأصلح ملفات النظام المحمية والتالفة باستخدام أدوات DISM و SFC الرسمية."
+        TitleLogs           = "سجل التنفيذ الحي"
+        DescLogs            = "تابع كل خطوات التحسين خطوة بخطوة في الوقت الفعلي مع إمكانية تصدير التقرير."
+        TitleAbout          = "حول برنامج REDADZDOptimiser"
+        DescAbout           = "مركز تحسين ويندوز 10/11، صُمم بعناية فائقة. تحقق من حالة نظامك وتواصل مع المطور."
+
+        # بطاقات حول البرنامج والدعم
+        AboutAppTitle       = "REDADZDOptimiser v2.0 Professional"
+        AboutAppSub         = "ترخيص مفتوح المصدر وحماية برمجية  •  تطوير Anagou Reda"
+        AboutStatusReady    = "✓ نظام ويندوز جاهز ومؤهل للتحسين الكامل"
+        BtnCheckState       = "🔄 فحص حالة النظام"
+        BtnGithub           = "🌐 مستودع GitHub ↗"
+        BtnRestoreSec       = "🛡️ نقطة استعادة النظام"
+        AboutSupportTitle   = "الدعم والمطور : Anagou Reda"
+        AboutSupportDesc    = "هل تحتاج إلى مساعدة تقنية، تحسينات مخصصة لأجهزتك أو صيانة شاملة؟ تواصل مباشرة مع المطور."
+        BtnCallAuthor       = "📞 هاتف : 0542439514"
+        AboutSpecsTitle     = "مواصفات نظام ويندوز المكتشفة"
 
         # أوضاع التحسين وحقوق المطور
         PresetLabel         = "⚡ أوضاع التحسين :"
@@ -547,6 +655,17 @@ $script:I18N = @{
 
 # ─── Palette Professionnelle & Claire (Style Windows 11 Fluent Pro) ────
 $script:colors = @{
+    # Palette Modern Kudu / Slate Fluent
+    SidebarBack     = [System.Drawing.Color]::FromArgb(248, 250, 252)      # #F8FAFC
+    NavActiveBack   = [System.Drawing.Color]::FromArgb(254, 243, 199)      # #FEF3C7 (Ambre Chaud Kudu)
+    NavActiveBar    = [System.Drawing.Color]::FromArgb(245, 158, 11)       # #F59E0B (Indicateur vertical ambre)
+    NavActiveFore   = [System.Drawing.Color]::FromArgb(217, 119, 6)        # #D97706
+    NavHoverBack    = [System.Drawing.Color]::FromArgb(241, 245, 249)      # #F1F5F9
+    NavMutedFore    = [System.Drawing.Color]::FromArgb(100, 116, 139)      # #64748B
+    WarmCardBack    = [System.Drawing.Color]::FromArgb(255, 251, 235)      # #FFFBEB (Carte Support Kudu)
+    WarmCardBorder  = [System.Drawing.Color]::FromArgb(253, 230, 138)      # #FDE68A
+    WarmCardTitle   = [System.Drawing.Color]::FromArgb(120, 53, 15)        # #78350F
+    WarmCardDesc    = [System.Drawing.Color]::FromArgb(146, 64, 14)        # #92400E
     # Arrière-plans clairs, lumineux et modernes
     BackColor       = [System.Drawing.Color]::FromArgb(241, 245, 249)    # #F1F5F9 (Fond canvas moderne Slate 100)
     CardBack        = [System.Drawing.Color]::FromArgb(255, 255, 255)    # #FFFFFF (Cartes blanches épurées)
@@ -603,6 +722,8 @@ $colors = $script:colors
 
 # ─── Typographie Professionnelle ───────────────────────────────────────
 $script:fonts = @{
+    HeroTitle   = New-Object System.Drawing.Font("Segoe UI", 18, [System.Drawing.FontStyle]::Bold)
+    Eyebrow     = New-Object System.Drawing.Font("Segoe UI", 8.5, [System.Drawing.FontStyle]::Bold)
     Title    = New-Object System.Drawing.Font("Segoe UI", 13.5, [System.Drawing.FontStyle]::Bold)
     SubTitle = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
     Badge    = New-Object System.Drawing.Font("Segoe UI", 8.5, [System.Drawing.FontStyle]::Bold)
@@ -1028,6 +1149,61 @@ function Apply-Preset {
 # APPLICATION DYNAMIQUE DE LA LANGUE (STABLE & PROPRE)
 # ════════════════════════════════════════════════════════════════════════
 
+
+# ─── Mise à jour dynamique du Header supérieur Kudu ────────────────────
+function Update-HeaderForActivePage {
+    if (-not $script:lblPageTitle -or -not $script:I18N) { return }
+    $strings = $script:I18N[$script:CurrentLang]
+    $idx = $script:ActiveNavIndex
+
+    if ($script:lblEyebrow) {
+        $script:lblEyebrow.Text = $strings.EyebrowCommon
+    }
+
+    switch ($idx) {
+        0 {
+            $script:lblPageTitle.Text = $strings.TitleDebloat
+            $script:lblPageDesc.Text  = $strings.DescDebloat
+        }
+        1 {
+            $script:lblPageTitle.Text = $strings.TitlePerf
+            $script:lblPageDesc.Text  = $strings.DescPerf
+        }
+        2 {
+            $script:lblPageTitle.Text = $strings.TitleSoftware
+            $script:lblPageDesc.Text  = $strings.DescSoftware
+        }
+        3 {
+            $script:lblPageTitle.Text = $strings.TitleNetwork
+            $script:lblPageDesc.Text  = $strings.DescNetwork
+        }
+        4 {
+            $script:lblPageTitle.Text = $strings.TitleStartup
+            $script:lblPageDesc.Text  = $strings.DescStartup
+        }
+        5 {
+            $script:lblPageTitle.Text = $strings.TitlePrivacy
+            $script:lblPageDesc.Text  = $strings.DescPrivacy
+        }
+        6 {
+            $script:lblPageTitle.Text = $strings.TitleCleanup
+            $script:lblPageDesc.Text  = $strings.DescCleanup
+        }
+        7 {
+            $script:lblPageTitle.Text = $strings.TitleRepair
+            $script:lblPageDesc.Text  = $strings.DescRepair
+        }
+        8 {
+            $script:lblPageTitle.Text = $strings.TitleLogs
+            $script:lblPageDesc.Text  = $strings.DescLogs
+        }
+        9 {
+            $script:lblPageTitle.Text = $strings.TitleAbout
+            $script:lblPageDesc.Text  = $strings.DescAbout
+        }
+    }
+}
+
 function Apply-Language {
     param([string]$Lang)
 
@@ -1204,6 +1380,43 @@ function Apply-Language {
     if ($script:BtnRun) {
         $script:BtnRun.Text = if ($script:IsRunning) { $strings.BtnRunning } else { $strings.BtnRun }
     }
+
+    # Mise à jour du bandeau supérieur (Eyebrow + Titre + Desc)
+    Update-HeaderForActivePage
+
+    # Infobulles de la barre latérale de navigation Kudu
+    if ($script:NavButtons -and $script:NavToolTip) {
+        $tips = @(
+            $strings.TabDebloat,
+            $strings.TabPerf,
+            $strings.TabSoftware,
+            $strings.TabNetwork,
+            $strings.TabStartup,
+            $strings.TabPrivacy,
+            $strings.TabCleanup,
+            $strings.TabRepair,
+            $strings.TabLogs,
+            $strings.TabAbout
+        )
+        for ($k = 0; $k -lt [math]::Min($script:NavButtons.Count, $tips.Count); $k++) {
+            if ($script:NavButtons[$k] -and $script:NavButtons[$k].Tag) {
+                $script:NavButtons[$k].Tag.Tooltip = $tips[$k]
+                $script:NavToolTip.SetToolTip($script:NavButtons[$k], $tips[$k])
+            }
+        }
+    }
+
+    # Onglet 10 : À propos & Support
+    if ($lblAboutAppTitle)     { $lblAboutAppTitle.Text = $strings.AboutAppTitle }
+    if ($lblAboutAppSub)       { $lblAboutAppSub.Text = $strings.AboutAppSub }
+    if ($lblAboutStatus)       { $lblAboutStatus.Text = $strings.AboutStatusReady }
+    if ($btnCheckSystemState)  { $btnCheckSystemState.Text = $strings.BtnCheckState }
+    if ($btnAboutGithub)       { $btnAboutGithub.Text = $strings.BtnGithub }
+    if ($btnAboutRestore)      { $btnAboutRestore.Text = $strings.BtnRestoreSec }
+    if ($lblSupportTitle)      { $lblSupportTitle.Text = $strings.AboutSupportTitle }
+    if ($lblSupportDesc)       { $lblSupportDesc.Text = $strings.AboutSupportDesc }
+    if ($btnSupportCall)       { $btnSupportCall.Text = $strings.BtnCallAuthor }
+    if ($cardSpecs -and $cardSpecs.Tag) { $cardSpecs.Tag.Header.Text = $strings.AboutSpecsTitle }
 }
 
 # ════════════════════════════════════════════════════════════════════════
@@ -1220,144 +1433,20 @@ $form.ForeColor = $colors.ForeColor
 $form.Font = $fonts.Normal
 $form.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Get-Process -Id $PID).Path)
 
-# Layout global en 4 lignes : Header (70px), Préréglages (48px), Onglets (100%), Barre d'action (66px)
-$mainLayout = New-Object System.Windows.Forms.TableLayoutPanel
-$mainLayout.Dock = [System.Windows.Forms.DockStyle]::Fill
-$mainLayout.ColumnCount = 1
-$mainLayout.RowCount = 4
-$mainLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 70))) | Out-Null
-$mainLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 48))) | Out-Null
-$mainLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null
-$mainLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 66))) | Out-Null
-$mainLayout.BackColor = $colors.BackColor
-$form.Controls.Add($mainLayout)
-
 # ════════════════════════════════════════════════════════════════════════
-# 1. HEADER (BANDEAU SUPÉRIEUR CLAIR & ÉPURÉ)
+# ARCHITECTURE MODERNE STYLE KUDU (NAVIGATION RAIL + HEADER + CANVAS)
 # ════════════════════════════════════════════════════════════════════════
 
-$headerPanel = New-Object System.Windows.Forms.Panel
-$headerPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$headerPanel.BackColor = $colors.HeaderBack
-$headerPanel.Padding = New-Object System.Windows.Forms.Padding(24, 10, 24, 10)
-$mainLayout.Controls.Add($headerPanel, 0, 0)
+$form.Size = New-Object System.Drawing.Size(1100, 800)
+$form.MinimumSize = New-Object System.Drawing.Size(1020, 740)
 
-# Bordure inférieure subtile
-$headerPanel.Add_Paint({
-    param($s, $e)
-    $pen = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
-    $e.Graphics.DrawLine($pen, 0, $s.Height - 1, $s.Width, $s.Height - 1)
-    $pen.Dispose()
-})
+# ToolTip global pour navigation
+$script:NavToolTip = New-Object System.Windows.Forms.ToolTip
+$script:NavToolTip.InitialDelay = 150
+$script:NavToolTip.ReshowDelay = 100
+$script:NavToolTip.AutoPopDelay = 5000
 
-# Titre Principal
-$titleLabel = New-Object System.Windows.Forms.Label
-$titleLabel.Text = "⚡ REDADZDOptimiser"
-$titleLabel.Font = $fonts.Title
-$titleLabel.ForeColor = $colors.AccentColor
-$titleLabel.AutoSize = $true
-$titleLabel.Location = New-Object System.Drawing.Point(22, 12)
-$headerPanel.Controls.Add($titleLabel)
-
-# Sous-titre descriptif
-$subtitleLabel = New-Object System.Windows.Forms.Label
-$subtitleLabel.Text = "Centre d'Optimisation Windows 10/11  •  Débloat, Confidentialité, Nettoyage & Intégrité"
-$subtitleLabel.Font = $fonts.Small
-$subtitleLabel.ForeColor = $colors.MutedColor
-$subtitleLabel.AutoSize = $true
-$subtitleLabel.Location = New-Object System.Drawing.Point(24, 40)
-$headerPanel.Controls.Add($subtitleLabel)
-
-# Badge Administrateur (Pill moderne vert pastel ou rouge pastel)
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-$adminBadge = New-Object System.Windows.Forms.Label
-$adminBadge.Text = if ($isAdmin) { "✓ ADMINISTRATEUR (Élevé)" } else { "⚠ NON-ADMIN (Droits limités)" }
-$adminBadge.Font = $fonts.Badge
-$adminBadge.ForeColor = if ($isAdmin) { $colors.AdminOkFore } else { $colors.AdminErrFore }
-$adminBadge.BackColor = if ($isAdmin) { $colors.AdminOkBack } else { $colors.AdminErrBack }
-$adminBadge.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
-$adminBadge.Size = New-Object System.Drawing.Size(195, 26)
-$adminBadge.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
-$adminBadge.Location = New-Object System.Drawing.Point(($form.Width - 235), 12)
-$adminBadge.Add_Paint({
-    param($s, $e)
-    $borderCol = if ($isAdmin) { $script:colors.AdminOkBorder } else { $script:colors.AdminErrBorder }
-    $p = New-Object System.Drawing.Pen($borderCol, 1)
-    $e.Graphics.DrawRectangle($p, 0, 0, $s.Width - 1, $s.Height - 1)
-    $p.Dispose()
-})
-$headerPanel.Controls.Add($adminBadge)
-
-# Version Windows
-$winVer = [System.Environment]::OSVersion.Version
-$verLabel = New-Object System.Windows.Forms.Label
-$verLabel.Text = "Windows $($winVer.Major).$($winVer.Minor) Build $($winVer.Build)"
-$verLabel.Font = $fonts.Small
-$verLabel.ForeColor = $colors.DisabledColor
-$verLabel.AutoSize = $true
-$verLabel.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
-$verLabel.Location = New-Object System.Drawing.Point(($form.Width - 235), 42)
-$headerPanel.Controls.Add($verLabel)
-
-# Sélecteur de Langue dynamique
-$script:LangLabel = New-Object System.Windows.Forms.Label
-$script:LangLabel.Text = "Langue :"
-$script:LangLabel.Font = $fonts.Small
-$script:LangLabel.ForeColor = $colors.MutedColor
-$script:LangLabel.AutoSize = $true
-$script:LangLabel.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
-$script:LangLabel.Location = New-Object System.Drawing.Point(($form.Width - 415), 24)
-$headerPanel.Controls.Add($script:LangLabel)
-
-$script:LangCombo = New-Object System.Windows.Forms.ComboBox
-$script:LangCombo.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-$script:LangCombo.Items.AddRange(@("🇫🇷 Français", "🇬🇧 English", "🇸🇦 العربية"))
-$script:LangCombo.BackColor = [System.Drawing.Color]::White
-$script:LangCombo.ForeColor = $colors.ForeColor
-$script:LangCombo.Font = $fonts.Normal
-$script:LangCombo.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$script:LangCombo.Size = New-Object System.Drawing.Size(130, 26)
-$script:LangCombo.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
-$script:LangCombo.Location = New-Object System.Drawing.Point(($form.Width - 360), 20)
-$script:LangCombo.Add_SelectedIndexChanged({
-    if (-not $script:SuppressLangEvent) {
-        $sel = switch ($this.SelectedIndex) {
-            0 { "FR" }
-            1 { "EN" }
-            2 { "AR" }
-            Default { "FR" }
-        }
-        Apply-Language -Lang $sel
-    }
-})
-$headerPanel.Controls.Add($script:LangCombo)
-
-# ════════════════════════════════════════════════════════════════════════
-# 1.5. MENU HORIZONTAL DES PRÉRÉGLAGES (TWEAK MINIMAL / STANDARD / MAX)
-# ════════════════════════════════════════════════════════════════════════
-
-$presetPanel = New-Object System.Windows.Forms.Panel
-$presetPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$presetPanel.BackColor = $colors.CardBack
-$presetPanel.Padding = New-Object System.Windows.Forms.Padding(24, 6, 24, 6)
-$mainLayout.Controls.Add($presetPanel, 0, 1)
-
-# Ligne inférieure de séparation fine
-$presetPanel.Add_Paint({
-    param($s, $e)
-    $pen = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
-    $e.Graphics.DrawLine($pen, 0, $s.Height - 1, $s.Width, $s.Height - 1)
-    $pen.Dispose()
-})
-
-$lblPresetTitle = New-Object System.Windows.Forms.Label
-$lblPresetTitle.Text = "⚡ Préréglages :"
-$lblPresetTitle.Font = $fonts.SubTitle
-$lblPresetTitle.ForeColor = $colors.ForeColor
-$lblPresetTitle.Location = New-Object System.Drawing.Point(24, 13)
-$lblPresetTitle.AutoSize = $true
-$presetPanel.Controls.Add($lblPresetTitle)
-
+# Helper pour boutons de préréglages
 function New-PresetButton {
     param(
         [string]$Text,
@@ -1367,7 +1456,7 @@ function New-PresetButton {
     $btn = New-Object System.Windows.Forms.Button
     $btn.Text = $Text
     $btn.Location = $Location
-    $btn.Size = New-Object System.Drawing.Size(155, 30)
+    $btn.Size = New-Object System.Drawing.Size(110, 28)
     $btn.Font = $fonts.Normal
     $btn.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $btn.FlatAppearance.BorderSize = 0
@@ -1397,103 +1486,437 @@ function New-PresetButton {
     return $btn
 }
 
-$script:BtnPresetMin = New-PresetButton -Text "🌱 Tweak Minimal" -Location (New-Object System.Drawing.Point(145, 9)) -Click {
+# ────────────────────────────────────────────────────────────────────────
+# 1. NAVIGATION RAIL VERTICAL GAUCHE (STYLE KUDU)
+# ────────────────────────────────────────────────────────────────────────
+
+$sidebarPanel = New-Object System.Windows.Forms.Panel
+$sidebarPanel.Dock = [System.Windows.Forms.DockStyle]::Left
+$sidebarPanel.Width = 74
+$sidebarPanel.BackColor = $colors.SidebarBack
+$form.Controls.Add($sidebarPanel)
+
+# Ligne séparatrice droite fine (1px)
+$sidebarPanel.Add_Paint({
+    param($s, $e)
+    $pen = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+    $e.Graphics.DrawLine($pen, $s.Width - 1, 0, $s.Width - 1, $s.Height)
+    $pen.Dispose()
+})
+
+# Haut de la barre latérale : Logo badge ambre Kudu
+$sidebarTop = New-Object System.Windows.Forms.Panel
+$sidebarTop.Dock = [System.Windows.Forms.DockStyle]::Top
+$sidebarTop.Height = 68
+$sidebarTop.BackColor = [System.Drawing.Color]::Transparent
+$sidebarPanel.Controls.Add($sidebarTop)
+
+$logoBadge = New-Object System.Windows.Forms.Panel
+$logoBadge.Size = New-Object System.Drawing.Size(46, 46)
+$logoBadge.Location = New-Object System.Drawing.Point(14, 11)
+$logoBadge.BackColor = [System.Drawing.Color]::FromArgb(245, 158, 11) # Amber 500
+$logoBadge.Cursor = [System.Windows.Forms.Cursors]::Hand
+$logoBadge.Add_Paint({
+    param($s, $e)
+    $g = $e.Graphics
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+    $f = New-Object System.Drawing.Font("Segoe UI", 16, [System.Drawing.FontStyle]::Bold)
+    $b = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
+    $sf = New-Object System.Drawing.StringFormat
+    $sf.Alignment = [System.Drawing.StringAlignment]::Center
+    $sf.LineAlignment = [System.Drawing.StringAlignment]::Center
+    $g.DrawString("⚡", $f, $b, (New-Object System.Drawing.RectangleF(0, 0, $s.Width, $s.Height)), $sf)
+    $b.Dispose()
+    $f.Dispose()
+    $sf.Dispose()
+})
+$logoBadge.Add_Click({
+    Select-NavPage -Index 9
+})
+$sidebarTop.Controls.Add($logoBadge)
+$script:NavToolTip.SetToolTip($logoBadge, "REDADZDOptimiser Professional")
+
+# Bas de la barre latérale : Bouton Paramètres / À propos (Gear)
+$sidebarBottom = New-Object System.Windows.Forms.Panel
+$sidebarBottom.Dock = [System.Windows.Forms.DockStyle]::Bottom
+$sidebarBottom.Height = 58
+$sidebarBottom.BackColor = [System.Drawing.Color]::Transparent
+$sidebarPanel.Controls.Add($sidebarBottom)
+
+# Milieu de la barre latérale : Pile d'icônes de navigation
+$sidebarNav = New-Object System.Windows.Forms.Panel
+$sidebarNav.Dock = [System.Windows.Forms.DockStyle]::Fill
+$sidebarNav.BackColor = [System.Drawing.Color]::Transparent
+$sidebarPanel.Controls.Add($sidebarNav)
+
+# Helper pour boutons d'icônes de la barre latérale
+function New-NavIconButton {
+    param(
+        [int]$Index,
+        [string]$Icon,
+        [string]$TooltipText,
+        [System.Drawing.Point]$Location,
+        [System.Drawing.Size]$Size = (New-Object System.Drawing.Size(54, 44))
+    )
+    $btn = New-Object System.Windows.Forms.Button
+    $btn.Text = $Icon
+    $btn.Location = $Location
+    $btn.Size = $Size
+    $btn.Font = New-Object System.Drawing.Font("Segoe UI Emoji", 14.5, [System.Drawing.FontStyle]::Regular)
+    $btn.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+    $btn.FlatAppearance.BorderSize = 0
+    $btn.Cursor = [System.Windows.Forms.Cursors]::Hand
+    $btn.BackColor = [System.Drawing.Color]::Transparent
+    $btn.ForeColor = $script:colors.NavMutedFore
+    $btn.Tag = @{
+        Index      = $Index
+        IsActive   = ($Index -eq 0)
+        IsHovered  = $false
+        Tooltip    = $TooltipText
+    }
+
+    $btn.Add_MouseEnter({
+        $this.Tag.IsHovered = $true
+        $this.Invalidate()
+    })
+    $btn.Add_MouseLeave({
+        $this.Tag.IsHovered = $false
+        $this.Invalidate()
+    })
+    $btn.Add_Click({
+        Select-NavPage -Index $this.Tag.Index
+    })
+
+    $btn.Add_Paint({
+        param($s, $e)
+        $g = $e.Graphics
+        $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+
+        if ($s.Tag.IsActive) {
+            # Fond actif ambre doux
+            $brush = New-Object System.Drawing.SolidBrush($script:colors.NavActiveBack)
+            $rect = New-Object System.Drawing.Rectangle(4, 2, $s.Width - 8, $s.Height - 4)
+            $g.FillRectangle($brush, $rect)
+            $brush.Dispose()
+
+            # Indicateur vertical Kudu sur le bord gauche (Ambre vif)
+            $barBrush = New-Object System.Drawing.SolidBrush($script:colors.NavActiveBar)
+            $g.FillRectangle($barBrush, 0, 7, 3.5, $s.Height - 14)
+            $barBrush.Dispose()
+        } elseif ($s.Tag.IsHovered) {
+            $hoverBrush = New-Object System.Drawing.SolidBrush($script:colors.NavHoverBack)
+            $rect = New-Object System.Drawing.Rectangle(4, 2, $s.Width - 8, $s.Height - 4)
+            $g.FillRectangle($hoverBrush, $rect)
+            $hoverBrush.Dispose()
+        }
+    })
+
+    if ($script:NavToolTip) {
+        $script:NavToolTip.SetToolTip($btn, $TooltipText)
+    }
+
+    return $btn
+}
+
+# ────────────────────────────────────────────────────────────────────────
+# 2. CONTENEUR PRINCIPAL DROIT (HEADER + CANVAS + BARRE D'ACTION)
+# ────────────────────────────────────────────────────────────────────────
+
+$rightMainPanel = New-Object System.Windows.Forms.Panel
+$rightMainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$rightMainPanel.BackColor = $colors.BackColor
+$form.Controls.Add($rightMainPanel)
+
+# 2.1. HEADER SUPÉRIEUR ÉPURÉ STYLE KUDU (Dock: Top, 84px)
+$topHeader = New-Object System.Windows.Forms.Panel
+$topHeader.Dock = [System.Windows.Forms.DockStyle]::Top
+$topHeader.Height = 84
+$topHeader.BackColor = $colors.CardBack
+$topHeader.Padding = New-Object System.Windows.Forms.Padding(28, 10, 24, 10)
+$rightMainPanel.Controls.Add($topHeader)
+
+$topHeader.Add_Paint({
+    param($s, $e)
+    $pen = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+    $e.Graphics.DrawLine($pen, 0, $s.Height - 1, $s.Width, $s.Height - 1)
+    $pen.Dispose()
+})
+
+# Eyebrow Kudu (YOUR WORKSPACE)
+$script:lblEyebrow = New-Object System.Windows.Forms.Label
+$script:lblEyebrow.Text = "ⓘ ESPACE DE TRAVAIL  •  REDADZDOptimiser"
+$script:lblEyebrow.Font = $fonts.Eyebrow
+$script:lblEyebrow.ForeColor = $colors.NavMutedFore
+$script:lblEyebrow.AutoSize = $true
+$script:lblEyebrow.Location = New-Object System.Drawing.Point(28, 12)
+$topHeader.Controls.Add($script:lblEyebrow)
+
+# Titre Principal Kudu (Grand & Gras)
+$script:lblPageTitle = New-Object System.Windows.Forms.Label
+$script:lblPageTitle.Text = "Suppression des Bloatwares"
+$script:lblPageTitle.Font = $fonts.HeroTitle
+$script:lblPageTitle.ForeColor = [System.Drawing.Color]::FromArgb(15, 23, 42) # Slate 900
+$script:lblPageTitle.AutoSize = $true
+$script:lblPageTitle.Location = New-Object System.Drawing.Point(26, 28)
+$topHeader.Controls.Add($script:lblPageTitle)
+
+# Sous-titre descriptif Kudu
+$script:lblPageDesc = New-Object System.Windows.Forms.Label
+$script:lblPageDesc.Text = "Supprimez les applications préinstallées inutiles et désactivez la télémétrie Windows."
+$script:lblPageDesc.Font = $fonts.Small
+$script:lblPageDesc.ForeColor = $colors.MutedColor
+$script:lblPageDesc.AutoSize = $true
+$script:lblPageDesc.Location = New-Object System.Drawing.Point(28, 58)
+$topHeader.Controls.Add($script:lblPageDesc)
+
+# Badge Administrateur (Pill moderne vert pastel ou rouge pastel)
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$adminBadge = New-Object System.Windows.Forms.Label
+$adminBadge.Text = if ($isAdmin) { "✓ ADMINISTRATEUR (Élevé)" } else { "⚠ NON-ADMIN (Droits limités)" }
+$adminBadge.Font = $fonts.Badge
+$adminBadge.ForeColor = if ($isAdmin) { $colors.AdminOkFore } else { $colors.AdminErrFore }
+$adminBadge.BackColor = if ($isAdmin) { $colors.AdminOkBack } else { $colors.AdminErrBack }
+$adminBadge.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+$adminBadge.Size = New-Object System.Drawing.Size(195, 26)
+$adminBadge.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
+$adminBadge.Location = New-Object System.Drawing.Point(($form.Width - 74 - 230), 14)
+$adminBadge.Add_Paint({
+    param($s, $e)
+    $borderCol = if ($isAdmin) { $script:colors.AdminOkBorder } else { $script:colors.AdminErrBorder }
+    $p = New-Object System.Drawing.Pen($borderCol, 1)
+    $e.Graphics.DrawRectangle($p, 0, 0, $s.Width - 1, $s.Height - 1)
+    $p.Dispose()
+})
+$topHeader.Controls.Add($adminBadge)
+
+# Version Windows
+$winVer = [System.Environment]::OSVersion.Version
+$verLabel = New-Object System.Windows.Forms.Label
+$verLabel.Text = "Windows $($winVer.Major).$($winVer.Minor) Build $($winVer.Build)"
+$verLabel.Font = $fonts.Small
+$verLabel.ForeColor = $colors.DisabledColor
+$verLabel.AutoSize = $true
+$verLabel.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
+$verLabel.Location = New-Object System.Drawing.Point(($form.Width - 74 - 230), 48)
+$topHeader.Controls.Add($verLabel)
+
+# Sélecteur de Langue dynamique
+$script:LangCombo = New-Object System.Windows.Forms.ComboBox
+$script:LangCombo.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$script:LangCombo.Items.AddRange(@("🇫🇷 Français", "🇬🇧 English", "🇸🇦 العربية"))
+$script:LangCombo.BackColor = [System.Drawing.Color]::White
+$script:LangCombo.ForeColor = $colors.ForeColor
+$script:LangCombo.Font = $fonts.Normal
+$script:LangCombo.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$script:LangCombo.Size = New-Object System.Drawing.Size(130, 26)
+$script:LangCombo.Anchor = [System.Windows.Forms.AnchorStyles]'Top, Right'
+$script:LangCombo.Location = New-Object System.Drawing.Point(($form.Width - 74 - 375), 14)
+$script:LangCombo.Add_SelectedIndexChanged({
+    if (-not $script:SuppressLangEvent) {
+        $sel = switch ($this.SelectedIndex) {
+            0 { "FR" }
+            1 { "EN" }
+            2 { "AR" }
+            Default { "FR" }
+        }
+        Apply-Language -Lang $sel
+    }
+})
+$topHeader.Controls.Add($script:LangCombo)
+
+# 2.2. BARRE BASSE PERSISTANTE (PRÉRÉGLAGES + ACTIONS + PROGRESSION) (Dock: Bottom, 70px)
+$bottomBar = New-Object System.Windows.Forms.Panel
+$bottomBar.Dock = [System.Windows.Forms.DockStyle]::Bottom
+$bottomBar.Height = 70
+$bottomBar.BackColor = $colors.CardBack
+$rightMainPanel.Controls.Add($bottomBar)
+
+$bottomBar.Add_Paint({
+    param($s, $e)
+    $pen = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+    $e.Graphics.DrawLine($pen, 0, 0, $s.Width, 0)
+    $pen.Dispose()
+})
+
+# Barre de progression moderne fluide (Dock: Top)
+$script:ProgressBar = New-Object System.Windows.Forms.ProgressBar
+$script:ProgressBar.Dock = [System.Windows.Forms.DockStyle]::Top
+$script:ProgressBar.Height = 4
+$script:ProgressBar.Style = [System.Windows.Forms.ProgressBarStyle]::Blocks
+$script:ProgressBar.ForeColor = $colors.AccentColor
+$script:ProgressBar.BackColor = $colors.BorderColor
+$bottomBar.Controls.Add($script:ProgressBar)
+
+# Contenu de la barre basse
+$bottomContent = New-Object System.Windows.Forms.Panel
+$bottomContent.Dock = [System.Windows.Forms.DockStyle]::Fill
+$bottomContent.BackColor = [System.Drawing.Color]::Transparent
+$bottomBar.Controls.Add($bottomContent)
+
+# Groupe Préréglages à gauche
+$lblPresetTitle = New-Object System.Windows.Forms.Label
+$lblPresetTitle.Text = "⚡ Préréglages :"
+$lblPresetTitle.Font = $fonts.SubTitle
+$lblPresetTitle.ForeColor = $colors.ForeColor
+$lblPresetTitle.Location = New-Object System.Drawing.Point(18, 9)
+$lblPresetTitle.AutoSize = $true
+$bottomContent.Controls.Add($lblPresetTitle)
+
+$script:BtnPresetMin = New-PresetButton -Text "🌱 Minimal" -Location (New-Object System.Drawing.Point(130, 6)) -Click {
     Apply-Preset -Preset "Minimal"
 }
-$presetPanel.Controls.Add($script:BtnPresetMin)
+$script:BtnPresetMin.Size = New-Object System.Drawing.Size(100, 28)
+$bottomContent.Controls.Add($script:BtnPresetMin)
 
-$script:BtnPresetStd = New-PresetButton -Text "⚡ Tweak Standard" -Location (New-Object System.Drawing.Point(310, 9)) -Click {
+$script:BtnPresetStd = New-PresetButton -Text "⚡ Standard" -Location (New-Object System.Drawing.Point(236, 6)) -Click {
     Apply-Preset -Preset "Standard"
 }
-$presetPanel.Controls.Add($script:BtnPresetStd)
+$script:BtnPresetStd.Size = New-Object System.Drawing.Size(108, 28)
+$bottomContent.Controls.Add($script:BtnPresetStd)
 
-$script:BtnPresetMax = New-PresetButton -Text "🚀 Tweak Max" -Location (New-Object System.Drawing.Point(475, 9)) -Click {
+$script:BtnPresetMax = New-PresetButton -Text "🚀 Max" -Location (New-Object System.Drawing.Point(350, 6)) -Click {
     Apply-Preset -Preset "Max"
 }
-$presetPanel.Controls.Add($script:BtnPresetMax)
+$script:BtnPresetMax.Size = New-Object System.Drawing.Size(92, 28)
+$bottomContent.Controls.Add($script:BtnPresetMax)
 
 $lblPresetDesc = New-Object System.Windows.Forms.Label
 $lblPresetDesc.Text = "(Recommandé : Débloat, télémétrie, nettoyage & CPU)"
 $lblPresetDesc.Font = $fonts.Small
 $lblPresetDesc.ForeColor = $colors.MutedColor
-$lblPresetDesc.Location = New-Object System.Drawing.Point(645, 15)
+$lblPresetDesc.Location = New-Object System.Drawing.Point(450, 12)
 $lblPresetDesc.AutoSize = $true
-$presetPanel.Controls.Add($lblPresetDesc)
+$bottomContent.Controls.Add($lblPresetDesc)
 
-# ════════════════════════════════════════════════════════════════════════
-# 2. ONGLETS PRINCIPAUX (STYLE MODERNE CLAIR AVEC ACCENT ROYAL)
-# ════════════════════════════════════════════════════════════════════════
+# Copyright & Auteur (Anagou Reda 0542439514)
+$copyrightLabel = New-Object System.Windows.Forms.Label
+$copyrightLabel.Text = "© 2026 REDADZDOptimiser • Anagou Reda  |  Tél : 0542439514"
+$copyrightLabel.Font = $fonts.Small
+$copyrightLabel.ForeColor = $colors.MutedColor
+$copyrightLabel.Location = New-Object System.Drawing.Point(18, 42)
+$copyrightLabel.AutoSize = $true
+$bottomContent.Controls.Add($copyrightLabel)
 
-$script:TabControl = New-Object System.Windows.Forms.TabControl
-$script:TabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
-$script:TabControl.Font = $fonts.SubTitle
-$script:TabControl.ItemSize = New-Object System.Drawing.Size(106, 38)
-$script:TabControl.SizeMode = [System.Windows.Forms.TabSizeMode]::Fixed
-$script:TabControl.Appearance = [System.Windows.Forms.TabAppearance]::Normal
-$script:TabControl.BackColor = $colors.BackColor
-$script:TabControl.ForeColor = $colors.ForeColor
-$mainLayout.Controls.Add($script:TabControl, 0, 2)
+# Boutons d'action alignés à droite
+$actionFlow = New-Object System.Windows.Forms.FlowLayoutPanel
+$actionFlow.Dock = [System.Windows.Forms.DockStyle]::Right
+$actionFlow.Width = 530
+$actionFlow.Height = 56
+$actionFlow.FlowDirection = [System.Windows.Forms.FlowDirection]::RightToLeft
+$actionFlow.BackColor = [System.Drawing.Color]::Transparent
+$actionFlow.Padding = New-Object System.Windows.Forms.Padding(8, 8, 16, 8)
+$bottomContent.Controls.Add($actionFlow)
 
-# OwnerDraw personnalisé : fond blanc pour l'actif avec ligne d'accent bleue, gris clair pour inactif
-$script:TabControl.DrawMode = [System.Windows.Forms.TabDrawMode]::OwnerDrawFixed
-$script:TabControl.Add_DrawItem({
-    param($sender, $e)
-    $tab = $sender
-    $g = $e.Graphics
-    $tabRect = $tab.GetTabRect($e.Index)
-    $tabText = $tab.TabPages[$e.Index].Text
-    $isSelected = ($e.State -band [System.Windows.Forms.DrawItemState]::Selected)
+# Bouton ANNULER
+$script:BtnCancel = New-ModernButton -Text "✕ Annuler" -Size (New-Object System.Drawing.Size(108, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
+    $script:CancelToken = $true
+    Set-REDADZDOptimiserConfig -CancelRequested $true
+    Append-Log ($script:I18N[$script:CurrentLang].CancelPrompt) "WARN"
+} -BackColor $colors.ErrorColor -HoverColor $colors.ErrorHover -PressColor $colors.ErrorPress
+$script:BtnCancel.Enabled = $false
+$actionFlow.Controls.Add($script:BtnCancel)
 
-    # Fond de l'onglet
-    $bg = if ($isSelected) { $script:colors.CardBack } else { $script:colors.TabInactiveBack }
-    $backBrush = New-Object System.Drawing.SolidBrush($bg)
-    $g.FillRectangle($backBrush, $tabRect)
-    $backBrush.Dispose()
+# Bouton SIMULATION DRY-RUN
+$script:BtnDryRun = New-ModernButton -Text "🔍 Simulation" -Size (New-Object System.Drawing.Size(150, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
+    Start-Optimization -DryRun $true
+} -BackColor $colors.WarningColor -HoverColor $colors.WarningHover -PressColor $colors.WarningPress
+$actionFlow.Controls.Add($script:BtnDryRun)
 
-    # Ligne d'accent inférieure pour l'onglet actif (Bleu Royal Moderne)
-    if ($isSelected) {
-        $accentPen = New-Object System.Drawing.Pen($script:colors.AccentColor, 3)
-        $g.DrawLine($accentPen, [int]$tabRect.Left, [int]($tabRect.Bottom - 2), [int]$tabRect.Right, [int]($tabRect.Bottom - 2))
-        $accentPen.Dispose()
-    } else {
-        $subtlePen = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
-        $g.DrawLine($subtlePen, [int]$tabRect.Left, [int]($tabRect.Bottom - 1), [int]$tabRect.Right, [int]($tabRect.Bottom - 1))
-        $subtlePen.Dispose()
+# Bouton OPTIMISER MAINTENANT
+$script:BtnRun = New-ModernButton -Text "▶ OPTIMISER MAINTENANT" -Size (New-Object System.Drawing.Size(215, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
+    Start-Optimization -DryRun $false
+} -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress
+$actionFlow.Controls.Add($script:BtnRun)
+
+# 2.3. CONTENEUR DES PAGES DE VUES (CANVAS CENTRAL)
+$script:ViewContainer = New-Object System.Windows.Forms.Panel
+$script:ViewContainer.Dock = [System.Windows.Forms.DockStyle]::Fill
+$script:ViewContainer.BackColor = $colors.BackColor
+$rightMainPanel.Controls.Add($script:ViewContainer)
+$script:ViewContainer.BringToFront()
+
+# Tableaux de gestion de la navigation
+$script:NavButtons = @()
+$script:NavPages = New-Object System.Collections.Generic.List[System.Windows.Forms.Panel]
+$script:ActiveNavIndex = 0
+
+# Objet de compatibilité TabControl pour tout code historique
+$script:TabControl = [PSCustomObject]@{
+    TabPages = [PSCustomObject]@{
+        Add = { param($p) }
     }
-
-    # Texte de l'onglet
-    $textColor = if ($isSelected) { $script:colors.AccentColor } else { $script:colors.MutedColor }
-    $textBrush = New-Object System.Drawing.SolidBrush($textColor)
-    $sf = New-Object System.Drawing.StringFormat
-    $sf.Alignment = [System.Drawing.StringAlignment]::Center
-    $sf.LineAlignment = [System.Drawing.StringAlignment]::Center
-    $fontToUse = if ($isSelected) { $script:fonts.SubTitle } else { $script:fonts.Normal }
-    $rectF = [System.Drawing.RectangleF]$tabRect
-    $g.DrawString($tabText, $fontToUse, $textBrush, $rectF, $sf)
-
-    $textBrush.Dispose()
-    $sf.Dispose()
-})
-
-# Fonction de création d'onglet avec défilement fluide
-function New-TabPage {
-    param([string]$Title)
-    $page = New-Object System.Windows.Forms.TabPage
-    $page.Text = $Title
-    $page.BackColor = $colors.BackColor
-    $page.ForeColor = $colors.ForeColor
-    $page.Padding = New-Object System.Windows.Forms.Padding(12)
-
-    $scroll = New-Object System.Windows.Forms.Panel
-    $scroll.Dock = [System.Windows.Forms.DockStyle]::Fill
-    $scroll.AutoScroll = $true
-    $scroll.BackColor = $colors.BackColor
-    $page.Controls.Add($scroll)
-
-    return @{ Page = $page; Scroll = $scroll }
+    Invalidate = {}
 }
 
-# ────────────────────────────────────────────────────────────────────────
+# Fonction de sélection de vue et synchronisation du rail
+function Select-NavPage {
+    param([int]$Index)
+    if ($Index -lt 0 -or $Index -ge $script:NavPages.Count) { return }
+    $script:ActiveNavIndex = $Index
+
+    for ($i = 0; $i -lt $script:NavPages.Count; $i++) {
+        $page = $script:NavPages[$i]
+        $btn  = if ($i -lt $script:NavButtons.Count) { $script:NavButtons[$i] } else { $null }
+        $isActive = ($i -eq $Index)
+        $page.Visible = $isActive
+        if ($isActive) {
+            $page.BringToFront()
+        }
+        if ($btn -and $btn.Tag) {
+            $btn.Tag.IsActive = $isActive
+            $btn.Invalidate()
+        }
+    }
+
+    Update-HeaderForActivePage
+}
+
+# Fonction de création de page (remplace New-TabPage avec compatibilité totale)
+function New-TabPage {
+    param(
+        [string]$Title,
+        [string]$Icon = "📄"
+    )
+    $page = New-Object System.Windows.Forms.Panel
+    $page.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $page.AutoScroll = $true
+    $page.BackColor = $script:colors.BackColor
+    $page.Padding = New-Object System.Windows.Forms.Padding(16, 12, 16, 20)
+    $page.Visible = ($script:NavPages.Count -eq 0)
+
+    $script:ViewContainer.Controls.Add($page)
+    $script:NavPages.Add($page)
+
+    return @{ Page = $page; Scroll = $page; Title = $Title; Icon = $Icon }
+}
+
+# Création des 9 boutons de modules dans le rail de navigation
+$navItems = @(
+    @{ Icon = "🗑️"; Tip = "Débloat" },
+    @{ Icon = "⚡"; Tip = "Performance & RAM" },
+    @{ Icon = "📦"; Tip = "Logiciels" },
+    @{ Icon = "🌐"; Tip = "Réseau & DNS" },
+    @{ Icon = "🚀"; Tip = "Démarrage" },
+    @{ Icon = "🛡️"; Tip = "Vie Privée" },
+    @{ Icon = "🧹"; Tip = "Nettoyage" },
+    @{ Icon = "🔧"; Tip = "Maintenance" },
+    @{ Icon = "📋"; Tip = "Journal" }
+)
+
+$yRailOffset = 6
+for ($n = 0; $n -lt $navItems.Count; $n++) {
+    $item = $navItems[$n]
+    $navBtn = New-NavIconButton -Index $n -Icon $item.Icon -TooltipText $item.Tip -Location (New-Object System.Drawing.Point(10, $yRailOffset))
+    $sidebarNav.Controls.Add($navBtn)
+    $script:NavButtons += $navBtn
+    $yRailOffset += 48
+}
+
+# Bouton 10 : Gear (Paramètres / À propos & Support) en bas du rail
+$gearNavBtn = New-NavIconButton -Index 9 -Icon "⚙️" -TooltipText "À propos & Support" -Location (New-Object System.Drawing.Point(10, 6))
+$sidebarBottom.Controls.Add($gearNavBtn)
+$script:NavButtons += $gearNavBtn
+
 # ONGLET 1 : DÉBLOAT
 # ────────────────────────────────────────────────────────────────────────
 $debloatTab = New-TabPage -Title "🗑️ Débloat"
@@ -1787,7 +2210,7 @@ $btnInstallApps = New-ModernButton -Text "🚀 Installer les applications coché
     $origText = $btnInstallApps.Text
     $btnInstallApps.Enabled = $false
     $btnInstallApps.Text = $script:I18N[$script:CurrentLang].BtnInstallingApps
-    $script:TabControl.SelectedTab = $logsTab.Page
+    Select-NavPage -Index 8
     [System.Windows.Forms.Application]::DoEvents()
     try {
         Append-Log "Démarrage de l'installation de $($selected.Count) application(s) via Winget..." "INFO"
@@ -2397,80 +2820,257 @@ $logToolbar.Controls.Add($btnSaveLog)
 $logToolbar.Controls.Add($btnClearLog)
 
 # ════════════════════════════════════════════════════════════════════════
-# 3. BARRE BASSE D'ACTION (BOUTONS PRINCIPAUX + PROGRESSION)
-# ════════════════════════════════════════════════════════════════════════
+# ────────────────────────────────────────────────────────────────────────
+# ONGLET 10 : À PROPOS & SUPPORT (STYLE KUDU v3.13)
+# ────────────────────────────────────────────────────────────────────────
+$aboutTab = New-TabPage -Title "⚙️ À propos & Support"
 
-$bottomPanel = New-Object System.Windows.Forms.Panel
-$bottomPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$bottomPanel.BackColor = $colors.BottomBack
-$bottomPanel.Padding = New-Object System.Windows.Forms.Padding(24, 6, 24, 8)
-$mainLayout.Controls.Add($bottomPanel, 0, 3)
+$yAbout = 14
 
-# Ligne supérieure de séparation
-$bottomPanel.Add_Paint({
+# 1. Carte Principale de l'Application (Style Kudu v3.13 About)
+$cardAboutApp = New-Object System.Windows.Forms.Panel
+$cardAboutApp.Location = New-Object System.Drawing.Point(12, $yAbout)
+$cardAboutApp.Size = New-Object System.Drawing.Size(890, 175)
+$cardAboutApp.BackColor = $script:colors.CardBack
+$cardAboutApp.Add_Paint({
     param($s, $e)
     $pen = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
-    $e.Graphics.DrawLine($pen, 0, 0, $s.Width, 0)
+    $e.Graphics.DrawRectangle($pen, 0, 0, $s.Width - 1, $s.Height - 1)
     $pen.Dispose()
 })
+$aboutTab.Scroll.Controls.Add($cardAboutApp)
 
-# Barre de progression moderne fluide
-$script:ProgressBar = New-Object System.Windows.Forms.ProgressBar
-$script:ProgressBar.Dock = [System.Windows.Forms.DockStyle]::Top
-$script:ProgressBar.Height = 5
-$script:ProgressBar.Style = [System.Windows.Forms.ProgressBarStyle]::Blocks
-$script:ProgressBar.ForeColor = $colors.AccentColor
-$script:ProgressBar.BackColor = $colors.BorderColor
-$bottomPanel.Controls.Add($script:ProgressBar)
+# Badge Logo Ambre dans la carte (Grand carré 60x60)
+$aboutLogoBadge = New-Object System.Windows.Forms.Panel
+$aboutLogoBadge.Size = New-Object System.Drawing.Size(60, 60)
+$aboutLogoBadge.Location = New-Object System.Drawing.Point(24, 22)
+$aboutLogoBadge.BackColor = [System.Drawing.Color]::FromArgb(245, 158, 11) # Amber 500
+$aboutLogoBadge.Add_Paint({
+    param($s, $e)
+    $g = $e.Graphics
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+    $f = New-Object System.Drawing.Font("Segoe UI", 22, [System.Drawing.FontStyle]::Bold)
+    $b = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
+    $sf = New-Object System.Drawing.StringFormat
+    $sf.Alignment = [System.Drawing.StringAlignment]::Center
+    $sf.LineAlignment = [System.Drawing.StringAlignment]::Center
+    $g.DrawString("⚡", $f, $b, (New-Object System.Drawing.RectangleF(0, 0, $s.Width, $s.Height)), $sf)
+    $b.Dispose()
+    $f.Dispose()
+    $sf.Dispose()
+})
+$cardAboutApp.Controls.Add($aboutLogoBadge)
 
-# Ligne inférieure contenant le Copyright à gauche et les Boutons à droite
-$actionRow = New-Object System.Windows.Forms.Panel
-$actionRow.Dock = [System.Windows.Forms.DockStyle]::Fill
-$actionRow.BackColor = $colors.Transparent
-$bottomPanel.Controls.Add($actionRow)
+$lblAboutAppTitle = New-Object System.Windows.Forms.Label
+$lblAboutAppTitle.Text = "REDADZDOptimiser v2.0 Professional"
+$lblAboutAppTitle.Font = New-Object System.Drawing.Font("Segoe UI", 15, [System.Drawing.FontStyle]::Bold)
+$lblAboutAppTitle.ForeColor = [System.Drawing.Color]::FromArgb(15, 23, 42)
+$lblAboutAppTitle.Location = New-Object System.Drawing.Point(100, 20)
+$lblAboutAppTitle.AutoSize = $true
+$cardAboutApp.Controls.Add($lblAboutAppTitle)
 
-# Copyright & Auteur (Anagou Reda 0542439514)
-$copyrightLabel = New-Object System.Windows.Forms.Label
-$copyrightLabel.Text = "© 2026 REDADZDOptimiser • Anagou Reda  |  Tél : 0542439514"
-$copyrightLabel.Font = $fonts.Small
-$copyrightLabel.ForeColor = $colors.MutedColor
-$copyrightLabel.Location = New-Object System.Drawing.Point(0, 16)
-$copyrightLabel.AutoSize = $true
-$actionRow.Controls.Add($copyrightLabel)
+$lblAboutAppSub = New-Object System.Windows.Forms.Label
+$lblAboutAppSub.Text = "Licence Open Source & Protection  •  Développé par Anagou Reda"
+$lblAboutAppSub.Font = $fonts.Small
+$lblAboutAppSub.ForeColor = $colors.MutedColor
+$lblAboutAppSub.Location = New-Object System.Drawing.Point(102, 48)
+$lblAboutAppSub.AutoSize = $true
+$cardAboutApp.Controls.Add($lblAboutAppSub)
 
-# Conteneur des boutons d'action (Alignés à droite)
-$btnFlow = New-Object System.Windows.Forms.FlowLayoutPanel
-$btnFlow.Dock = [System.Windows.Forms.DockStyle]::Right
-$btnFlow.Width = 570
-$btnFlow.Height = 44
-$btnFlow.FlowDirection = [System.Windows.Forms.FlowDirection]::RightToLeft
-$btnFlow.BackColor = $colors.Transparent
-$actionRow.Controls.Add($btnFlow)
+# Status Pill vert pastel (comme "You're up to date")
+$pillStatus = New-Object System.Windows.Forms.Panel
+$pillStatus.Location = New-Object System.Drawing.Point(102, 78)
+$pillStatus.Size = New-Object System.Drawing.Size(340, 28)
+$pillStatus.BackColor = [System.Drawing.Color]::FromArgb(236, 253, 245) # Emerald 50
+$pillStatus.Add_Paint({
+    param($s, $e)
+    $pen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(167, 243, 208), 1)
+    $e.Graphics.DrawRectangle($pen, 0, 0, $s.Width - 1, $s.Height - 1)
+    $pen.Dispose()
+})
+$cardAboutApp.Controls.Add($pillStatus)
 
-# Bouton ANNULER (Rouge Corail)
-$script:BtnCancel = New-ModernButton -Text "✕ Annuler" -Size (New-Object System.Drawing.Size(130, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
-    $script:CancelToken = $true
-    Set-REDADZDOptimiserConfig -CancelRequested $true
-    Append-Log ($script:I18N[$script:CurrentLang].CancelPrompt) "WARN"
-} -BackColor $colors.ErrorColor -HoverColor $colors.ErrorHover -PressColor $colors.ErrorPress
-$script:BtnCancel.Enabled = $false
-$btnFlow.Controls.Add($script:BtnCancel)
+$lblAboutStatus = New-Object System.Windows.Forms.Label
+$lblAboutStatus.Text = "✓ Votre système Windows est prêt et optimisable"
+$lblAboutStatus.Font = $fonts.Badge
+$lblAboutStatus.ForeColor = [System.Drawing.Color]::FromArgb(4, 120, 87) # Emerald 700
+$lblAboutStatus.Dock = [System.Windows.Forms.DockStyle]::Fill
+$lblAboutStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+$pillStatus.Controls.Add($lblAboutStatus)
 
-# Bouton SIMULATION DRY-RUN (Ambre Chaleureux)
-$script:BtnDryRun = New-ModernButton -Text "🔍 Simulation (Dry-Run)" -Size (New-Object System.Drawing.Size(200, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
-    Start-Optimization -DryRun $true
-} -BackColor $colors.WarningColor -HoverColor $colors.WarningHover -PressColor $colors.WarningPress
-$btnFlow.Controls.Add($script:BtnDryRun)
+# Boutons d'action rapides de la carte principale
+$btnCheckSystemState = New-ModernButton -Text "🔄 Vérifier l'état système" -Size (New-Object System.Drawing.Size(195, 34)) -Location (New-Object System.Drawing.Point(102, 122)) -Click {
+    $m = Get-SystemPerformanceMetrics
+    if ($m) {
+        Append-Log "État système vérifié : CPU $($m.CpuPercent)%, RAM utilisée $($m.UsedRamGB) Go / $($m.TotalRamGB) Go ($($m.RamPercent)%), $($m.ProcessCount) processus actifs." "SUCCESS"
+        [System.Windows.Forms.MessageBox]::Show(
+            "Système vérifié avec succès !`n`nCPU : $($m.CpuPercent)%`nRAM : $($m.UsedRamGB) Go / $($m.TotalRamGB) Go ($($m.RamPercent)%)`nProcessus en cours : $($m.ProcessCount)`nEspace disque : Prêt",
+            "Vérification Système",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+    }
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$btnCheckSystemState.Add_Paint({
+    param($s, $e)
+    $p = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+    $e.Graphics.DrawRectangle($p, 0, 0, $s.Width - 1, $s.Height - 1)
+    $p.Dispose()
+})
+$cardAboutApp.Controls.Add($btnCheckSystemState)
 
-# Bouton OPTIMISER MAINTENANT (Vert Émeraude Pro)
-$script:BtnRun = New-ModernButton -Text "▶ OPTIMISER MAINTENANT" -Size (New-Object System.Drawing.Size(215, 38)) -Location (New-Object System.Drawing.Point(0,0)) -Click {
-    Start-Optimization -DryRun $false
-} -BackColor $colors.SuccessColor -HoverColor $colors.SuccessHover -PressColor $colors.SuccessPress
-$btnFlow.Controls.Add($script:BtnRun)
+$btnAboutGithub = New-ModernButton -Text "🌐 Dépôt GitHub ↗" -Size (New-Object System.Drawing.Size(165, 34)) -Location (New-Object System.Drawing.Point(308, 122)) -Click {
+    try {
+        [System.Diagnostics.Process]::Start("https://github.com/") | Out-Null
+    } catch {}
+} -BackColor $colors.CardBack -HoverColor $colors.AccentColor -PressColor $colors.AccentPress -ForeColor $colors.ForeColor
+$btnAboutGithub.Add_Paint({
+    param($s, $e)
+    $p = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+    $e.Graphics.DrawRectangle($p, 0, 0, $s.Width - 1, $s.Height - 1)
+    $p.Dispose()
+})
+$cardAboutApp.Controls.Add($btnAboutGithub)
 
-# ════════════════════════════════════════════════════════════════════════
-# LOGIQUE D'EXÉCUTION
-# ════════════════════════════════════════════════════════════════════════
+$btnAboutRestore = New-ModernButton -Text "🛡️ Point de Restauration" -Size (New-Object System.Drawing.Size(195, 34)) -Location (New-Object System.Drawing.Point(484, 122)) -Click {
+    Append-Log "Création manuelle d'un point de restauration..." "INFO"
+    try {
+        Enable-ComputerRestore -Drive "C:" -ErrorAction SilentlyContinue
+        Checkpoint-Computer -Description "REDADZDOptimiser_Manual_Checkpoint" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
+        Append-Log "Point de restauration créé avec succès !" "SUCCESS"
+        [System.Windows.Forms.MessageBox]::Show(
+            "Point de restauration système créé avec succès !",
+            "Point de Restauration",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
+    } catch {
+        Append-Log "Impossible de créer le point de restauration : $_" "WARN"
+        [System.Windows.Forms.MessageBox]::Show(
+            "Notification : $_",
+            "Point de Restauration",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Warning
+        ) | Out-Null
+    }
+} -BackColor $colors.CardBack -HoverColor $colors.SuccessColor -PressColor $colors.SuccessPress -ForeColor $colors.ForeColor
+$btnAboutRestore.Add_Paint({
+    param($s, $e)
+    $p = New-Object System.Drawing.Pen($script:colors.BorderColor, 1)
+    $e.Graphics.DrawRectangle($p, 0, 0, $s.Width - 1, $s.Height - 1)
+    $p.Dispose()
+})
+$cardAboutApp.Controls.Add($btnAboutRestore)
+
+$yAbout += 190
+
+# 2. Carte Support Kudu (Fond Ambre Chaud, Bordure Dorée, Badge Cœur)
+$cardSupport = New-Object System.Windows.Forms.Panel
+$cardSupport.Location = New-Object System.Drawing.Point(12, $yAbout)
+$cardSupport.Size = New-Object System.Drawing.Size(890, 115)
+$cardSupport.BackColor = $script:colors.WarmCardBack # #FFFBEB
+$cardSupport.Add_Paint({
+    param($s, $e)
+    $pen = New-Object System.Drawing.Pen($script:colors.WarmCardBorder, 1.5)
+    $e.Graphics.DrawRectangle($pen, 0, 0, $s.Width - 1, $s.Height - 1)
+    $pen.Dispose()
+})
+$aboutTab.Scroll.Controls.Add($cardSupport)
+
+# Badge Cœur Doré (comme Kudu)
+$heartBadge = New-Object System.Windows.Forms.Panel
+$heartBadge.Size = New-Object System.Drawing.Size(50, 50)
+$heartBadge.Location = New-Object System.Drawing.Point(24, 28)
+$heartBadge.BackColor = [System.Drawing.Color]::FromArgb(254, 240, 138) # Yellow 200
+$heartBadge.Add_Paint({
+    param($s, $e)
+    $g = $e.Graphics
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+    $f = New-Object System.Drawing.Font("Segoe UI", 16, [System.Drawing.FontStyle]::Bold)
+    $b = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(180, 83, 9)) # Amber 700
+    $sf = New-Object System.Drawing.StringFormat
+    $sf.Alignment = [System.Drawing.StringAlignment]::Center
+    $sf.LineAlignment = [System.Drawing.StringAlignment]::Center
+    $g.DrawString("♥", $f, $b, (New-Object System.Drawing.RectangleF(0, 0, $s.Width, $s.Height)), $sf)
+    $b.Dispose()
+    $f.Dispose()
+    $sf.Dispose()
+})
+$cardSupport.Controls.Add($heartBadge)
+
+$lblSupportTitle = New-Object System.Windows.Forms.Label
+$lblSupportTitle.Text = "Support & Auteur : Anagou Reda"
+$lblSupportTitle.Font = New-Object System.Drawing.Font("Segoe UI", 11.5, [System.Drawing.FontStyle]::Bold)
+$lblSupportTitle.ForeColor = $script:colors.WarmCardTitle # #78350F
+$lblSupportTitle.Location = New-Object System.Drawing.Point(90, 24)
+$lblSupportTitle.AutoSize = $true
+$cardSupport.Controls.Add($lblSupportTitle)
+
+$lblSupportDesc = New-Object System.Windows.Forms.Label
+$lblSupportDesc.Text = "Besoin d'une assistance technique, d'un tweak sur-mesure ou d'une maintenance professionnelle ? Contactez le créateur."
+$lblSupportDesc.Font = $fonts.Small
+$lblSupportDesc.ForeColor = $script:colors.WarmCardDesc # #92400E
+$lblSupportDesc.Location = New-Object System.Drawing.Point(92, 52)
+$lblSupportDesc.Size = New-Object System.Drawing.Size(560, 48)
+$lblSupportDesc.AutoSize = $false
+$cardSupport.Controls.Add($lblSupportDesc)
+
+# Bouton Téléphone / Contact à droite (comme View sponsorships de Kudu)
+$btnSupportCall = New-ModernButton -Text "📞 Tél : 0542439514" -Size (New-Object System.Drawing.Size(195, 42)) -Location (New-Object System.Drawing.Point(670, 34)) -Click {
+    try {
+        [System.Windows.Forms.Clipboard]::SetText("0542439514")
+    } catch {}
+    [System.Windows.Forms.MessageBox]::Show(
+        "Coordonnées de l'auteur :`n`nNom : Anagou Reda`nTéléphone : 0542439514`n`nLe numéro 0542439514 a été copié dans votre presse-papiers !",
+        "Contact & Support Auteur",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Information
+    ) | Out-Null
+} -BackColor [System.Drawing.Color]::White -HoverColor [System.Drawing.Color]::FromArgb(254, 243, 199) -PressColor [System.Drawing.Color]::FromArgb(253, 230, 138) -ForeColor [System.Drawing.Color]::FromArgb(180, 83, 9)
+$btnSupportCall.Font = $fonts.Button
+$btnSupportCall.Add_Paint({
+    param($s, $e)
+    $p = New-Object System.Drawing.Pen($script:colors.WarmCardBorder, 1.5)
+    $e.Graphics.DrawRectangle($p, 0, 0, $s.Width - 1, $s.Height - 1)
+    $p.Dispose()
+})
+$cardSupport.Controls.Add($btnSupportCall)
+
+$yAbout += 130
+
+# 3. Spécifications du Système Windows Détecté
+$cardSpecs = New-ModernCard -Title "Spécifications du Système Windows Détecté" -Location (New-Object System.Drawing.Point(12, $yAbout)) -Size (New-Object System.Drawing.Size(890, 230)) -AccentLineColor $colors.AccentColor
+$aboutTab.Scroll.Controls.Add($cardSpecs)
+
+$sysSpecs = @(
+    @{ Label = "Système d'exploitation :"; Val = "Windows $($winVer.Major).$($winVer.Minor) (Build $($winVer.Build))" },
+    @{ Label = "Nom de la machine :"; Val = "$($env:COMPUTERNAME)" },
+    @{ Label = "Utilisateur connecté :"; Val = "$($env:USERNAME)" },
+    @{ Label = "Privilèges d'exécution :"; Val = if ($isAdmin) { "Élevé (Administrateur)" } else { "Standard (Limité)" } },
+    @{ Label = "Architecture processeur :"; Val = "$($env:PROCESSOR_ARCHITECTURE) ($([System.Environment]::ProcessorCount) cœurs logiques)" },
+    @{ Label = "Protection du binaire :"; Val = "Chiffré AES/XOR + In-Memory Execution (Zéro fuite disque)" }
+)
+
+$specY = 48
+foreach ($spec in $sysSpecs) {
+    $lblSpName = New-Object System.Windows.Forms.Label
+    $lblSpName.Text = $spec.Label
+    $lblSpName.Font = $fonts.SubTitle
+    $lblSpName.ForeColor = $colors.ForeColor
+    $lblSpName.Location = New-Object System.Drawing.Point(24, $specY)
+    $lblSpName.Size = New-Object System.Drawing.Size(220, 22)
+    $cardSpecs.Controls.Add($lblSpName)
+
+    $lblSpVal = New-Object System.Windows.Forms.Label
+    $lblSpVal.Text = $spec.Val
+    $lblSpVal.Font = $fonts.Normal
+    $lblSpVal.ForeColor = $colors.MutedColor
+    $lblSpVal.Location = New-Object System.Drawing.Point(250, $specY)
+    $lblSpVal.Size = New-Object System.Drawing.Size(600, 22)
+    $cardSpecs.Controls.Add($lblSpVal)
+
+    $specY += 28
+}
 
 function Set-RunningState {
     param([bool]$Running)
@@ -2510,7 +3110,7 @@ function Start-Optimization {
     Set-REDADZDOptimiserConfig -CancelRequested $false
 
     # Basculer sur l'onglet Logs
-    $script:TabControl.SelectedTab = $logsTab.Page
+    Select-NavPage -Index 8
 
     Set-RunningState -Running $true
 
