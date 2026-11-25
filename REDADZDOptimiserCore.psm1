@@ -2793,13 +2793,13 @@ function Export-REDADZDClientReport {
 function Test-REDADZDUpdate {
     param(
         [string]$CurrentVersion = "2.1.0",
-        [string]$RepoApiUrl = "https://api.github.com/repos/AnagouReda/REDADZDOptimiser/releases/latest"
+        [string]$RepoApiUrl = "https://api.github.com/repos/anareda1999/REDADZDOptimiser/releases/latest"
     )
     try {
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         $headers = @{ "User-Agent" = "REDADZDOptimiser/$CurrentVersion" }
         $resp = Invoke-RestMethod -Uri $RepoApiUrl -Headers $headers -TimeoutSec 6 -ErrorAction Stop
-        $latest = ($resp.tag_name -replace '^v', '').Trim()
+        $latest = ($resp.tag_name -replace '^[vV]_?', '').Trim()
         if ($latest -and ([version]$latest -gt [version]$CurrentVersion)) {
             return @{ Success = $true; UpdateAvailable = $true; Current = $CurrentVersion; Latest = $latest; Url = $resp.html_url }
         }
