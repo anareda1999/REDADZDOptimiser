@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     REDADZDOptimiser GUI - Interface graphique professionnelle Windows (FR / EN / AR)
     Thème moderne épuré & professionnel (Windows 11 Fluent / Slate & Pure White)
@@ -1772,16 +1772,16 @@ function New-NavIconButton {
 
         if ($s.Tag.IsActive) {
             $brush = New-Object System.Drawing.SolidBrush($script:colors.NavActiveBack)
-            $rect = New-Object System.Drawing.Rectangle(4, 2, $s.Width - 8, $s.Height - 4)
+            $rect = New-Object System.Drawing.Rectangle(4, 2, ($s.Width - 8), ($s.Height - 4))
             $g.FillRectangle($brush, $rect)
             $brush.Dispose()
 
             $barBrush = New-Object System.Drawing.SolidBrush($script:colors.NavActiveBar)
-            $g.FillRectangle($barBrush, 0, 7, 3.5, $s.Height - 14)
+            $g.FillRectangle($barBrush, 0, 7, 3.5, ($s.Height - 14))
             $barBrush.Dispose()
         } elseif ($s.Tag.IsHovered) {
             $hoverBrush = New-Object System.Drawing.SolidBrush($script:colors.NavHoverBack)
-            $rect = New-Object System.Drawing.Rectangle(4, 2, $s.Width - 8, $s.Height - 4)
+            $rect = New-Object System.Drawing.Rectangle(4, 2, ($s.Width - 8), ($s.Height - 4))
             $g.FillRectangle($hoverBrush, $rect)
             $hoverBrush.Dispose()
         }
