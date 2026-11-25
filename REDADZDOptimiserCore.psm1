@@ -61,6 +61,8 @@ function Get-REDADZDOptimiserConfig {
 if (-not ([System.Management.Automation.PSTypeName]'REDADZD.SystemHelper').Type) {
     $csharp = @'
 using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace REDADZD {
@@ -135,6 +137,17 @@ namespace REDADZD {
             } catch {
                 return false;
             }
+        }
+
+        public static void AttachProcessOutput(Process proc, ConcurrentQueue<string> outQueue) {
+            proc.OutputDataReceived += (s, e) => {
+                if (!string.IsNullOrEmpty(e.Data)) outQueue.Enqueue(e.Data);
+            };
+            proc.ErrorDataReceived += (s, e) => {
+                // Drain stderr asynchronously without blocking the UI thread
+            };
+            proc.BeginOutputReadLine();
+            proc.BeginErrorReadLine();
         }
     }
 }
@@ -395,6 +408,10 @@ function Invoke-NativeCommandWithProgress {
     $psi.RedirectStandardError = $true
     $psi.UseShellExecute = $false
     $psi.CreateNoWindow = $true
+    if ($FilePath -match 'sfc') {
+        $psi.StandardOutputEncoding = [System.Text.Encoding]::Unicode
+        $psi.StandardErrorEncoding  = [System.Text.Encoding]::Unicode
+    }
 
     try {
         $proc = [System.Diagnostics.Process]::Start($psi)
@@ -403,27 +420,28 @@ function Invoke-NativeCommandWithProgress {
         return @{ ExitCode = -1; Output = ""; TimedOut = $false; Cancelled = $false }
     }
 
-    $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $outLines = @()
-    $lastPct = -1
+    $outQueue = New-Object 'System.Collections.Concurrent.ConcurrentQueue[string]'
+    [REDADZD.SystemHelper]::AttachProcessOutput($proc, $outQueue)
 
-    while (-not $proc.HasExited -or -not $proc.StandardOutput.EndOfStream) {
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $outLines = New-Object System.Collections.Generic.List[string]
+    $lastPct = -1
+    $lastHeartbeatSec = 0
+
+    while (-not $proc.HasExited -or -not $outQueue.IsEmpty) {
         if ($script:Config -and $script:Config.CancelRequested) {
             try { $proc.Kill() } catch { }
             Write-Log "$ActivityTitle interrompu par l'utilisateur." "WARN"
             return @{ ExitCode = -2; Output = ($outLines -join "`n"); Cancelled = $true; TimedOut = $false }
         }
 
-        $readSomething = $false
-
-        if ($proc.StandardOutput.Peek() -ne -1) {
-            $line = $proc.StandardOutput.ReadLine()
-            if ($line -and $line.Trim()) {
-                $trimmed = $line.Trim()
-                $outLines += $trimmed
-                $readSomething = $true
-
-                # Extraire le pourcentage pour la barre de progression
+        $line = $null
+        $processedAny = $false
+        while ($outQueue.TryDequeue([ref]$line)) {
+            $processedAny = $true
+            $trimmed = ($line -replace "`0", "").Trim()
+            if ($trimmed) {
+                $outLines.Add($trimmed)
                 if ($trimmed -match '(\d{1,3}(?:\.\d)?)\s*%') {
                     $pct = [int][double]$matches[1]
                     if ($pct -ne $lastPct) {
@@ -435,16 +453,10 @@ function Invoke-NativeCommandWithProgress {
             }
         }
 
-        # Vider également le flux d'erreur standard pour éviter tout blocage du tampon système
-        if ($proc.StandardError.Peek() -ne -1) {
-            $null = $proc.StandardError.ReadLine()
-            $readSomething = $true
-        }
-
-        if (-not $readSomething) {
-            Start-Sleep -Milliseconds 60
-            # Pompage des événements pour éviter que l'UI WinForms ne gèle
-            try { [System.Windows.Forms.Application]::DoEvents() } catch { }
+        $elapsedSec = [int]$sw.Elapsed.TotalSeconds
+        if (($elapsedSec - $lastHeartbeatSec) -ge 15) {
+            $lastHeartbeatSec = $elapsedSec
+            Write-Log "[$ActivityTitle] En cours d'exécution... ($($elapsedSec)s)" "INFO"
         }
 
         if ($sw.Elapsed.TotalSeconds -gt $TimeoutSeconds) {
@@ -452,7 +464,14 @@ function Invoke-NativeCommandWithProgress {
             Write-Log "Délai maximum ($($TimeoutSeconds)s) dépassé pour $ActivityTitle. Interrompu proprement pour éviter le gel." "WARN"
             return @{ ExitCode = -1; Output = ($outLines -join "`n"); TimedOut = $true; Cancelled = $false }
         }
+
+        if (-not $processedAny) {
+            Start-Sleep -Milliseconds 50
+        }
+        try { [System.Windows.Forms.Application]::DoEvents() } catch { }
     }
+
+    try { $proc.WaitForExit(1000) | Out-Null } catch { }
 
     return @{
         ExitCode  = $proc.ExitCode
